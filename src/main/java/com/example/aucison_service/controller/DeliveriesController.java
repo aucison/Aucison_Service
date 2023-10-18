@@ -1,8 +1,9 @@
 package com.example.aucison_service.controller;
 
-import com.example.Aucison_Shipping_Service.dto.ApiResponse;
-import com.example.Aucison_Shipping_Service.dto.deliveries.DeliveriesResponseDto;
-import com.example.Aucison_Shipping_Service.service.DeliveriesService;
+
+import com.example.aucison_service.dto.ApiResponse;
+import com.example.aucison_service.dto.deliveries.DeliveriesResponseDto;
+import com.example.aucison_service.service.shipping.DeliveriesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

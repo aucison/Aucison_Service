@@ -1,9 +1,10 @@
 package com.example.aucison_service.controller;
 
 
-import com.example.Aucsion_Product_Service.dto.ApiResponse;
-import com.example.Aucsion_Product_Service.dto.board.*;
-import com.example.Aucsion_Product_Service.service.BoardService;
+
+import com.example.aucison_service.dto.ApiResponse;
+import com.example.aucison_service.dto.board.*;
+import com.example.aucison_service.service.product.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,6 +1,7 @@
 package com.example.aucison_service.dto.orders;
 
-import com.example.Aucison_Shipping_Service.OrderStatus;
+
+import com.example.aucison_service.enums.OrderStatus;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;

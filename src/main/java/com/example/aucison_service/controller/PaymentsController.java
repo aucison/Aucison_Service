@@ -1,9 +1,10 @@
 package com.example.aucison_service.controller;
 
-import com.example.Aucison_Shipping_Service.dto.ApiResponse;
-import com.example.Aucison_Shipping_Service.dto.payments.PaymentsRequestDto;
-import com.example.Aucison_Shipping_Service.dto.payments.VirtualPaymentResponseDto;
-import com.example.Aucison_Shipping_Service.service.PaymentsService;
+
+import com.example.aucison_service.dto.ApiResponse;
+import com.example.aucison_service.dto.payments.PaymentsRequestDto;
+import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
+import com.example.aucison_service.service.shipping.PaymentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

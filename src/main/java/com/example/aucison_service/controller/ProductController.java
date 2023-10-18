@@ -1,9 +1,10 @@
 package com.example.aucison_service.controller;
 
 
-import com.example.Aucsion_Product_Service.dto.ApiResponse;
-import com.example.Aucsion_Product_Service.dto.auc_nor.AucsProductResponseDto;
-import com.example.Aucsion_Product_Service.service.ProductService;
+
+import com.example.aucison_service.dto.ApiResponse;
+import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
+import com.example.aucison_service.service.product.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
