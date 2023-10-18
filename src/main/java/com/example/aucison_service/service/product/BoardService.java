@@ -1,6 +1,9 @@
 package com.example.aucison_service.service.product;
 
-import com.example.Aucsion_Product_Service.dto.board.*;
+
+
+import com.example.aucison_service.dto.board.*;
+
 
 import java.util.List;
 

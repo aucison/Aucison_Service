@@ -1,8 +1,8 @@
 package com.example.aucison_service.service.product;
 
-import com.example.Aucsion_Product_Service.client.MemberServiceClient;
-import com.example.Aucsion_Product_Service.dto.board.*;
-import com.example.Aucsion_Product_Service.jpa.*;
+
+import com.example.aucison_service.dto.board.*;
+import com.example.aucison_service.jpa.product.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -99,7 +99,7 @@ public class BoardServiceImpl implements  BoardService{
     //게시물과 댓글에 대한 CRUD 서비스 코드
     //최대한 간결하고 직관성있고 통일성있게...
     @Override
-    public PostCRUDResponseDto registPost(Long productId,PostRegistRequestDto dto){
+    public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto){
         ProductsEntity productsEntity = productsRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + productId));
 
