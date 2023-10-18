@@ -1,17 +1,13 @@
 package com.example.aucison_service.service.product;
 
 
-import com.example.Aucsion_Product_Service.client.MemberServiceClient;
-import com.example.Aucsion_Product_Service.client.ShippingServiceClient;
-import com.example.Aucsion_Product_Service.dto.auc_nor.AucsProductResponseDto;
-import com.example.Aucsion_Product_Service.dto.auc_nor.SaleProductResponseDto;
-import com.example.Aucsion_Product_Service.dto.product.ProductDetailResponseDto;
-import com.example.Aucsion_Product_Service.dto.product.ProductRegisterRequestDto;
-import com.example.Aucsion_Product_Service.dto.search.ProductSearchResponseDto;
-import com.example.Aucsion_Product_Service.exception.AppException;
-import com.example.Aucsion_Product_Service.exception.ErrorCode;
-import com.example.Aucsion_Product_Service.jpa.*;
-import com.example.Aucsion_Product_Service.util.S3Utils;
+
+import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
+import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
+import com.example.aucison_service.dto.product.ProductDetailResponseDto;
+import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
+import com.example.aucison_service.dto.search.ProductSearchResponseDto;
+import com.example.aucison_service.jpa.product.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

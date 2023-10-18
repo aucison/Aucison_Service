@@ -1,10 +1,11 @@
 package com.example.aucison_service.service.product;
 
-import com.example.Aucsion_Product_Service.dto.auc_nor.AucsProductResponseDto;
-import com.example.Aucsion_Product_Service.dto.auc_nor.SaleProductResponseDto;
-import com.example.Aucsion_Product_Service.dto.product.ProductDetailResponseDto;
-import com.example.Aucsion_Product_Service.dto.product.ProductRegisterRequestDto;
-import com.example.Aucsion_Product_Service.dto.search.ProductSearchResponseDto;
+
+import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
+import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
+import com.example.aucison_service.dto.product.ProductDetailResponseDto;
+import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
+import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 
 import java.util.List;
 
