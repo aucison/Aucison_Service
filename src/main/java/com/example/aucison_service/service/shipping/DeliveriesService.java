@@ -1,6 +1,7 @@
 package com.example.aucison_service.service.shipping;
 
-import com.example.Aucison_Shipping_Service.dto.deliveries.DeliveriesResponseDto;
+
+import com.example.aucison_service.dto.deliveries.DeliveriesResponseDto;
 
 public interface DeliveriesService {
 //    /**

@@ -1,7 +1,8 @@
 package com.example.aucison_service.service.shipping;
 
-import com.example.Aucison_Shipping_Service.dto.payments.PaymentsRequestDto;
-import com.example.Aucison_Shipping_Service.dto.payments.VirtualPaymentResponseDto;
+
+import com.example.aucison_service.dto.payments.PaymentsRequestDto;
+import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
 
 public interface PaymentsService {
     /**

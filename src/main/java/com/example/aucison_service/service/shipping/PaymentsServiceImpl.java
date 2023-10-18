@@ -1,17 +1,11 @@
 package com.example.aucison_service.service.shipping;
 
-import com.example.Aucison_Shipping_Service.OrderStatus;
-import com.example.Aucison_Shipping_Service.PageType;
-import com.example.Aucison_Shipping_Service.client.MemberServiceClient;
-import com.example.Aucison_Shipping_Service.client.ProductServiceClient;
-import com.example.Aucison_Shipping_Service.dto.client.AddrInfoResponseDto;
-import com.example.Aucison_Shipping_Service.dto.client.UpdateCreditRequestDto;
-import com.example.Aucison_Shipping_Service.dto.client.VirtualPaymentProductInfoResponseDto;
-import com.example.Aucison_Shipping_Service.dto.payments.PaymentsRequestDto;
-import com.example.Aucison_Shipping_Service.dto.payments.VirtualPaymentResponseDto;
-import com.example.Aucison_Shipping_Service.exception.AppException;
-import com.example.Aucison_Shipping_Service.exception.ErrorCode;
-import com.example.Aucison_Shipping_Service.jpa.*;
+
+import com.example.aucison_service.dto.payments.PaymentsRequestDto;
+import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
+import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.PageType;
+import com.example.aucison_service.jpa.shipping.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

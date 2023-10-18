@@ -1,10 +1,9 @@
 package com.example.aucison_service.service.shipping;
 
-import com.example.Aucison_Shipping_Service.dto.deliveries.DeliveriesResponseDto;
-import com.example.Aucison_Shipping_Service.exception.AppException;
-import com.example.Aucison_Shipping_Service.exception.ErrorCode;
-import com.example.Aucison_Shipping_Service.jpa.Deliveries;
-import com.example.Aucison_Shipping_Service.jpa.DeliveriesRepository;
+
+import com.example.aucison_service.dto.deliveries.DeliveriesResponseDto;
+import com.example.aucison_service.jpa.shipping.Deliveries;
+import com.example.aucison_service.jpa.shipping.DeliveriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

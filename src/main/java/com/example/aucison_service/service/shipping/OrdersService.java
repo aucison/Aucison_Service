@@ -1,6 +1,7 @@
 package com.example.aucison_service.service.shipping;
 
-import com.example.Aucison_Shipping_Service.dto.orders.OrdersResponseDto;
+
+import com.example.aucison_service.dto.orders.OrdersResponseDto;
 
 import java.util.List;
 
