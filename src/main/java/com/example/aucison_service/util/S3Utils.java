@@ -5,6 +5,8 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.Aucsion_Product_Service.exception.AppException;
 import com.example.Aucsion_Product_Service.exception.ErrorCode;
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
