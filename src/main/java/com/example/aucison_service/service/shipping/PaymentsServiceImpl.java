@@ -5,6 +5,8 @@ import com.example.aucison_service.dto.payments.PaymentsRequestDto;
 import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
 import com.example.aucison_service.enums.OrderStatus;
 import com.example.aucison_service.enums.PageType;
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.shipping.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //현재 credit에서 등록 가격을 차감
         float newCredit = currentCredit - product.getPrice();
+
+        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
+            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+        }
+
 
         return VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())

@@ -1,6 +1,8 @@
 package com.example.aucison_service.service.shipping;
 
 import com.example.aucison_service.dto.orders.OrdersResponseDto;
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.shipping.Orders;
 import com.example.aucison_service.jpa.shipping.OrdersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,8 @@ public class OrdersServiceImpl implements OrdersService{
     @Transactional(readOnly = true)
     public List<OrdersResponseDto> findAllOrdersByEmail(String email) { //email로 주문내역 전체 조회
         List<Orders> orders = ordersRepository.findAllByEmail(email);
+
+        //TODO: 이메일로 내역 조회를 그대로 유지할 것인지에 따라 email 유효 검증 추가 유무가 달라짐
 
         if (orders.isEmpty()) {
             throw new AppException(ErrorCode.ORDER_NOT_FOUND);
