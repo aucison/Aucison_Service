@@ -2,6 +2,8 @@ package com.example.aucison_service.service.shipping;
 
 
 import com.example.aucison_service.dto.deliveries.DeliveriesResponseDto;
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.shipping.Deliveries;
 import com.example.aucison_service.jpa.shipping.DeliveriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
