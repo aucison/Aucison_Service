@@ -105,6 +105,12 @@ public class BoardServiceImpl implements BoardService{
         ProductsEntity product = productsRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        // 입력값 검증 (예: 제목이나 내용이 비어 있지 않은지 확인)
+        if (dto.getTitle() == null || dto.getTitle().trim().isEmpty() ||
+                dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
+
         // member-service로부터 이메일을 가져옴
         String emailFromMemberService = memberServiceClient.getEmail();
 
@@ -133,6 +139,11 @@ public class BoardServiceImpl implements BoardService{
 
         PostsEntity postEntity = postsRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        // 입력값 검증 (예: 제목이나 내용이 비어 있지 않은지 확인)
+        if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
 
         // member-service로부터 이메일을 가져옴
         String emailFromMemberService = memberServiceClient.getEmail();
