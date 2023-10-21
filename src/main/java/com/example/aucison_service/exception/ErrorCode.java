@@ -25,6 +25,7 @@ public enum ErrorCode {
     // Payments 관련 에러 코드들
     CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 카테고리(경매/판매)가 존재하지 않습니다."),
     AUCTION_ENDED(HttpStatus.FORBIDDEN, "경매가 이미 종료되었습니다."),
+    INSUFFICIENT_CREDIT(HttpStatus.BAD_REQUEST, "잔액이 부족합니다."),
     SHIPPING_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "배송지를 새로 등록해주세요."),
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "로그를 찾을 수 없습니다.");
 

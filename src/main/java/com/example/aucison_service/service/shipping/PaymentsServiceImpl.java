@@ -75,6 +75,11 @@ public class PaymentsServiceImpl implements PaymentsService {
         //현재 credit에서 등록 가격을 차감
         float newCredit = currentCredit - product.getPrice();
 
+        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
+            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+        }
+
+
         return VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())
                 .name(product.getProductName())
