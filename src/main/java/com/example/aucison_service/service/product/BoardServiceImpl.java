@@ -2,6 +2,8 @@ package com.example.aucison_service.service.product;
 
 
 import com.example.aucison_service.dto.board.*;
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.product.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class BoardServiceImpl implements  BoardService{
+public class BoardServiceImpl implements BoardService{
 
     PostsRepository postsRepository;
     CommentsRepository commentsRepository;
@@ -100,8 +102,14 @@ public class BoardServiceImpl implements  BoardService{
     //최대한 간결하고 직관성있고 통일성있게...
     @Override
     public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto){
-        ProductsEntity productsEntity = productsRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + productId));
+        ProductsEntity product = productsRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 입력값 검증 (예: 제목이나 내용이 비어 있지 않은지 확인)
+        if (dto.getTitle() == null || dto.getTitle().trim().isEmpty() ||
+                dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
 
         // member-service로부터 이메일을 가져옴
         String emailFromMemberService = memberServiceClient.getEmail();
@@ -130,7 +138,12 @@ public class BoardServiceImpl implements  BoardService{
     public CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto){
 
         PostsEntity postEntity = postsRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        // 입력값 검증 (예: 제목이나 내용이 비어 있지 않은지 확인)
+        if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
 
         // member-service로부터 이메일을 가져옴
         String emailFromMemberService = memberServiceClient.getEmail();
@@ -155,9 +168,9 @@ public class BoardServiceImpl implements  BoardService{
 
     @Override
     public PostCRUDResponseDto updatePost(Long postId, PostUpdateRequestDto postRequestDto) {
-        PostsEntity post = postsRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
-        post.update(postRequestDto.getTitle(), postRequestDto.getContent());    //실제 수정 로직
+        PostsEntity postEntity = postsRepository.findById(postId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+        postEntity.update(postRequestDto.getTitle(), postRequestDto.getContent());    //실제 수정 로직
 
         /*
         postsRepository.save(post);
@@ -166,7 +179,7 @@ public class BoardServiceImpl implements  BoardService{
 
          */
 
-        PostsEntity updatedPost = postsRepository.save(post);
+        PostsEntity updatedPost = postsRepository.save(postEntity);
 
         PostCRUDResponseDto responseDto = PostCRUDResponseDto.builder()
                 .posts_id(updatedPost.getPosts_id())
@@ -187,7 +200,7 @@ public class BoardServiceImpl implements  BoardService{
     @Override
     public CommentCRUDResponseDto updateComment(Long commentId, CommentUpdateRequestDto commentRequestDto) {
         CommentsEntity comment = commentsRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다. id=" + commentId));
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
         comment.update(commentRequestDto.getContent()); //실제 수정 로직
 
         CommentsEntity updatedComment = commentsRepository.save(comment);
@@ -204,8 +217,6 @@ public class BoardServiceImpl implements  BoardService{
         commentsRepository.deleteById(commentId);
         return CommentCRUDResponseDto.builder().comment_id(commentId).build();
     }
-
-
 
 
 }
