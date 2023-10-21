@@ -5,6 +5,8 @@ import com.example.aucison_service.dto.payments.PaymentsRequestDto;
 import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
 import com.example.aucison_service.enums.OrderStatus;
 import com.example.aucison_service.enums.PageType;
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.shipping.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
