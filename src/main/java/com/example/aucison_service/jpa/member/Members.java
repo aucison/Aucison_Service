@@ -1,6 +1,5 @@
 package com.example.aucison_service.jpa.member;
 
-import com.example.Aucison_Member_Service.dto.MembersInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +14,7 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "members")
-public class MembersEntity { // 사용자
+public class Members { // 사용자
 
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +37,7 @@ public class MembersEntity { // 사용자
     @OneToMany(mappedBy = "membersEntity", fetch = FetchType.LAZY) // 양방향 매핑
     private List<WishesEntity> wishesEntity;
 
-    public MembersEntity updateInfo(MembersInfoDto membersInfoDto) {
+    public Members updateInfo(MembersInfoDto membersInfoDto) {
         this.name = membersInfoDto.getName();
         this.nickname = membersInfoDto.getNickName();
 
