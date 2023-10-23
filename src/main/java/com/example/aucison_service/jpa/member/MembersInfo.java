@@ -35,7 +35,7 @@ public class MembersInfo { // 사용자 추가 정보
     private Members members; // 사용자
 
     @OneToOne(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
-    private MembersImgEntity membersImgEntity;
+    private MembersImg membersImg;
 
     @OneToMany(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
     private List<Addresses> addressesList;
