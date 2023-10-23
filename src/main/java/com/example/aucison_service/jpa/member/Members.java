@@ -31,10 +31,10 @@ public class Members { // 사용자
     @Column(nullable = false)
     private String nickname; // 별명(사용자 지정값)
 
-    @OneToOne(mappedBy = "membersEntity", fetch = FetchType.LAZY) // 양방향 매핑
-    private MembersInfoEntity membersInfoEntity;
+    @OneToOne(mappedBy = "members", fetch = FetchType.LAZY) // 양방향 매핑
+    private MembersInfo membersInfo;
 
-    @OneToMany(mappedBy = "membersEntity", fetch = FetchType.LAZY) // 양방향 매핑
+    @OneToMany(mappedBy = "members", fetch = FetchType.LAZY) // 양방향 매핑
     private List<WishesEntity> wishesEntity;
 
     public Members updateInfo(MembersInfoDto membersInfoDto) {
