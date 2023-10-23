@@ -41,7 +41,7 @@ public class MembersInfo { // 사용자 추가 정보
     private List<Addresses> addressesList;
 
     @OneToMany(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
-    private List<HistoriesEntity> historiesEntity;
+    private List<Histories> historiesList;
 
     public MembersInfo updateInfo(Members members, MembersInfoDto membersInfoDto) {
         this.phone = membersInfoDto.getPhone();
