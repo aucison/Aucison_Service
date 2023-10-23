@@ -35,7 +35,7 @@ public class Members { // 사용자
     private MembersInfo membersInfo;
 
     @OneToMany(mappedBy = "members", fetch = FetchType.LAZY) // 양방향 매핑
-    private List<WishesEntity> wishesEntity;
+    private List<Wishes> wishes;
 
     public Members updateInfo(MembersInfoDto membersInfoDto) {
         this.name = membersInfoDto.getName();
