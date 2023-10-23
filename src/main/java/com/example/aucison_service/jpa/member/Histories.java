@@ -44,6 +44,6 @@ public class Histories { // 사용자 구매/판매 내역
     @JoinColumn(name = "members_info_id") // 연관관계 주인
     private MembersInfo membersInfo; // 사용자 추가 정보
 
-    @OneToOne(mappedBy = "historiesEntity", fetch = FetchType.LAZY) // 양방향 매핑
-    private HistoriesImgEntity historiesImgEntity;
+    @OneToOne(mappedBy = "histories", fetch = FetchType.LAZY) // 양방향 매핑
+    private HistoriesImg historiesImg;
 }
