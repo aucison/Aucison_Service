@@ -34,13 +34,13 @@ public class MembersInfo { // 사용자 추가 정보
     @JoinColumn(name = "email") // 연관관계 주인
     private Members members; // 사용자
 
-    @OneToOne(mappedBy = "membersInfoEntity", fetch = FetchType.LAZY) // 양방향 매핑
+    @OneToOne(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
     private MembersImgEntity membersImgEntity;
 
-    @OneToMany(mappedBy = "membersInfoEntity", fetch = FetchType.LAZY) // 양방향 매핑
-    private List<AddressesEntity> addressesEntity;
+    @OneToMany(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
+    private List<Addresses> addressesList;
 
-    @OneToMany(mappedBy = "membersInfoEntity", fetch = FetchType.LAZY) // 양방향 매핑
+    @OneToMany(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
     private List<HistoriesEntity> historiesEntity;
 
     public MembersInfo updateInfo(Members members, MembersInfoDto membersInfoDto) {
