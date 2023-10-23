@@ -1,5 +1,8 @@
 package com.example.aucison_service.jpa.member;
 
+import com.example.aucison_service.enums.Category;
+import com.example.aucison_service.enums.Kind;
+import com.example.aucison_service.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
