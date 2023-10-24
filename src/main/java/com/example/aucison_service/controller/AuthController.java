@@ -1,8 +1,17 @@
 package com.example.aucison_service.controller;
 
+import com.example.aucison_service.util.JwtUtils;
 import com.example.newapigatewayservice.config.security.JwtUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -36,8 +45,9 @@ public class AuthController {
         String accessToken = jwtUtils.createAccessToken(member);
         String refreshToken = jwtUtils.createRefreshToken(member);
 
+        //모놀리틱 변경으로 필요없어짐 -> 자동화됨
         // 4. redis에 refresh token 저장
-        jwtUtils.updateRefreshToken(member, refreshToken);
+        //jwtUtils.updateRefreshToken(member, refreshToken);
 
         // 5. 토큰 반환
         Map<String, String> tokens = new HashMap<>();
@@ -82,16 +92,24 @@ public class AuthController {
     }
      */
     public ResponseEntity<?> reissueToken(String refreshToken) {
+
+        if (!jwtUtils.validateToken(refreshToken)) {
+            return ResponseEntity.badRequest().body("Invalid refresh token");
+        }
+
         // refreshToken에서 이메일 추출
         String email = jwtUtils.getEmailFromToken(refreshToken);
 
+        //모놀리틱으로 주석처리
         // refreshToken 삭제
-        jwtUtils.deleteRefreshToken(email);
+        //jwtUtils.deleteRefreshToken(email);
 
         // 내부 메소드를 호출하여 로직 수행 (외부 서비스 호출 대신)
         // 예를 들어, 사용자 인증 및 토큰 재발급 로직
         // 이 부분은 실제 사용자 인증 로직에 따라 다를 수 있음
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email); // 사용자 정보 로드
+
+
         String newAccessToken = jwtUtils.createAccessToken(userDetails); // 새 액세스 토큰 생성
         String newRefreshToken = jwtUtils.createRefreshToken(userDetails); // 새 리프레시 토큰 생성
 
