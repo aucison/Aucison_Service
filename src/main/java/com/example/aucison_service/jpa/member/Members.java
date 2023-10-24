@@ -1,5 +1,6 @@
 package com.example.aucison_service.jpa.member;
 
+import com.example.aucison_service.dto.auth.MembersInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
