@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/shipping-service")
+@RequestMapping("/")
 public class OrdersController {
     private final OrdersService ordersService;
 

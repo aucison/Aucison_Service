@@ -4,6 +4,7 @@ package com.example.aucison_service.controller;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
 import com.example.aucison_service.dto.mypage.ResponseOrderDetailsDto;
 import com.example.aucison_service.service.member.MypageService;
+import com.example.aucison_service.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/member-service")
+@RequestMapping("/")
 public class MypageController {
 
     private final JwtUtils jwtUtils;

@@ -4,6 +4,7 @@ package com.example.aucison_service.service.member;
 import com.example.aucison_service.dto.auth.MemberDto;
 import com.example.aucison_service.dto.auth.MembersInfoDto;
 import com.example.aucison_service.jpa.member.*;
+import com.example.aucison_service.util.JwtUtils;
 import com.example.aucison_service.vo.RequestLoginVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

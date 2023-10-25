@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/product-service")
+@RequestMapping("/")
 public class BoardController {
 
     private BoardService boardService;
