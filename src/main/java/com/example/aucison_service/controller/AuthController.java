@@ -21,10 +21,24 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     private final AuthenticationManager authenticationManager;
+    
+    private final AuthService authService;
 
-    public AuthController(JwtUtils jwtUtils, AuthenticationManager authenticationManager) {
+    public AuthController(JwtUtils jwtUtils, AuthenticationManager authenticationManager, AuthService authService) {
         this.jwtUtils = jwtUtils;
         this.authenticationManager = authenticationManager;
+        this.authService = authService;
+    }
+  
+   @PostMapping("/signin")
+    public ResponseEntity signIn(@RequestBody RequestSignInVo request) {
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        MemberDto memberDto = mapper.map(request, MemberDto.class);
+        authService.createMember(memberDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     @PostMapping("/login")
@@ -55,6 +69,12 @@ public class AuthController {
         tokens.put("refreshToken", refreshToken);
 
         return ResponseEntity.ok(tokens);
+    }
+  
+    @PostMapping("/logout")
+    public ResponseEntity logOut(@RequestHeader("accessToken") String accessToken) {
+        authService.logout(accessToken);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PostMapping("/reissue")
@@ -91,6 +111,19 @@ public class AuthController {
         return loginResponse;
     }
      */
+
+    @GetMapping("/mp")
+    public ResponseEntity getMemberInfo(@RequestHeader("accessToken") String accessToken) {
+        return ResponseEntity.status(HttpStatus.OK).body(authService.getMember(accessToken));
+    }
+
+    @PatchMapping("/mp")
+    public ResponseEntity patchMemberInfo(@RequestHeader("accessToken") String accessToken,
+                                          @RequestBody MembersInfoDto membersInfoDto) {
+        authService.patchMember(accessToken, membersInfoDto);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+  
     public ResponseEntity<?> reissueToken(String refreshToken) {
 
         if (!jwtUtils.validateToken(refreshToken)) {
@@ -119,5 +152,6 @@ public class AuthController {
         tokens.put("refreshToken", newRefreshToken);
 
         return ResponseEntity.ok(tokens);
+
     }
 }
