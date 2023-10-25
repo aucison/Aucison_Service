@@ -1,6 +1,7 @@
 package com.example.aucison_service.util;
 
 
+import com.example.aucison_service.dto.auth.MemberDto;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

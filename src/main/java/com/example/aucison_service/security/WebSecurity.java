@@ -1,6 +1,7 @@
 package com.example.aucison_service.security;
 
-import com.example.Aucison_Member_Service.service.AuthService;
+
+import com.example.aucison_service.service.member.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -5,6 +5,7 @@ import com.example.aucison_service.dto.zzim.ResponseZzimHistoryDto;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.Wishes;
 import com.example.aucison_service.jpa.member.WishesRepository;
+import com.example.aucison_service.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/shipping-service")
+@RequestMapping("/")
 public class PaymentsController {
 
     private final PaymentsService paymentsService;

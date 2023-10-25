@@ -3,8 +3,7 @@ package com.example.aucison_service.util;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.example.Aucsion_Product_Service.exception.AppException;
-import com.example.Aucsion_Product_Service.exception.ErrorCode;
+
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

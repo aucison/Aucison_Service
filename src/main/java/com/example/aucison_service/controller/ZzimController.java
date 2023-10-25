@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/member-service")
+@RequestMapping("/")
 public class ZzimController {
 
     private final ZzimService zzimService;
