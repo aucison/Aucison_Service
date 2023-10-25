@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,7 +24,11 @@ public class WebSecurity {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final Environment env;
     private final ObjectPostProcessor<Object> objectPostProcessor;
-
+    // authenticationManager를 Bean 등록
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
     @Bean // 권한 관련
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.csrf(c->c.disable());

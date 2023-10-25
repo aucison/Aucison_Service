@@ -1,7 +1,6 @@
 package com.example.aucison_service.controller;
 
 import com.example.aucison_service.util.JwtUtils;
-import com.example.newapigatewayservice.config.security.JwtUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
