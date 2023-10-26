@@ -3,7 +3,7 @@ package com.example.aucison_service.service.member;
 
 import com.example.aucison_service.dto.auth.MemberDto;
 import com.example.aucison_service.dto.auth.MembersInfoDto;
-import com.example.aucison_service.jpa.member.Members;
+import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.vo.RequestLoginVo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,6 +16,6 @@ public interface AuthService extends UserDetailsService {
     MembersInfoDto getMember(String accessToken);
     void patchMember(String accessToken, MembersInfoDto membersInfoDto);
 
-    Iterable<Members> getMemberByAll();
+    Iterable<MembersEntity> getMemberByAll();
 //    MemberDto getMemberDetailsByGoogleEmail(String email);
 }

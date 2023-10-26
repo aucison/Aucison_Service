@@ -26,22 +26,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public MemberDto createMember(MemberDto memberDto) {
 
-        Members members = Members.builder()
+        MembersEntity membersEntity = MembersEntity.builder()
                         .email(memberDto.getEmail())
                         .name(memberDto.getName())
 //                        .nickname(memberDto.getNickname())
                         .build();
 
-        membersRepository.save(members);
+        membersRepository.save(membersEntity);
 
-        return new ModelMapper().map(members, MemberDto.class);
+        return new ModelMapper().map(membersEntity, MemberDto.class);
     }
 
     @Override
     public ResponseEntity login(RequestLoginVo requestLoginVo) {
-        Members members = membersRepository.findByEmail(requestLoginVo.getEmail());
+        MembersEntity membersEntity = membersRepository.findByEmail(requestLoginVo.getEmail());
 
-        if(members != null) {
+        if(membersEntity != null) {
             // MembersEntity -> MemberDto
             ModelMapper mapper = new ModelMapper();
             mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -70,28 +70,20 @@ public class AuthServiceImpl implements AuthService {
         jwtUtils.setBlackList(accessToken);
     }
 
-//    @Override
-//    public ResponseEntity reissueToken(String refreshToken) { // 토큰 재발행
-//
-//        String email = jwtUtils.getEmailFromToken(refreshToken);
-//        jwtUtils.deleteRefreshToken(email);
-//        RequestLoginVo requestLoginVo = RequestLoginVo.builder().email(email).build();
-//        return login(requestLoginVo);
-//    }
 
     @Override
     public MembersInfoDto getMember(String accessToken) {
         String email = jwtUtils.getEmailFromToken(accessToken);
         if(email != null) {
             // null 검증 로직 추가하기
-            Members members = membersRepository.findByEmail(email);
-            MembersInfo membersInfo = membersInfoRepository.findByMembers(members);
+            MembersEntity membersEntity = membersRepository.findByEmail(email);
+            MembersInfo membersInfo = membersInfoRepository.findByMembers(membersEntity);
             MembersImg membersImgEntity = membersImgRepository.findByMembersInfo(membersInfo);
 
             return MembersInfoDto.builder()
                     .subEmail(membersInfo.getSubEmail())
-                    .name(members.getName())
-                    .nickName(members.getNickname())
+                    .name(membersEntity.getName())
+                    .nickName(membersEntity.getNickname())
                     .phone(membersInfo.getPhone())
                     .imgUrl(membersImgEntity.getUrl())
                     .build();
@@ -104,34 +96,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void patchMember(String accessToken, MembersInfoDto membersInfoDto) {
         String email = jwtUtils.getEmailFromToken(accessToken);
-        Members members = membersRepository.findByEmail(email);
-        MembersInfo membersInfo = membersInfoRepository.findByMembers(members);
+        MembersEntity membersEntity = membersRepository.findByEmail(email);
+        MembersInfo membersInfo = membersInfoRepository.findByMembers(membersEntity);
         MembersImg membersImg = membersImgRepository.findByMembersInfo(membersInfo);
 
         membersImg.updateInfo(
                 membersInfo.updateInfo(
-                        members.updateInfo(membersInfoDto),
+                        membersEntity.updateInfo(membersInfoDto),
                         membersInfoDto),
                 membersInfoDto);
     }
 
     @Override
-    public Iterable<Members> getMemberByAll() {
+    public Iterable<MembersEntity> getMemberByAll() {
         return null;
     }
 
-//    @Override
-//    public MemberDto getMemberDetailsByGoogleEmail(String email) {
-//        MembersEntity membersEntity = membersRepository.findByEmail(email);
-//
-//        if(membersEntity == null) {
-//            throw new UsernameNotFoundException(email);
-//        }
-//
-//        MemberDto memberDto = new ModelMapper().map(membersEntity, MemberDto.class);
-//
-//        return memberDto;
-//    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

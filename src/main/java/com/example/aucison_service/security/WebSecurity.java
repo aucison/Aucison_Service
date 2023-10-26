@@ -2,66 +2,75 @@ package com.example.aucison_service.security;
 
 
 import com.example.aucison_service.service.member.AuthService;
+import com.example.aucison_service.service.member.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
+
+
+
 
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
 
-    private final AuthService authService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final Environment env;
-    private final ObjectPostProcessor<Object> objectPostProcessor;
-    // authenticationManager를 Bean 등록
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private static final String[] WHITE_LIST = {
+            "/users/**",
+            "/**"
+    };
+
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-    @Bean // 권한 관련
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        http.csrf(c->c.disable());
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable());
+        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // X-Frame-Options 헤더를 비활성화
+        /*
+        authorizeRequest는 deprecated로 더이상 권장되지 않기 때문에 이제는 authorizeHttpRequests()를 대신 사용하는 것을 권장됨
 
-//        Deprecated.....
-//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.formLogin().disable(); // 폼 로그인 비활성화
-//        http.httpBasic().disable(); // HTTP 기본 인증 비활성화
+        http
+                .authorizeRequests(authorizeRequests -> {
+                    for (String pattern : WHITE_LIST) {
+                        authorizeRequests.requestMatchers(new AntPathRequestMatcher(pattern)).permitAll(); // 화이트리스트에 있는 URL들에 대한 접근을 허용
+                    }
+                    authorizeRequests
+                            .requestMatchers(PathRequest.toH2Console()).permitAll() // H2 데이터베이스 콘솔에 대한 접근을 허용
+                            .requestMatchers(new IpAddressMatcher("192.168.0.130")).permitAll(); // 특정 IP 주소에서의 요청을 허용
+                })
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 인증 필터를 추가합니다.
 
-        http.authorizeHttpRequests((authz)-> authz
-                .requestMatchers(new AntPathRequestMatcher("/**")
-                        , new AntPathRequestMatcher("/member-service/**")
-                        , new AntPathRequestMatcher("/actuator/**")).permitAll()
-                .requestMatchers(new IpAddressMatcher("127.0.0.1")).permitAll()
-                .anyRequest().authenticated());
+         */
+        http
+                .authorizeHttpRequests(authorizeRequests -> {
+                    for (String pattern : WHITE_LIST) {
+                        authorizeRequests.requestMatchers(new AntPathRequestMatcher(pattern)).permitAll(); // 화이트리스트에 있는 URL들에 대한 접근을 허용
+                    }
+                    authorizeRequests
+                            .requestMatchers(PathRequest.toH2Console()).permitAll() // H2 데이터베이스 콘솔에 대한 접근을 허용
+                            .requestMatchers(new IpAddressMatcher("192.168.0.130")).permitAll(); // 특정 IP 주소에서의 요청을 허용
+                })
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 인증 필터를 추가합니다.
 
-        // apigateway-service에서 토큰 검증 후 들어오기 때문에 필터 걸 필요 없음
-        //http.addFilter(getAuthenticationFilter());
 
-        http.headers(h->h.frameOptions(f->f.disable()).disable());
         return http.build();
-    }
 
-//    public AuthenticationManager authenticationManager(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(authService).passwordEncoder(bCryptPasswordEncoder);
-//        return auth.build();
-//    }
-//
-//    private AuthFilter getAuthenticationFilter() throws Exception {
-//        AuthFilter authenticationFilter = new AuthFilter(authService, env);
-//        AuthenticationManagerBuilder builder = new AuthenticationManagerBuilder(objectPostProcessor);
-//        authenticationFilter.setAuthenticationManager(authenticationManager(builder));
-//        return authenticationFilter;
-//    }
+
+    }
 }
