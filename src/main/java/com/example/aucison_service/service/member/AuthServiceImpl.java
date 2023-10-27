@@ -26,15 +26,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public MemberDto createMember(MemberDto memberDto) {
 
-        Members members = Members.builder()
-                        .email(memberDto.getEmail())
-                        .name(memberDto.getName())
-//                        .nickname(memberDto.getNickname())
-                        .build();
+//        Members members = Members.builder()
+//                        .email(memberDto.getEmail())
+//                        .name(memberDto.getName())
+////                        .nickname(memberDto.getNickname())
+//                        .build();
+//
+//        membersRepository.save(members);
+
+        // DTO -> Entity 변환
+        Members members = memberDto.toEntity();
 
         membersRepository.save(members);
 
-        return new ModelMapper().map(members, MemberDto.class);
+        // Entity -> DTO 변환
+        return MemberDto.fromEntity(members);
     }
 
     @Override

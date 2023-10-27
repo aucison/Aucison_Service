@@ -36,14 +36,21 @@ public class AuthController {
   
    @PostMapping("/signin")
     public ResponseEntity signIn(@RequestBody RequestSignInVo request) {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+//        ModelMapper mapper = new ModelMapper();
+//        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+//
+//        MemberDto memberDto = mapper.map(request, MemberDto.class);
+//        authService.createMember(memberDto);
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(null);
 
-        MemberDto memberDto = mapper.map(request, MemberDto.class);
-        authService.createMember(memberDto);
+       // RequestVO -> DTO 변환
+       MemberDto memberDto = new MemberDto(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
-    }
+       authService.createMember(memberDto);
+
+       return ResponseEntity.status(HttpStatus.CREATED).build();
+   }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
