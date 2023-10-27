@@ -49,9 +49,12 @@ public class AuthServiceImpl implements AuthService {
 
         if(members != null) {
             // MembersEntity -> MemberDto
-            ModelMapper mapper = new ModelMapper();
-            mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-            MemberDto memberDto = mapper.map(membersEntity, MemberDto.class);
+//            ModelMapper mapper = new ModelMapper();
+//            mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+//            MemberDto memberDto = mapper.map(membersEntity, MemberDto.class);
+
+            // MembersEntity -> MemberDto
+            MemberDto memberDto = MemberDto.fromEntity(members);
 
             String accessToken = jwtUtils.createAccessToken(memberDto);
             String refreshToken = jwtUtils.getRefreshToken(memberDto.getEmail());
