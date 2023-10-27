@@ -3,37 +3,30 @@ package com.example.aucison_service.controller;
 import com.example.aucison_service.dto.auth.MemberDto;
 import com.example.aucison_service.dto.auth.MembersInfoDto;
 import com.example.aucison_service.service.member.AuthService;
-import com.example.aucison_service.util.JwtUtils;
-import com.example.aucison_service.vo.RequestSignInVo;
-import org.springframework.http.HttpStatus;
+import com.example.aucison_service.vo.RequestLoginVo;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    private final JwtUtils jwtUtils;
-
-    private final AuthenticationManager authenticationManager;
-    
     private final AuthService authService;
 
-    public AuthController(JwtUtils jwtUtils, AuthenticationManager authenticationManager, AuthService authService) {
-        this.jwtUtils = jwtUtils;
-        this.authenticationManager = authenticationManager;
+    @Autowired
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
-  
+
+    //매우주의!!!! -> 이전 코드 영역 전부 주석처리함, 10.27(금) 이후 전체 재 작성 바람, 해당부분 지우지 말고 아래에 새로 작성할 것
+    /* 매우주의!!!! -> 이전 코드 영역 전부 주석처리함, 10.27(금) 이후 전체 재 작성 바람, 해당부분 지우지 말고 아래에 새로 작성할 것
+
    @PostMapping("/signin")
     public ResponseEntity signIn(@RequestBody RequestSignInVo request) {
 //        ModelMapper mapper = new ModelMapper();
@@ -93,35 +86,6 @@ public class AuthController {
         return reissueToken(refreshToken);
     }
 
-    /*
-    //msa 적용으로 인해 해당코드 수정
-    public ResponseEntity reissueToken(String refreshToken) { // 토큰 재발행
-        // refreshToken에서 이메일을 추출
-        // jwtUtils는 JWT를 파싱하여 payload에 저장된 이메일을 반환하는 메서드를 제공
-        String email = jwtUtils.getEmailFromToken(refreshToken);
-
-        // 토큰이 더 이상 사용되지 않도록 삭제
-        jwtUtils.deleteRefreshToken(email);
-
-        // 이메일 정보를 사용하여 login 서비스 호출
-        String loginServiceUrl = "member-service-URL"; // 로그인 서비스의 URL을 설정해야함
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        String requestBody = "{\"email\": \"" + email + "\"}";  // 이메일을 JSON 형식으로 전달
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-        // POST 요청을 통해 login 서비스 호출, 로그인 서비스를 호출하여 새로운 토큰을 받음
-        ResponseEntity<String> loginResponse = restTemplate.exchange(
-                loginServiceUrl,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-
-        // login 서비스의 응답을 그대로 반환, 응답에는 새로운 access 토큰이 포함
-        return loginResponse;
-    }
-     */
 
     @GetMapping("/mp")
     public ResponseEntity getMemberInfo(@RequestHeader("accessToken") String accessToken) {
@@ -164,5 +128,47 @@ public class AuthController {
 
         return ResponseEntity.ok(tokens);
 
+    }
+
+     */
+
+
+
+    // 회원 가입
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody MemberDto memberDto) {
+        MemberDto result = authService.createMember(memberDto);
+        return ResponseEntity.ok(result);
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody RequestLoginVo requestLoginVo) {
+        return authService.login(requestLoginVo);
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(@RequestHeader(value="Authorization") String accessToken) {
+        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        authService.logout(accessToken);
+        return ResponseEntity.ok().build();
+    }
+
+    // 회원 정보 가져오기
+    @GetMapping("/member")
+    public ResponseEntity<?> getMemberInfo(@RequestHeader(value="Authorization") String accessToken) {
+        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        MembersInfoDto membersInfoDto = authService.getMember(accessToken);
+        return ResponseEntity.ok(membersInfoDto);
+    }
+
+    // 회원 정보 업데이트
+    @PatchMapping("/member")
+    public ResponseEntity<?> updateMemberInfo(@RequestHeader(value="Authorization") String accessToken,
+                                              @Valid @RequestBody MembersInfoDto membersInfoDto) {
+        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        authService.patchMember(accessToken, membersInfoDto);
+        return ResponseEntity.ok().build();
     }
 }

@@ -21,7 +21,7 @@ public class Wishes { // 찜
 
     @ManyToOne
     @JoinColumn(name = "email") // 연관관계 주인
-    private Members members; // 사용자
+    private MembersEntity membersEntity; // 사용자
 
     @Column(name = "products_id", nullable = false)
     private Long productId; // products-server: products entity의 products_id

@@ -7,12 +7,18 @@ import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.util.JwtUtils;
 import com.example.aucison_service.vo.RequestLoginVo;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -22,85 +28,93 @@ public class AuthServiceImpl implements AuthService {
     private final MembersInfoRepository membersInfoRepository;
     private final MembersImgRepository membersImgRepository;
     private final JwtUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public MemberDto createMember(MemberDto memberDto) {
 
-//        Members members = Members.builder()
-//                        .email(memberDto.getEmail())
-//                        .name(memberDto.getName())
-////                        .nickname(memberDto.getNickname())
-//                        .build();
-//
-//        membersRepository.save(members);
+        // 이메일 중복 검사
+        if (membersRepository.existsByEmail(memberDto.getEmail())) {
+            throw new RuntimeException("Error: 중복된 이메일");
+        }
+        MembersEntity membersEntity = MembersEntity.builder()
+                .email(memberDto.getEmail())
+                .name(memberDto.getName())
+//                        .nickname(memberDto.getNickname())
+                .build();
 
-        // DTO -> Entity 변환
-        Members members = memberDto.toEntity();
+        membersRepository.save(membersEntity);
 
-        membersRepository.save(members);
-
-        // Entity -> DTO 변환
-        return MemberDto.fromEntity(members);
+        return new ModelMapper().map(membersEntity, MemberDto.class);
     }
 
     @Override
     public ResponseEntity login(RequestLoginVo requestLoginVo) {
-        Members members = membersRepository.findByEmail(requestLoginVo.getEmail());
+        MembersEntity membersEntity = membersRepository.findByEmail(requestLoginVo.getEmail());
 
-        if(members != null) {
-            // MembersEntity -> MemberDto
-//            ModelMapper mapper = new ModelMapper();
-//            mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-//            MemberDto memberDto = mapper.map(membersEntity, MemberDto.class);
-
-            // MembersEntity -> MemberDto
-            MemberDto memberDto = MemberDto.fromEntity(members);
-
-            String accessToken = jwtUtils.createAccessToken(memberDto);
-            String refreshToken = jwtUtils.getRefreshToken(memberDto.getEmail());
-
-            jwtUtils.updateRefreshToken(memberDto, refreshToken);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("accessToken", accessToken);
-            headers.add("refreshToken", refreshToken);
-
-            return (ResponseEntity) ResponseEntity.ok().headers(headers);
-
-        } else {
-            throw new RuntimeException();
+        if (membersEntity == null) {
+            // 이메일로 사용자를 찾을 수 없는 경우, 명확한 예외 메시지와 함께 예외를 발생
+            throw new UsernameNotFoundException("User not found with email: " + requestLoginVo.getEmail());
         }
+
+        // DTO 변환(MembersEntity -> MemberDto)
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        MemberDto memberDto = mapper.map(membersEntity, MemberDto.class);
+
+        // JWT 토큰 생성
+        String accessToken = jwtUtils.createAccessToken(memberDto);
+        String refreshToken = jwtUtils.createRefreshToken(memberDto);
+
+        // 응답 헤더에 토큰 추가
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.add("RefreshToken", refreshToken);
+
+        // 응답 본문에도 토큰 정보를 넣을 수 있음 (선택사항)
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+
+        return ResponseEntity.ok()
+                .headers(headers) // 헤더에 토큰을 포함시킬 수 있음
+                .body(tokens); // 응답 본문에 토큰을 넣음, 이 부분은 선택사항
     }
 
+    //현재 미구현으로 두는게 나음, 그 이유는 블랙리스트관련 서비스를 아직 만들지 않음 -> 결국에는 만들어야하나 원할한 테스트를 위해 주석 하는게 나아보임
     @Override
     public void logout(String accessToken) {
+        // 토큰에서 이메일 추출
         String email = jwtUtils.getEmailFromToken(accessToken);
+
+        if(email == null) {
+            throw new RuntimeException("Could not find email in the token");
+        }
+
+        // refreshToken 무효화 (DB에서 삭제 등)
         jwtUtils.deleteRefreshToken(email);
+
+        // accessToken을 블랙리스트에 추가하여 더 이상 사용할 수 없도록 함
         jwtUtils.setBlackList(accessToken);
     }
 
-//    @Override
-//    public ResponseEntity reissueToken(String refreshToken) { // 토큰 재발행
-//
-//        String email = jwtUtils.getEmailFromToken(refreshToken);
-//        jwtUtils.deleteRefreshToken(email);
-//        RequestLoginVo requestLoginVo = RequestLoginVo.builder().email(email).build();
-//        return login(requestLoginVo);
-//    }
 
+
+    //이 아래로 아직 미수정!!!!
+    //이 아래로 아직 미수정!!!!
     @Override
     public MembersInfoDto getMember(String accessToken) {
         String email = jwtUtils.getEmailFromToken(accessToken);
-        if(email != null) {
+        if (email != null) {
             // null 검증 로직 추가하기
-            Members members = membersRepository.findByEmail(email);
-            MembersInfo membersInfo = membersInfoRepository.findByMembers(members);
+            MembersEntity membersEntity = membersRepository.findByEmail(email);
+            MembersInfo membersInfo = membersInfoRepository.findByMembers(membersEntity);
             MembersImg membersImgEntity = membersImgRepository.findByMembersInfo(membersInfo);
 
             return MembersInfoDto.builder()
                     .subEmail(membersInfo.getSubEmail())
-                    .name(members.getName())
-                    .nickName(members.getNickname())
+                    .name(membersEntity.getName())
+                    .nickName(membersEntity.getNickname())
                     .phone(membersInfo.getPhone())
                     .imgUrl(membersImgEntity.getUrl())
                     .build();
@@ -113,34 +127,22 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void patchMember(String accessToken, MembersInfoDto membersInfoDto) {
         String email = jwtUtils.getEmailFromToken(accessToken);
-        Members members = membersRepository.findByEmail(email);
-        MembersInfo membersInfo = membersInfoRepository.findByMembers(members);
+        MembersEntity membersEntity = membersRepository.findByEmail(email);
+        MembersInfo membersInfo = membersInfoRepository.findByMembers(membersEntity);
         MembersImg membersImg = membersImgRepository.findByMembersInfo(membersInfo);
 
         membersImg.updateInfo(
                 membersInfo.updateInfo(
-                        members.updateInfo(membersInfoDto),
+                        membersEntity.updateInfo(membersInfoDto),
                         membersInfoDto),
                 membersInfoDto);
     }
 
     @Override
-    public Iterable<Members> getMemberByAll() {
+    public Iterable<MembersEntity> getMemberByAll() {
         return null;
     }
 
-//    @Override
-//    public MemberDto getMemberDetailsByGoogleEmail(String email) {
-//        MembersEntity membersEntity = membersRepository.findByEmail(email);
-//
-//        if(membersEntity == null) {
-//            throw new UsernameNotFoundException(email);
-//        }
-//
-//        MemberDto memberDto = new ModelMapper().map(membersEntity, MemberDto.class);
-//
-//        return memberDto;
-//    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
