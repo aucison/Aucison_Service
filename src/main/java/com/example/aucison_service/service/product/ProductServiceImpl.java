@@ -9,6 +9,10 @@ import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
+import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.jpa.member.MembersRepository;
+import com.example.aucison_service.jpa.member.Wishes;
+import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
 import com.example.aucison_service.util.S3Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,21 +29,27 @@ public class ProductServiceImpl implements ProductService{
     ProductsRepository productsRepository;
     Sale_infosRepository sale_infosRepository;
     Aucs_infosRepository aucs_infosRepository;
+    MembersRepository membersRepository;
+    WishesRepository wishesRepository;
 
-    MemberServiceClient memberServiceClient;
 
-    ShippingServiceClient shippingServiceClient;
+//    MemberServiceClient memberServiceClient;
+//
+//    ShippingServiceClient shippingServiceClient;
 
     S3Utils s3Utils;
 
 
     @Autowired
-    public ProductServiceImpl(ProductsRepository productsRepository, Sale_infosRepository sale_infosRepository, Aucs_infosRepository aucs_infosRepository, MemberServiceClient memberServiceClient, ShippingServiceClient shippingServiceClient, S3Utils s3Utils){
+    public ProductServiceImpl(ProductsRepository productsRepository, Sale_infosRepository sale_infosRepository,
+                              Aucs_infosRepository aucs_infosRepository, MembersRepository membersRepository,
+                              WishesRepository wishesRepository,
+                              S3Utils s3Utils){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
-        this.memberServiceClient = memberServiceClient;
-        this.shippingServiceClient = shippingServiceClient;
+        this.membersRepository=membersRepository;
+        this.wishesRepository=wishesRepository;
         this.s3Utils = s3Utils;
     }
 
@@ -173,8 +183,9 @@ public class ProductServiceImpl implements ProductService{
     public void registerProduct(ProductRegisterRequestDto dto) {
         //상품 등록 서비스 로직
 
-        // member-service로부터 이메일을 가져옴
-        String emailFromMemberService = memberServiceClient.getEmail();
+        // member-service로부터 이메일을 가져옴 -> dto에서 추출
+        // 추후 인증인가 방식으로 수정 필요할 수 있음
+        String email = dto.getEmail();
 
         //ProductsEntity를 먼저 저장을 한다.
         ProductsEntity product = ProductsEntity.builder()
@@ -183,7 +194,7 @@ public class ProductServiceImpl implements ProductService{
                 .information(dto.getInformation())
                 .summary(dto.getSummary())
                 .brand(dto.getBrand())
-                .email(emailFromMemberService) // 가져온 이메일을 설정
+                .email(email) // 가져온 이메일을 설정
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
 
@@ -239,8 +250,15 @@ public class ProductServiceImpl implements ProductService{
         //검색결과 -> 일치하는 것 발견
 
         // member-service에서 사용자의 찜 여부를 확인
-        List<Long> wishedProductIds = memberServiceClient.getWishesProductIdsByEmail(email);
-        userWishStatus = wishedProductIds.contains(product.getProducts_id());
+        //사용자 조회
+        MembersEntity member = membersRepository.findByEmail(email);
+
+        // 사용자의 찜 목록 조회
+        //        List<Long> wishedProductIds = memberServiceClient.getWishesProductIdsByEmail(email);
+        List<Wishes> userWishes = wishesRepository.findByMembersEntity(member);
+        // 사용자의 찜 목록에서 상품 ID 확인
+        userWishStatus = userWishes.stream()
+                .anyMatch(wish -> wish.getProductId().equals(product.getProducts_id()));
 
         //아래와 같이 짜면 경매/비경매 상품 따로 못보여줌
 //            return ProductSearchResponseDto.builder()
