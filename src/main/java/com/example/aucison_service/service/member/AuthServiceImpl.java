@@ -32,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public MemberDto createMember(MemberDto memberDto) {
+
         // 이메일 중복 검사
         if (membersRepository.existsByEmail(memberDto.getEmail())) {
             throw new RuntimeException("Error: 중복된 이메일");
