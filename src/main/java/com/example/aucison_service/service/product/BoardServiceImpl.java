@@ -19,14 +19,14 @@ public class BoardServiceImpl implements BoardService{
 
     ProductsRepository productsRepository;
 
-    MemberServiceClient memberServiceClient;
+//    MemberServiceClient memberServiceClient;
 
     @Autowired
-    public BoardServiceImpl(PostsRepository postsRepository, CommentsRepository commentsRepository, ProductsRepository productsRepository, MemberServiceClient memberServiceClient) {
+    public BoardServiceImpl(PostsRepository postsRepository, CommentsRepository commentsRepository,
+                            ProductsRepository productsRepository) {
         this.productsRepository=productsRepository;
         this.commentsRepository=commentsRepository;
         this.postsRepository=postsRepository;
-        this.memberServiceClient = memberServiceClient;
     }
 
     @Override
@@ -111,14 +111,15 @@ public class BoardServiceImpl implements BoardService{
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        // member-service로부터 이메일을 가져옴
-        String emailFromMemberService = memberServiceClient.getEmail();
+        // member-service로부터 이메일을 가져옴 -> dto에서 추출
+        // 추후 인증인가 방식으로 수정 필요할 수 있음
+        String email = dto.getEmail();
 
         PostsEntity post = PostsEntity.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .email(emailFromMemberService)
-                .productsEntity(productsEntity)
+                .email(email)
+                .productsEntity(product)
                 .build();
 
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
@@ -145,12 +146,13 @@ public class BoardServiceImpl implements BoardService{
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        // member-service로부터 이메일을 가져옴
-        String emailFromMemberService = memberServiceClient.getEmail();
+        // member-service로부터 이메일을 가져옴 -> dto에서 추출
+        // 추후 인증인가 방식으로 수정 필요할 수 있음
+        String email = dto.getEmail();
 
         CommentsEntity comment = CommentsEntity.builder()
                 .content(dto.getContent())
-                .email(emailFromMemberService)
+                .email(email)
                 .postsEntity(postEntity)
                 .build();
 
