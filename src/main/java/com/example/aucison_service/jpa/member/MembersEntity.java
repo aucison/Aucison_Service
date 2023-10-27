@@ -53,4 +53,15 @@ public class MembersEntity { // 사용자
         return this;
     }
 
+    public void updateGoogleInfo(String name, String email) {
+        this.name = name;
+        this.email = email;
+        // 필요하다면 다른 정보도 업데이트 할 수 있습니다.
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+        // 필요한 경우 다른 값들도 여기에서 업데이트할 수 있습니다.
+    }
+
 }

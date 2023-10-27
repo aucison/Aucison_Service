@@ -2,7 +2,10 @@ package com.example.aucison_service.util;
 
 
 import com.example.aucison_service.dto.auth.MemberDto;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import io.jsonwebtoken.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,8 +23,23 @@ public class JwtUtils {
     @Value("${token.secret}")
     private String secretKey;
 
+    private GoogleIdTokenVerifier googleIdTokenVerifier;
 
-    //토큰생성 코드
+
+
+    //구글 로그인으로 인한 추가 코드
+    //구글 토큰을 파싱하고 검증하는 메소드
+    public GoogleIdToken.Payload verifyGoogleToken(String idTokenString) throws Exception {
+        GoogleIdToken idToken = googleIdTokenVerifier.verify(idTokenString);
+        if (idToken != null) {
+            return idToken.getPayload();
+        } else {
+            throw new RuntimeException("Invalid ID token.");
+        }
+    }
+
+
+        //토큰생성 코드
     public String createAccessToken(MemberDto memberDto) {
         Claims claims = Jwts.claims();
         claims.put("email", memberDto.getEmail());
