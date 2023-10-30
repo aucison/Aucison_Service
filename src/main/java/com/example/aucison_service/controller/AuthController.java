@@ -1,9 +1,12 @@
 package com.example.aucison_service.controller;
 
+import com.example.aucison_service.dto.auth.GoogleRequestDto;
+import com.example.aucison_service.dto.auth.GoogleResponseDto;
 import com.example.aucison_service.dto.auth.MemberDto;
 import com.example.aucison_service.dto.auth.MembersInfoDto;
 import com.example.aucison_service.service.member.AuthService;
-import com.example.aucison_service.vo.RequestLoginVo;
+import com.example.aucison_service.service.member.GoogleService;
+import com.example.aucison_service.util.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 
 
 @RestController
@@ -18,10 +22,17 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtils jwtUtils;
+    private final GoogleService googleService;
+
+    // 구글 클라이언트 ID
+    private static final String GOOGLE_CLIENT_ID = "509320414110-n3vuvelvfthqjkmt2s842mf95ieohf62.apps.googleusercontent.com";
 
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtUtils jwtUtils, GoogleService googleService) {
         this.authService = authService;
+        this.jwtUtils = jwtUtils;
+        this.googleService = googleService;
     }
 
     //매우주의!!!! -> 이전 코드 영역 전부 주석처리함, 10.27(금) 이후 전체 재 작성 바람, 해당부분 지우지 말고 아래에 새로 작성할 것
@@ -133,7 +144,15 @@ public class AuthController {
      */
 
 
+    // 구글 로그인
+    // 구글 로그인 처리
+    @PostMapping("/google/login")
+    public ResponseEntity<?> authenticateGoogleUser(@RequestBody GoogleRequestDto requestDto) {
+        GoogleResponseDto responseDto = authService.authenticateGoogleUser(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
 
+    /* 임시 기능정지
     // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody MemberDto memberDto) {
@@ -141,11 +160,17 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
+     */
+
+    /* 임시 기능 정지
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody RequestLoginVo requestLoginVo) {
         return authService.login(requestLoginVo);
     }
+
+     */
+
 
     // 로그아웃
     @PostMapping("/logout")

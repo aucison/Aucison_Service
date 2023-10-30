@@ -1,6 +1,7 @@
 package com.example.aucison_service.util;
 
 
+import com.example.aucison_service.dto.auth.GoogleLoginDto;
 import com.example.aucison_service.dto.auth.MemberDto;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +23,9 @@ public class JwtUtils {
 
 
     //토큰생성 코드
-    public String createAccessToken(MemberDto memberDto) {
+    public String createAccessToken(GoogleLoginDto loginDto) {
         Claims claims = Jwts.claims();
-        claims.put("email", memberDto.getEmail());
+        claims.put("email", loginDto.getEmail());
 
         Date now = new Date();
         return Jwts.builder()
@@ -36,9 +37,9 @@ public class JwtUtils {
     }
 
     //토큰생성 코드
-    public String createRefreshToken(MemberDto memberDto) { // 새로 만들기 전에 기존 refreshToken 지우고 만들기
+    public String createRefreshToken(GoogleLoginDto loginDto) { // 새로 만들기 전에 기존 refreshToken 지우고 만들기
         Claims claims = Jwts.claims();
-        claims.put("email", memberDto.getEmail());
+        claims.put("email", loginDto.getEmail());
 
         Date now = new Date();
         return Jwts.builder()

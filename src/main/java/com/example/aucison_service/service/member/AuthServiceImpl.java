@@ -1,17 +1,15 @@
 package com.example.aucison_service.service.member;
 
 
-import com.example.aucison_service.dto.auth.MemberDto;
-import com.example.aucison_service.dto.auth.MembersInfoDto;
+import com.example.aucison_service.dto.auth.*;
 import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.util.JwtUtils;
-import com.example.aucison_service.vo.RequestLoginVo;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -28,8 +26,39 @@ public class AuthServiceImpl implements AuthService {
     private final MembersInfoRepository membersInfoRepository;
     private final MembersImgRepository membersImgRepository;
     private final JwtUtils jwtUtils;
-    private final AuthenticationManager authenticationManager;
+    private final GoogleService googleService;
 
+    @Override
+    public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
+        GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
+
+        // Google payload에서 이메일을 기반으로 사용자 검색 또는 생성
+        MembersEntity user = membersRepository.findByEmail(payload.getEmail());
+
+        if (user == null) {
+            user = new MembersEntity();
+            user.updateFromGoogle(payload);
+            membersRepository.save(user);
+        }
+
+
+        // 사용자에 대한 JWT 토큰 생성
+        GoogleLoginDto googleLoginDto = GoogleLoginDto.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .build();
+
+        // JWT 토큰 생성에 필요한 정보가 있다면 GoogleLoginDto에서 가져옴
+        String accessToken = jwtUtils.createAccessToken(googleLoginDto);
+        String refreshToken = jwtUtils.createRefreshToken(googleLoginDto);
+
+        return GoogleResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    /* 임시 기능 정지
     @Override
     public MemberDto createMember(MemberDto memberDto) {
 
@@ -48,6 +77,9 @@ public class AuthServiceImpl implements AuthService {
         return new ModelMapper().map(membersEntity, MemberDto.class);
     }
 
+     */
+
+    /* 임시 기능 정지
     @Override
     public ResponseEntity login(RequestLoginVo requestLoginVo) {
         MembersEntity membersEntity = membersRepository.findByEmail(requestLoginVo.getEmail());
@@ -80,6 +112,10 @@ public class AuthServiceImpl implements AuthService {
                 .headers(headers) // 헤더에 토큰을 포함시킬 수 있음
                 .body(tokens); // 응답 본문에 토큰을 넣음, 이 부분은 선택사항
     }
+
+     */
+
+
 
     //현재 미구현으로 두는게 나음, 그 이유는 블랙리스트관련 서비스를 아직 만들지 않음 -> 결국에는 만들어야하나 원할한 테스트를 위해 주석 하는게 나아보임
     @Override
