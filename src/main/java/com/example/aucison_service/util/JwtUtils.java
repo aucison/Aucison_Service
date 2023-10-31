@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
-@RequiredArgsConstructor
+
 @Component
 public class JwtUtils {
     @Value("${token.access-token-time}")

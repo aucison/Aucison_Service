@@ -4,3 +4,8 @@ spring:
     show-sql: 'true'
   profiles:
     include: aws, google
+
+token:
+  access-token-time: 18000000 # 5시간
+  refresh-token-time: 2592000000 # 30일
+  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==
