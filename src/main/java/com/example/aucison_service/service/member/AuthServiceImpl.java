@@ -6,13 +6,10 @@ import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.util.JwtUtils;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.*;
@@ -72,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
 
 
-    //회원 상세정보 조회
+    //회원 상세정보 조회 -> 현재 이미지, 배송지 안됨
     public MembersInfoDto getMemberInfo(String email) {
         MembersEntity member = membersRepository.findByEmail(email);
         if (member == null) {
@@ -90,6 +87,22 @@ public class AuthServiceImpl implements AuthService {
                 .phone(membersInfo.getPhone())
                 .build();
     }
+
+    //회원정보 수정 -> 현재 이미지, 배송지 안됨
+    @Transactional
+    public void updateMemberInfo(String email, MemberUpdateDto updateDto) {
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // nickname이 존재하면 수정
+        member.updateNickname(updateDto.getNickname());
+
+        // phone이 존재하면 수정
+        member.getMembersInfo().updatePhone(updateDto.getPhone());
+    }
+
 
     /* 임시로 구글로그인만 활성화
     @Override
