@@ -1,10 +1,7 @@
 package com.example.aucison_service.service.member;
 
 
-import com.example.aucison_service.dto.auth.GoogleRequestDto;
-import com.example.aucison_service.dto.auth.GoogleResponseDto;
-import com.example.aucison_service.dto.auth.MemberDto;
-import com.example.aucison_service.dto.auth.MembersInfoDto;
+import com.example.aucison_service.dto.auth.*;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +15,7 @@ public interface AuthService extends UserDetailsService {
     void addTokenToBlacklist(String token);
     public boolean isTokenBlacklisted(String token);
     MembersInfoDto getMemberInfo(String email);
+    void updateMemberInfo(String email, MemberUpdateDto updateDto);
 
 
     //MemberDto createMember(MemberDto memberDto);
