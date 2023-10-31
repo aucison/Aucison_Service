@@ -1,11 +1,13 @@
 package com.example.aucison_service.util;
 
 
-import com.example.aucison_service.dto.auth.MemberDto;
+import com.example.aucison_service.dto.auth.GoogleLoginDto;
 import io.jsonwebtoken.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 
 import java.util.Date;
@@ -22,9 +24,9 @@ public class JwtUtils {
 
 
     //토큰생성 코드
-    public String createAccessToken(MemberDto memberDto) {
+    public String createAccessToken(GoogleLoginDto loginDto) {
         Claims claims = Jwts.claims();
-        claims.put("email", memberDto.getEmail());
+        claims.put("email", loginDto.getEmail());
 
         Date now = new Date();
         return Jwts.builder()
@@ -36,9 +38,9 @@ public class JwtUtils {
     }
 
     //토큰생성 코드
-    public String createRefreshToken(MemberDto memberDto) { // 새로 만들기 전에 기존 refreshToken 지우고 만들기
+    public String createRefreshToken(GoogleLoginDto loginDto) { // 새로 만들기 전에 기존 refreshToken 지우고 만들기
         Claims claims = Jwts.claims();
-        claims.put("email", memberDto.getEmail());
+        claims.put("email", loginDto.getEmail());
 
         Date now = new Date();
         return Jwts.builder()
@@ -124,6 +126,17 @@ public class JwtUtils {
 
     public Claims getClaims(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    }
+
+    //파싱 -> "Bearer " 문자열 뒤의 값을 추출하는 로직을 사용
+    public String parseJwt(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);
+        }
+
+        return null;
     }
 
 /*

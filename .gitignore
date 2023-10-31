@@ -34,6 +34,8 @@ build/
 
 
 ### custom add ###
+src/main/resources/application-aws.yml
+src/main/resources/application-google.yml
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,java,maven
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,java,maven
 
