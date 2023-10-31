@@ -4,6 +4,9 @@ spring:
     show-sql: 'true'
   profiles:
     include: aws, google
+  redis:
+    host: localhost
+    port: 6379
 
 token:
   access-token-time: 18000000 # 5시간
