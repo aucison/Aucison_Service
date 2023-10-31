@@ -1,7 +1,7 @@
 package com.example.aucison_service.jpa.shipping;
 
-import com.example.Aucison_Shipping_Service.BaseTimeEntity;
-import com.example.Aucison_Shipping_Service.OrderStatus;
+import com.example.aucison_service.BaseTimeEntity;
+import com.example.aucison_service.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

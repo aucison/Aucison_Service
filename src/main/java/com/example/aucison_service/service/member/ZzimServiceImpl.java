@@ -25,7 +25,7 @@ public class ZzimServiceImpl implements ZzimService {
     @Override
     public List<ResponseZzimHistoryDto> getZzimHistoryList(String accessToken) {
         String email = jwtUtils.getEmailFromToken(accessToken);
-        return wishesRepository.findByMembers(membersRepository.findByEmail(email))
+        return wishesRepository.findByMembersEntity(membersRepository.findByEmail(email))
                 .stream()
                 .map(wishesEntity -> {
                     return ResponseZzimHistoryDto.builder()
