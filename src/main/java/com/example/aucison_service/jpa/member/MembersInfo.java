@@ -51,4 +51,10 @@ public class MembersInfo { // 사용자 추가 정보
 
         return this;
     }
+
+    public void updatePhone(String phone) {
+        if (phone != null && !phone.isEmpty()) {
+            this.phone = phone;
+        }
+    }
 }

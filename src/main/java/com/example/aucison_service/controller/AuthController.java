@@ -1,9 +1,6 @@
 package com.example.aucison_service.controller;
 
-import com.example.aucison_service.dto.auth.GoogleRequestDto;
-import com.example.aucison_service.dto.auth.GoogleResponseDto;
-import com.example.aucison_service.dto.auth.MemberDto;
-import com.example.aucison_service.dto.auth.MembersInfoDto;
+import com.example.aucison_service.dto.auth.*;
 import com.example.aucison_service.service.member.AuthService;
 import com.example.aucison_service.service.member.GoogleService;
 import com.example.aucison_service.util.JwtUtils;
@@ -70,5 +67,17 @@ public class AuthController {
     }
 
     // 회원 정보 업데이트
+    @PutMapping("/update-info")
+    public ResponseEntity<Void> updateMemberInfo(HttpServletRequest request, @RequestBody MemberUpdateDto updateDto) {
+        String jwt = jwtUtils.parseJwt(request);
+        if (jwt == null || !jwtUtils.validateToken(jwt)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 유효하지 않은 접근
+        }
+
+        String userEmail = jwtUtils.getEmailFromToken(jwt);
+        authService.updateMemberInfo(userEmail, updateDto);
+
+        return ResponseEntity.ok().build();
+    }
 
 }

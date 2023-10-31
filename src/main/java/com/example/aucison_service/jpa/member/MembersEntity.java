@@ -57,4 +57,10 @@ public class MembersEntity {
         this.name = membersInfoDto.getName();
         this.nickname = membersInfoDto.getNickName();
     }
+
+    public void updateNickname(String nickname) {
+        if (nickname != null && !nickname.isEmpty()) {
+            this.nickname = nickname;
+        }
+    }
 }
