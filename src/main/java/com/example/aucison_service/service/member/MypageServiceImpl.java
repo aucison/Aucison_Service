@@ -25,13 +25,13 @@ public class MypageServiceImpl implements MypageService {
     @Override
     public List<ResponseOrderHistoryDto> getOrderHistoryList(String email) {
         MembersEntity membersEntity = membersRepository.findByEmail(email);
-        return historiesRepository.findByMembersInfo(membersInfoRepository.findByMembers(membersEntity))
+        return historiesRepository.findByMembersInfo(membersInfoRepository.findByMembersEntity(membersEntity))
                 .stream()
                 .filter(historiesEntity -> historiesEntity.getOrderStatus() == OrderStatus.BUY)
                 .map(historiesEntity -> {
                     ResponseOrderHistoryDto responseOrderHistoryDto = new ResponseOrderHistoryDto(historiesEntity);
                     responseOrderHistoryDto.setImgUrl(membersImgRepository.findByMembersInfo
-                            (membersInfoRepository.findByMembers(membersEntity)).getUrl());
+                            (membersInfoRepository.findByMembersEntity(membersEntity)).getUrl());
                     //responseOrderHistoryDto.setOrdersAt("product-server에서 받아오기");
                     //responseOrderHistoryDto.setState("product-server에서 받아오기");
                     return responseOrderHistoryDto;
@@ -43,7 +43,7 @@ public class MypageServiceImpl implements MypageService {
         MembersEntity membersEntity = membersRepository.findByEmail(requestOrderDetailsDto.getEmail());
         ResponseOrderDetailsDto responseOrderDetailsDto = new ResponseOrderDetailsDto(historiesRepository.findById
                 (requestOrderDetailsDto.getHistoriesId()).orElseThrow(() -> new Exception("수정필요수정필요")));
-        responseOrderDetailsDto.setImgUrl(membersImgRepository.findByMembersInfo(membersInfoRepository.findByMembers
+        responseOrderDetailsDto.setImgUrl(membersImgRepository.findByMembersInfo(membersInfoRepository.findByMembersEntity
                 (membersEntity)).getUrl());
         //responseOrderDetailsDto.setOrdersAt("product-server에서 받아오기");
         //responseOrderDetailsDto.setState("product-server에서 받아오기");
@@ -63,13 +63,13 @@ public class MypageServiceImpl implements MypageService {
     @Override
     public List<ResponseSellHistoryDto> getSellHistoryList(String email) {
         MembersEntity membersEntity = membersRepository.findByEmail(email);
-        return historiesRepository.findByMembersInfo(membersInfoRepository.findByMembers(membersEntity))
+        return historiesRepository.findByMembersInfo(membersInfoRepository.findByMembersEntity(membersEntity))
                 .stream()
                 .filter(historiesEntity -> historiesEntity.getOrderStatus() == OrderStatus.SELL)
                 .map(historiesEntity -> {
                     ResponseSellHistoryDto responseSellHistoryDto = new ResponseSellHistoryDto(historiesEntity);
                     responseSellHistoryDto.setImgUrl(membersImgRepository.findByMembersInfo
-                            (membersInfoRepository.findByMembers(membersEntity)).getUrl());
+                            (membersInfoRepository.findByMembersEntity(membersEntity)).getUrl());
                     //responseSellHistoryDto.setState("product-server에서 받아오기");
                     return responseSellHistoryDto;
                 }).collect(Collectors.toList());
