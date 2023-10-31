@@ -3,4 +3,4 @@ spring:
     database: mysql
     show-sql: 'true'
   profiles:
-    include: aws
+    include: aws, google

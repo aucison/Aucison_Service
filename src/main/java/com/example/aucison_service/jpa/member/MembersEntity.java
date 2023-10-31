@@ -2,6 +2,7 @@ package com.example.aucison_service.jpa.member;
 
 import com.example.aucison_service.dto.auth.MembersInfoDto;
 import com.example.aucison_service.enums.Role;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,43 +15,46 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "members")
-public class MembersEntity { // 사용자
+public class MembersEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "members_id")
-    private Long id; // 사용자 id
-
-    @Column
-    private String email; // 구글 이메일
+    private Long id;
 
     @Column(nullable = false)
-    private String name; // 이름(구글)
+    private String email;   //구글 이메일
 
     @Column(nullable = false)
-    private String nickname; // 별명(사용자 지정값)
+    private String name;    //구글 이름
+
+    @Column(nullable = true)
+    private String nickname;    //닉네임
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(mappedBy = "membersEntity", fetch = FetchType.LAZY) // 양방향 매핑
+    @OneToOne(mappedBy = "membersEntity", fetch = FetchType.LAZY)
     private MembersInfo membersInfo;
 
-    @OneToMany(mappedBy = "membersEntity", fetch = FetchType.LAZY) // 양방향 매핑
+    @OneToMany(mappedBy = "membersEntity", fetch = FetchType.LAZY)
     private List<Wishes> wishes;
-
 
     @Builder
     public MembersEntity(String email, String name, String nickname) {
-        this.name = name;
         this.email = email;
+        this.name = name;
         this.nickname = nickname;
     }
 
-    public MembersEntity updateInfo(MembersInfoDto membersInfoDto) {
-        this.name = membersInfoDto.getName();
-        this.nickname = membersInfoDto.getNickName();
-        return this;
+    public void updateFromGoogle(GoogleIdToken.Payload payload) {
+        this.email = payload.getEmail();
+        this.name = (String) payload.get("name");
+        this.nickname = this.name + "_google";
     }
 
+    public void updateInfo(MembersInfoDto membersInfoDto) {
+        this.name = membersInfoDto.getName();
+        this.nickname = membersInfoDto.getNickName();
+    }
 }
