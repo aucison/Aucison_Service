@@ -17,8 +17,6 @@ import java.util.UUID;
 
 @Service
 public class PaymentsServiceImpl implements PaymentsService {
-    private final ProductServiceClient productServiceClient;
-    private final MemberServiceClient memberServiceClient;
     private final BidsRepository bidsRepository;
     private PageAccessLogsRepository pageAccessLogsRepository;
     private OrdersRepository ordersRepository;
@@ -27,12 +25,9 @@ public class PaymentsServiceImpl implements PaymentsService {
     private RefundsRepository refundsRepository;
 
     @Autowired
-    public PaymentsServiceImpl(ProductServiceClient productServiceClient, MemberServiceClient memberServiceClient,
-                               BidsRepository bidsRepository, PageAccessLogsRepository pageAccessLogsRepository,
+    public PaymentsServiceImpl(BidsRepository bidsRepository, PageAccessLogsRepository pageAccessLogsRepository,
                                OrdersRepository ordersRepository, PaymentsRepository paymentsRepository,
                                DeliveriesRepository deliveriesRepository, RefundsRepository refundsRepository) {
-        this.productServiceClient = productServiceClient;
-        this.memberServiceClient = memberServiceClient;
         this.bidsRepository = bidsRepository;
         this.pageAccessLogsRepository = pageAccessLogsRepository;
         this.ordersRepository = ordersRepository;
@@ -45,55 +40,59 @@ public class PaymentsServiceImpl implements PaymentsService {
     public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, String email,
                                                            String addrName, int percent) {  //가상 결제
 
+//         TODO: msa 통신 부분 대체 필요
+//
+//        //MSA 통신을 사용하여 product-service에서 product 정보 가져오기
+//        VirtualPaymentProductInfoResponseDto product = productServiceClient.getVirtualPaymentProductByProductsId(productsId);
+//
+//        if ("AUCS".equals(product.getCategory())) {
+//            //경매 상품
+//            return getAucsVirtualPaymentInfo(productsId, email, addrName, percent);
+//        } else if ("SALE".equals(product.getCategory())) {
+//            //비경매 상품
+//            return getSaleVirtualPaymentInfo(productsId, email, addrName);
+//        } else {
+//            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+//        }
 
-        //MSA 통신을 사용하여 product-service에서 product 정보 가져오기
-        VirtualPaymentProductInfoResponseDto product = productServiceClient.getVirtualPaymentProductByProductsId(productsId);
-
-        if ("AUCS".equals(product.getCategory())) {
-            //경매 상품
-            return getAucsVirtualPaymentInfo(productsId, email, addrName, percent);
-        } else if ("SALE".equals(product.getCategory())) {
-            //비경매 상품
-            return getSaleVirtualPaymentInfo(productsId, email, addrName);
-        } else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
     }
 
     public VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
                                                            String addrName) {  //가상 결제(비경매)
 
-        //MSA 통신을 사용하여 product-service에서 product 정보 가져오기
-        VirtualPaymentProductInfoResponseDto product = productServiceClient.getVirtualPaymentProductByProductsId(productsId);
+        //         TODO: msa 통신 부분 대체 필요
 
-        //MSA 통신을 사용하여 member-service에서 배송지 정보 가져오기
-        AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
-
-        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
-        float currentCredit = memberServiceClient.getCreditByEmail(email);
-
-        //현재 credit에서 등록 가격을 차감
-        float newCredit = currentCredit - product.getPrice();
-
-        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
-
-
-        return VirtualPaymentResponseDto.builder()
-                .category(product.getCategory())
-                .name(product.getProductName())
-                .productImg(product.getProductImg())
-                .price(product.getPrice())
-                .addrName(addrInfoResponseDto.getAddrName())
-                .name(addrInfoResponseDto.getName())
-                .tel(addrInfoResponseDto.getTel())
-                .zipCode(addrInfoResponseDto.getZipCode())
-                .addr(addrInfoResponseDto.getAddr())
-                .addrDetail(addrInfoResponseDto.getAddrDetail())
-                .credit(currentCredit)
-                .newCredit(newCredit)
-                .build();
+//        //MSA 통신을 사용하여 product-service에서 product 정보 가져오기
+//        VirtualPaymentProductInfoResponseDto product = productServiceClient.getVirtualPaymentProductByProductsId(productsId);
+//
+//        //MSA 통신을 사용하여 member-service에서 배송지 정보 가져오기
+//        AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
+//
+//        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
+//        float currentCredit = memberServiceClient.getCreditByEmail(email);
+//
+//        //현재 credit에서 등록 가격을 차감
+//        float newCredit = currentCredit - product.getPrice();
+//
+//        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
+//            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+//        }
+//
+//
+//        return VirtualPaymentResponseDto.builder()
+//                .category(product.getCategory())
+//                .name(product.getProductName())
+//                .productImg(product.getProductImg())
+//                .price(product.getPrice())
+//                .addrName(addrInfoResponseDto.getAddrName())
+//                .name(addrInfoResponseDto.getName())
+//                .tel(addrInfoResponseDto.getTel())
+//                .zipCode(addrInfoResponseDto.getZipCode())
+//                .addr(addrInfoResponseDto.getAddr())
+//                .addrDetail(addrInfoResponseDto.getAddrDetail())
+//                .credit(currentCredit)
+//                .newCredit(newCredit)
+//                .build();
     }
 
     public VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email,
@@ -107,57 +106,58 @@ public class PaymentsServiceImpl implements PaymentsService {
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
 
-
-        //MSA 통신을 사용하여 product-service에서 product 정보 가져오기
-        VirtualPaymentProductInfoResponseDto product = productServiceClient.getVirtualPaymentProductByProductsId(productsId);
-
-        //bids에서 실시간 가격 정보를 받아옴
-        Bids bid = bidsRepository.findByBidsCode(product.getBidsCode());
-        float nowPrice = bid.getNowPrice();
-
-        //MSA 통신을 사용하여 member-service에서 배송지 정보 가져오기
-        AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
-
-        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
-        float currentCredit = memberServiceClient.getCreditByEmail(email);
-
-        //현재 credit에서 경매 가격을 차감
-        float newCredit = currentCredit - nowPrice;
-
-        float newPrice = nowPrice + (nowPrice * (percent / 100));   //응찰가
-
-        //가상 결제 페이지 탈출 로그 생성 전에 체크
-        LocalDateTime exitTime = LocalDateTime.now();
-        if(!isBeforeAuctionEndDate(productsId, exitTime)) {
-            throw new AppException(ErrorCode.AUCTION_ENDED);
-        }
-
-        logPageExit(logId);
-
-        return VirtualPaymentResponseDto.builder()
-                .category(product.getCategory())
-                .name(product.getProductName())
-                .productImg(product.getProductImg())
-                .nowPrice(newPrice)
-                .addrName(addrInfoResponseDto.getAddrName())
-                .name(addrInfoResponseDto.getName())
-                .tel(addrInfoResponseDto.getTel())
-                .zipCode(addrInfoResponseDto.getZipCode())
-                .addr(addrInfoResponseDto.getAddr())
-                .addrDetail(addrInfoResponseDto.getAddrDetail())
-                .credit(currentCredit)
-                .newCredit(newCredit)
-                .build();
+//         TODO: msa 통신 부분 대체 필요
+//        //MSA 통신을 사용하여 product-service에서 product 정보 가져오기
+//        VirtualPaymentProductInfoResponseDto product = productServiceClient.getVirtualPaymentProductByProductsId(productsId);
+//
+//        //bids에서 실시간 가격 정보를 받아옴
+//        Bids bid = bidsRepository.findByBidsCode(product.getBidsCode());
+//        float nowPrice = bid.getNowPrice();
+//
+//        //MSA 통신을 사용하여 member-service에서 배송지 정보 가져오기
+//        AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
+//
+//        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
+//        float currentCredit = memberServiceClient.getCreditByEmail(email);
+//
+//        //현재 credit에서 경매 가격을 차감
+//        float newCredit = currentCredit - nowPrice;
+//
+//        float newPrice = nowPrice + (nowPrice * (percent / 100));   //응찰가
+//
+//        //가상 결제 페이지 탈출 로그 생성 전에 체크
+//        LocalDateTime exitTime = LocalDateTime.now();
+//        if(!isBeforeAuctionEndDate(productsId, exitTime)) {
+//            throw new AppException(ErrorCode.AUCTION_ENDED);
+//        }
+//
+//        logPageExit(logId);
+//
+//        return VirtualPaymentResponseDto.builder()
+//                .category(product.getCategory())
+//                .name(product.getProductName())
+//                .productImg(product.getProductImg())
+//                .nowPrice(newPrice)
+//                .addrName(addrInfoResponseDto.getAddrName())
+//                .name(addrInfoResponseDto.getName())
+//                .tel(addrInfoResponseDto.getTel())
+//                .zipCode(addrInfoResponseDto.getZipCode())
+//                .addr(addrInfoResponseDto.getAddr())
+//                .addrDetail(addrInfoResponseDto.getAddrDetail())
+//                .credit(currentCredit)
+//                .newCredit(newCredit)
+//                .build();
 
     }
 
-    private AddrInfoResponseDto fetchShippingInfo(String email, String addrName) {  //배송지명으로 배송지 조회
-        AddrInfoResponseDto addrInfoResponseDto = memberServiceClient.getShippingInfo(email, addrName);
-        if (addrInfoResponseDto == null) {
-            throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
-        }
-        return addrInfoResponseDto;
-    }
+    //         TODO: msa 통신 부분 대체 필요
+//    private AddrInfoResponseDto fetchShippingInfo(String email, String addrName) {  //배송지명으로 배송지 조회
+//        AddrInfoResponseDto addrInfoResponseDto = memberServiceClient.getShippingInfo(email, addrName);
+//        if (addrInfoResponseDto == null) {
+//            throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
+//        }
+//        return addrInfoResponseDto;
+//    }
 
     @Override
     public Long savePayment(PaymentsRequestDto paymentsRequestDto) {    //결제완료
@@ -202,19 +202,21 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         delivery = deliveriesRepository.save(delivery);
 
-        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
-        float currentCredit = memberServiceClient.getCreditByEmail(paymentsRequestDto.getEmail());
-        float updatedCredit = currentCredit - paymentsRequestDto.getPrice();
+        //         TODO: msa 통신 부분 대체 필요
 
-        // MSA 통신을 사용하여 결제 금액을 차감한 credit 정보 업데이트
-        UpdateCreditRequestDto updateCreditRequestDto = UpdateCreditRequestDto.builder()
-                .email(paymentsRequestDto.getEmail())
-                .credit(updatedCredit)
-                .build();
-
-        memberServiceClient.updateCreditByEmail(updateCreditRequestDto);
-
-        return order.getOrdersId();
+//        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
+//        float currentCredit = memberServiceClient.getCreditByEmail(paymentsRequestDto.getEmail());
+//        float updatedCredit = currentCredit - paymentsRequestDto.getPrice();
+//
+//        // MSA 통신을 사용하여 결제 금액을 차감한 credit 정보 업데이트
+//        UpdateCreditRequestDto updateCreditRequestDto = UpdateCreditRequestDto.builder()
+//                .email(paymentsRequestDto.getEmail())
+//                .credit(updatedCredit)
+//                .build();
+//
+//        memberServiceClient.updateCreditByEmail(updateCreditRequestDto);
+//
+//        return order.getOrdersId();
     }
 
     public Long saveAucsPayment(PaymentsRequestDto paymentsRequestDto) {    //결제완료(경매)
@@ -273,73 +275,75 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         bid = bidsRepository.save(bid);
 
-        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
-        float currentCredit = memberServiceClient.getCreditByEmail(paymentsRequestDto.getEmail());
-        float updatedCredit = currentCredit - paymentsRequestDto.getNowPrice();
+        //         TODO: msa 통신 부분 대체 필요
 
-        // MSA 통신을 사용하여 결제 금액을 차감한 credit 정보 업데이트
-        UpdateCreditRequestDto updateCreditRequestDto = UpdateCreditRequestDto.builder()
-                .email(paymentsRequestDto.getEmail())
-                .credit(updatedCredit)
-                .build();
-
-        memberServiceClient.updateCreditByEmail(updateCreditRequestDto);
-
-        //경매 미낙찰에 따른 환불
-        //상품 id로 해당 상품 주문 정보를 모두 찾음
-        List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
-
-        Orders winningOrder = existingOrders.get(0);
-
-        for (Orders ord : existingOrders) {
-            //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
-            if (!ord.equals(winningOrder) && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
-
-                ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
-
-                float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
-
-                // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
-                currentCredit = memberServiceClient.getCreditByEmail(ord.getEmail());
-                updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
-
-                // `member-service`에 credit 업데이트 요청
-                updateCreditRequestDto = UpdateCreditRequestDto.builder()
-                        .email(ord.getEmail())
-                        .credit(updatedCredit)
-                        .build();
-
-                memberServiceClient.updateCreditByEmail(updateCreditRequestDto);
-
-                // 환불 정보 저장
-                Refunds refund = Refunds.builder()
-                        .cost(refundedAmount)
-                        .build();
-                refundsRepository.save(refund);
-
-                // 실시간 응찰 내역에 패찰 정보 저장
-                Bids failedBid = Bids.builder()
-                        .productsId(paymentsRequestDto.getProductsId())
-                        .email(ord.getEmail())
-                        .nowPrice(ord.getPayments().getCost())
-//                        .bidsAt(new Date())
-                        .status(OrderStatus.FAILED_BID)
-                        .bidsCode(UUID.randomUUID().toString())
-                        .build();
-                bidsRepository.save(failedBid);
-
-            }
-        }
-
-        //가상 결제 페이지 탈출 로그 생성 전에 체크
-        LocalDateTime exitTime = LocalDateTime.now();
-        if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
-            throw new AppException(ErrorCode.AUCTION_ENDED);
-        }
-
-        logPageExit(logId);
-
-        return order.getOrdersId();
+//        // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
+//        float currentCredit = memberServiceClient.getCreditByEmail(paymentsRequestDto.getEmail());
+//        float updatedCredit = currentCredit - paymentsRequestDto.getNowPrice();
+//
+//        // MSA 통신을 사용하여 결제 금액을 차감한 credit 정보 업데이트
+//        UpdateCreditRequestDto updateCreditRequestDto = UpdateCreditRequestDto.builder()
+//                .email(paymentsRequestDto.getEmail())
+//                .credit(updatedCredit)
+//                .build();
+//
+//        memberServiceClient.updateCreditByEmail(updateCreditRequestDto);
+//
+//        //경매 미낙찰에 따른 환불
+//        //상품 id로 해당 상품 주문 정보를 모두 찾음
+//        List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
+//
+//        Orders winningOrder = existingOrders.get(0);
+//
+//        for (Orders ord : existingOrders) {
+//            //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
+//            if (!ord.equals(winningOrder) && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
+//
+//                ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
+//
+//                float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
+//
+//                // MSA 통신을 사용하여 member-service에서 credit 정보 가져오기
+//                currentCredit = memberServiceClient.getCreditByEmail(ord.getEmail());
+//                updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
+//
+//                // `member-service`에 credit 업데이트 요청
+//                updateCreditRequestDto = UpdateCreditRequestDto.builder()
+//                        .email(ord.getEmail())
+//                        .credit(updatedCredit)
+//                        .build();
+//
+//                memberServiceClient.updateCreditByEmail(updateCreditRequestDto);
+//
+//                // 환불 정보 저장
+//                Refunds refund = Refunds.builder()
+//                        .cost(refundedAmount)
+//                        .build();
+//                refundsRepository.save(refund);
+//
+//                // 실시간 응찰 내역에 패찰 정보 저장
+//                Bids failedBid = Bids.builder()
+//                        .productsId(paymentsRequestDto.getProductsId())
+//                        .email(ord.getEmail())
+//                        .nowPrice(ord.getPayments().getCost())
+////                        .bidsAt(new Date())
+//                        .status(OrderStatus.FAILED_BID)
+//                        .bidsCode(UUID.randomUUID().toString())
+//                        .build();
+//                bidsRepository.save(failedBid);
+//
+//            }
+//        }
+//
+//        //가상 결제 페이지 탈출 로그 생성 전에 체크
+//        LocalDateTime exitTime = LocalDateTime.now();
+//        if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
+//            throw new AppException(ErrorCode.AUCTION_ENDED);
+//        }
+//
+//        logPageExit(logId);
+//
+//        return order.getOrdersId();
     }
 
     // 페이지에 접근했을 때의 로그 생성
@@ -366,7 +370,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private boolean isBeforeAuctionEndDate(Long productsId, LocalDateTime dateTimeToCheck) {
         //종료 날짜를 받아와 현재 시간과 비교하여 true 또는 false를 반환
-        LocalDateTime auctionEndDate = productServiceClient.getAuctionEndDateByProductId(productsId);
-        return dateTimeToCheck.isBefore(auctionEndDate);
+        //         TODO: msa 통신 부분 대체 필요
+//        LocalDateTime auctionEndDate = productServiceClient.getAuctionEndDateByProductId(productsId);
+//        return dateTimeToCheck.isBefore(auctionEndDate);
     }
 }
