@@ -3,4 +3,19 @@ spring:
     database: mysql
     show-sql: 'true'
   profiles:
+<<<<<<< HEAD
     include: aws
+=======
+    include: aws, google
+  redis:
+    host: localhost
+    port: 6379
+  h2:
+    console:
+      enabled: true
+
+token:
+  access-token-time: 18000000 # 5시간
+  refresh-token-time: 2592000000 # 30일
+  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==
+>>>>>>> 0e60cad856c1cb95699ab8fae005e5fc10e508b7
