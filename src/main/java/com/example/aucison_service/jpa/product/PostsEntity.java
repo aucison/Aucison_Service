@@ -18,8 +18,8 @@ public class PostsEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "products_id")
-    private Long posts_id;       //PK
+    @Column(name = "posts_id")
+    private Long postsId;       //PK
 
 
     @Column(name = "title", nullable = false)

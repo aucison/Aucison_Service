@@ -39,19 +39,19 @@ public class BoardServiceImpl implements BoardService{
         return postsEntities.stream()
                 .map(postEntity -> {
                     PostListResponseDto postListResponseDto = PostListResponseDto.builder()
-                            .posts_id(postEntity.getPosts_id())
+                            .posts_id(postEntity.getPostsId())
                             .title(postEntity.getTitle())
                             .content(postEntity.getContent())
                             .createdTime(postEntity.getCreatedTime())
                             .email(postEntity.getEmail())
                             .build();
 
-                    List<CommentsEntity> commentsEntities = commentsRepository.findByPostsId(postEntity.getPosts_id());
+                    List<CommentsEntity> commentsEntities = commentsRepository.findByPostsEntity_PostsId(postEntity.getPostsId());
 
                     List<CommentListResponseDto> commentListResponseDtos = postEntity.getCommentsEntities()
                             .stream()
                             .map(commentEntity -> CommentListResponseDto.builder()
-                                    .comments_id(commentEntity.getComments_id())
+                                    .comments_id(commentEntity.getCommentsId())
                                     .content(commentEntity.getContent())
                                     .createdTime(commentEntity.getCreatedTime())
                                     .email(commentEntity.getEmail())
@@ -68,23 +68,23 @@ public class BoardServiceImpl implements BoardService{
 
     @Override
     public List<PostListResponseDto> getBoardByProductId(Long productId) {
-        List<PostsEntity> postsEntities = postsRepository.findByProductId(productId);
+        List<PostsEntity> postsEntities = postsRepository.findByProductsEntity_ProductsId(productId);
 
         return postsEntities.stream()
                 .map(postEntity -> {
                     PostListResponseDto postListResponseDto = PostListResponseDto.builder()
-                            .posts_id(postEntity.getPosts_id())
+                            .posts_id(postEntity.getPostsId())
                             .title(postEntity.getTitle())
                             .content(postEntity.getContent())
                             .createdTime(postEntity.getCreatedTime())
                             .email(postEntity.getEmail())
                             .build();
 
-                    List<CommentsEntity> commentsEntities = commentsRepository.findByPostsId(postEntity.getPosts_id());
+                    List<CommentsEntity> commentsEntities = commentsRepository.findByPostsEntity_PostsId(postEntity.getPostsId());
 
                     List<CommentListResponseDto> commentListResponseDtos = commentsEntities.stream()
                             .map(commentEntity -> CommentListResponseDto.builder()
-                                    .comments_id(commentEntity.getComments_id())
+                                    .comments_id(commentEntity.getCommentsId())
                                     .content(commentEntity.getContent())
                                     .createdTime(commentEntity.getCreatedTime())
                                     .email(commentEntity.getEmail())
@@ -129,7 +129,7 @@ public class BoardServiceImpl implements BoardService{
 
         // savedPost에는 이제 데이터베이스에서 자동 생성된 ID가 포함되어 있음
         PostCRUDResponseDto responseDto = PostCRUDResponseDto.builder()
-                .posts_id(savedPost.getPosts_id())
+                .posts_id(savedPost.getPostsId())
                 .build();
 
         return responseDto;
@@ -162,7 +162,7 @@ public class BoardServiceImpl implements BoardService{
 
         //이제 생성된 ID 있으므로
         CommentCRUDResponseDto responseDto = CommentCRUDResponseDto.builder()
-                .comment_id(savedComment.getComments_id())
+                .comment_id(savedComment.getCommentsId())
                 .build();
 
         return responseDto;
@@ -184,7 +184,7 @@ public class BoardServiceImpl implements BoardService{
         PostsEntity updatedPost = postsRepository.save(postEntity);
 
         PostCRUDResponseDto responseDto = PostCRUDResponseDto.builder()
-                .posts_id(updatedPost.getPosts_id())
+                .posts_id(updatedPost.getPostsId())
                 .build();
 
         return responseDto;
@@ -208,7 +208,7 @@ public class BoardServiceImpl implements BoardService{
         CommentsEntity updatedComment = commentsRepository.save(comment);
 
         CommentCRUDResponseDto responseDto = CommentCRUDResponseDto.builder()
-                .comment_id(updatedComment.getComments_id())
+                .comment_id(updatedComment.getCommentsId())
                 .build();
 
         return responseDto;
