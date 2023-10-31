@@ -13,10 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -27,7 +26,10 @@ public class AuthServiceImpl implements AuthService {
     private final MembersImgRepository membersImgRepository;
     private final JwtUtils jwtUtils;
     private final GoogleService googleService;
+    private final Set<String> tokenBlacklist = Collections.synchronizedSet(new HashSet<>());
 
+
+    //구글 로그인 처리
     @Override
     public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
         GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
@@ -58,7 +60,38 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    /* 임시 기능 정지
+    //로그아웃 관련 블랙리스트
+    public void addTokenToBlacklist(String token) {
+        tokenBlacklist.add(token);
+    }
+
+    //로그아웃 관련 블랙리스트
+    public boolean isTokenBlacklisted(String token) {
+        return tokenBlacklist.contains(token);
+    }
+
+
+
+    //회원 상세정보 조회
+    public MembersInfoDto getMemberInfo(String email) {
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        MembersInfo membersInfo = member.getMembersInfo();  //1대 1 관계라 가능
+        if (membersInfo == null) {
+            throw new RuntimeException("MemberInfo not found for this user");
+        }
+        return MembersInfoDto.builder()
+                .email(member.getEmail())
+                .name(member.getName())
+                .nickName(member.getNickname())
+                .phone(membersInfo.getPhone())
+                .build();
+    }
+
+    /* 임시로 구글로그인만 활성화
     @Override
     public MemberDto createMember(MemberDto memberDto) {
 
@@ -69,7 +102,6 @@ public class AuthServiceImpl implements AuthService {
         MembersEntity membersEntity = MembersEntity.builder()
                 .email(memberDto.getEmail())
                 .name(memberDto.getName())
-//                        .nickname(memberDto.getNickname())
                 .build();
 
         membersRepository.save(membersEntity);
@@ -77,9 +109,7 @@ public class AuthServiceImpl implements AuthService {
         return new ModelMapper().map(membersEntity, MemberDto.class);
     }
 
-     */
 
-    /* 임시 기능 정지
     @Override
     public ResponseEntity login(RequestLoginVo requestLoginVo) {
         MembersEntity membersEntity = membersRepository.findByEmail(requestLoginVo.getEmail());
@@ -115,73 +145,6 @@ public class AuthServiceImpl implements AuthService {
 
      */
 
-
-
-    //현재 미구현으로 두는게 나음, 그 이유는 블랙리스트관련 서비스를 아직 만들지 않음 -> 결국에는 만들어야하나 원할한 테스트를 위해 주석 하는게 나아보임
-//    @Override
-//    public void logout(String accessToken) {
-//        // 토큰에서 이메일 추출
-//        String email = jwtUtils.getEmailFromToken(accessToken);
-//
-//        if(email == null) {
-//            throw new RuntimeException("Could not find email in the token");
-//        }
-//
-//        // refreshToken 무효화 (DB에서 삭제 등)
-//        jwtUtils.deleteRefreshToken(email);
-//
-//        // accessToken을 블랙리스트에 추가하여 더 이상 사용할 수 없도록 함
-//        jwtUtils.setBlackList(accessToken);
-//    }
-
-
-
-    //이 아래로 아직 미수정!!!!
-    //이 아래로 아직 미수정!!!!
-    /*
-    @Override
-    public MembersInfoDto getMember(String accessToken) {
-        String email = jwtUtils.getEmailFromToken(accessToken);
-        if (email != null) {
-            // null 검증 로직 추가하기
-            MembersEntity membersEntity = membersRepository.findByEmail(email);
-            MembersInfo membersInfo = membersInfoRepository.findByMembers(membersEntity);
-            MembersImg membersImgEntity = membersImgRepository.findByMembersInfo(membersInfo);
-
-            return MembersInfoDto.builder()
-                    .subEmail(membersInfo.getSubEmail())
-                    .name(membersEntity.getName())
-                    .nickName(membersEntity.getNickname())
-                    .phone(membersInfo.getPhone())
-                    .imgUrl(membersImgEntity.getUrl())
-                    .build();
-        } else {
-            throw new RuntimeException();
-        }
-    }
-
-    @Transactional
-    @Override
-    public void patchMember(String accessToken, MembersInfoDto membersInfoDto) {
-        String email = jwtUtils.getEmailFromToken(accessToken);
-        MembersEntity membersEntity = membersRepository.findByEmail(email);
-        MembersInfo membersInfo = membersInfoRepository.findByMembers(membersEntity);
-        MembersImg membersImg = membersImgRepository.findByMembersInfo(membersInfo);
-
-        membersImg.updateInfo(
-                membersInfo.updateInfo(
-                        membersEntity.updateInfo(membersInfoDto),
-                        membersInfoDto),
-                membersInfoDto);
-    }
-
-    @Override
-    public Iterable<MembersEntity> getMemberByAll() {
-        return null;
-    }
-
-
-     */
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

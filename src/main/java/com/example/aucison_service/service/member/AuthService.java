@@ -12,14 +12,20 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import java.util.Map;
 
 public interface AuthService extends UserDetailsService {
+
+
+    GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
+    void addTokenToBlacklist(String token);
+    public boolean isTokenBlacklisted(String token);
+    MembersInfoDto getMemberInfo(String email);
+
+
     //MemberDto createMember(MemberDto memberDto);
     //ResponseEntity login(RequestLoginVo requestLoginVo);
-  //  void logout(String accessToken);
-//    ResponseEntity reissueToken(String refreshToken);
-  //  MembersInfoDto getMember(String accessToken);
-  //  void patchMember(String accessToken, MembersInfoDto membersInfoDto);
-    GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
-
-  //  Iterable<MembersEntity> getMemberByAll();
-//    MemberDto getMemberDetailsByGoogleEmail(String email);
+    //void logout(String accessToken);
+    //ResponseEntity reissueToken(String refreshToken);
+    //MembersInfoDto getMember(String accessToken);
+    //void patchMember(String accessToken, MembersInfoDto membersInfoDto);
+    //Iterable<MembersEntity> getMemberByAll();
+    //MemberDto getMemberDetailsByGoogleEmail(String email);
 }

@@ -22,14 +22,14 @@ public class MembersEntity {
     @Column(name = "members_id")
     private Long id;
 
-    @Column
-    private String email;
+    @Column(nullable = false)
+    private String email;   //구글 이메일
 
     @Column(nullable = false)
-    private String name;
+    private String name;    //구글 이름
 
-    @Column(nullable = false)
-    private String nickname;
+    @Column(nullable = true)
+    private String nickname;    //닉네임
 
     @Enumerated(EnumType.STRING)
     private Role role;

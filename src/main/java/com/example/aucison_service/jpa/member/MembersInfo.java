@@ -22,7 +22,7 @@ public class MembersInfo { // 사용자 추가 정보
     @Column(name = "members_info_id")
     private Long id; // 사용자 추가 정보 id
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String phone; // 전화번호
 
     @Column(nullable = false)
