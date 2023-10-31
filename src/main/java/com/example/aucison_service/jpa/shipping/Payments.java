@@ -1,6 +1,6 @@
 package com.example.aucison_service.jpa.shipping;
 
-import com.example.Aucison_Shipping_Service.BaseTimeEntity;
+import com.example.aucison_service.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

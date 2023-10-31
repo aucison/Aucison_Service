@@ -16,12 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class OrdersServiceImpl implements OrdersService{
     private final OrdersRepository ordersRepository;
-    private final ProductServiceClient productServiceClient;
+//    private final ProductServiceClient productServiceClient;
 
     @Autowired
-    public OrdersServiceImpl(OrdersRepository ordersRepository, ProductServiceClient productServiceClient) {
+    public OrdersServiceImpl(OrdersRepository ordersRepository) {
         this.ordersRepository = ordersRepository;
-        this.productServiceClient = productServiceClient;
     }
 
 //    @Transactional
@@ -87,20 +86,21 @@ public class OrdersServiceImpl implements OrdersService{
 
     private OrdersResponseDto convertToDto(Orders order) { // 주문 정보(Orders)를 응답용 DTO로 변환하는 메서드
         //products_id로 product 정보를 가져옴
-        ProductInfoResponseDto productInfoResponse = productServiceClient.getOrderProductByProductsId(order.getProductsId());
-
-        //주문 일자 형식
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-
-        return OrdersResponseDto.builder()
-                .productName(productInfoResponse.getProductName())
-                .productImg(productInfoResponse.getProductImg())
-                .productDescription(productInfoResponse.getProductDescription())
-                .category(productInfoResponse.getCategory())
-                .ordersId(order.getOrdersId())
-                .price(productInfoResponse.getPrice())
-                .createdTime(order.getCreatedDate().toLocalDate().format(formatter))
-                .status(order.getStatus())
-                .build();
-    }
+        //         TODO: msa 통신 부분 대체 필요
+//        ProductInfoResponseDto productInfoResponse = productServiceClient.getOrderProductByProductsId(order.getProductsId());
+//
+//        //주문 일자 형식
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+//
+//        return OrdersResponseDto.builder()
+//                .productName(productInfoResponse.getProductName())
+//                .productImg(productInfoResponse.getProductImg())
+//                .productDescription(productInfoResponse.getProductDescription())
+//                .category(productInfoResponse.getCategory())
+//                .ordersId(order.getOrdersId())
+//                .price(productInfoResponse.getPrice())
+//                .createdTime(order.getCreatedDate().toLocalDate().format(formatter))
+//                .status(order.getStatus())
+//                .build();
+//    }
 }

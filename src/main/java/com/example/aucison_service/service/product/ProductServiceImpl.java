@@ -276,6 +276,9 @@ public class ProductServiceImpl implements ProductService{
                 .summary(product.getSummary())
                 .brand(product.getBrand())
                 .isWished(userWishStatus);
+
+        /** TODO: msa 통신 부분 대체 필요
+         *
         if("AUCS".equals(product.getCategory())){
 
             //최고가를 얻기 위해 nowPrice의 모든 값 비교
@@ -292,6 +295,7 @@ public class ProductServiceImpl implements ProductService{
             responseDtoBuilder
                     .price(product.getSale_infosEntity().getPrice());
         }
+         */
         return responseDtoBuilder.build();
 
     }
