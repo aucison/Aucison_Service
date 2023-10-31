@@ -118,26 +118,27 @@ public class AuthServiceImpl implements AuthService {
 
 
     //현재 미구현으로 두는게 나음, 그 이유는 블랙리스트관련 서비스를 아직 만들지 않음 -> 결국에는 만들어야하나 원할한 테스트를 위해 주석 하는게 나아보임
-    @Override
-    public void logout(String accessToken) {
-        // 토큰에서 이메일 추출
-        String email = jwtUtils.getEmailFromToken(accessToken);
-
-        if(email == null) {
-            throw new RuntimeException("Could not find email in the token");
-        }
-
-        // refreshToken 무효화 (DB에서 삭제 등)
-        jwtUtils.deleteRefreshToken(email);
-
-        // accessToken을 블랙리스트에 추가하여 더 이상 사용할 수 없도록 함
-        jwtUtils.setBlackList(accessToken);
-    }
+//    @Override
+//    public void logout(String accessToken) {
+//        // 토큰에서 이메일 추출
+//        String email = jwtUtils.getEmailFromToken(accessToken);
+//
+//        if(email == null) {
+//            throw new RuntimeException("Could not find email in the token");
+//        }
+//
+//        // refreshToken 무효화 (DB에서 삭제 등)
+//        jwtUtils.deleteRefreshToken(email);
+//
+//        // accessToken을 블랙리스트에 추가하여 더 이상 사용할 수 없도록 함
+//        jwtUtils.setBlackList(accessToken);
+//    }
 
 
 
     //이 아래로 아직 미수정!!!!
     //이 아래로 아직 미수정!!!!
+    /*
     @Override
     public MembersInfoDto getMember(String accessToken) {
         String email = jwtUtils.getEmailFromToken(accessToken);
@@ -180,8 +181,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
+     */
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return null;
     }
+
+
 }

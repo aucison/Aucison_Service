@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -12,7 +13,8 @@ import java.util.Collections;
 public class GoogleService {
 
     // Google client ID
-    private final String googleClientId = "509320414110-n3vuvelvfthqjkmt2s842mf95ieohf62.apps.googleusercontent.com";
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
 
     // GoogleIdToken을 검증하기 위한 파서
     private final GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())

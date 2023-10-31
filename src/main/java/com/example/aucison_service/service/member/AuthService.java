@@ -12,14 +12,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import java.util.Map;
 
 public interface AuthService extends UserDetailsService {
-    MemberDto createMember(MemberDto memberDto);
-    ResponseEntity login(RequestLoginVo requestLoginVo);
-    void logout(String accessToken);
+    //MemberDto createMember(MemberDto memberDto);
+    //ResponseEntity login(RequestLoginVo requestLoginVo);
+  //  void logout(String accessToken);
 //    ResponseEntity reissueToken(String refreshToken);
-    MembersInfoDto getMember(String accessToken);
-    void patchMember(String accessToken, MembersInfoDto membersInfoDto);
+  //  MembersInfoDto getMember(String accessToken);
+  //  void patchMember(String accessToken, MembersInfoDto membersInfoDto);
     GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
 
-    Iterable<MembersEntity> getMemberByAll();
+  //  Iterable<MembersEntity> getMemberByAll();
 //    MemberDto getMemberDetailsByGoogleEmail(String email);
 }
