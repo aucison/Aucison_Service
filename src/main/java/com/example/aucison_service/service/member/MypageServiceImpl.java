@@ -79,7 +79,7 @@ public class MypageServiceImpl implements MypageService {
                                 .productDescription(historiesEntity.getInfo())
                                 .category(historiesEntity.getCategory().toString())
                                 .ordersId(ordersEntity.getOrdersId())
-                                .createdTime(ordersEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                .createdTime(ordersEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                                 .status(ordersEntity.getStatus())
                                 .price(historiesEntity.getPrice())
                                 .build();

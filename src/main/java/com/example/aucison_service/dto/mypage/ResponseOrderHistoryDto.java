@@ -16,7 +16,7 @@ import java.util.Date;
 public class ResponseOrderHistoryDto {
     //주문내역 조회 시 사용하는 dto
     private String productName; //상품명
-    private String productImg; //상품 사진
+    private String productImg; //상품 사진(url)
     private String productDescription;  //상품 간단 설명
     private String category; // 경매여부(경매/비경매)
     private Long ordersId;  //주문번호

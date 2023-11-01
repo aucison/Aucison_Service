@@ -1,6 +1,7 @@
 package com.example.aucison_service.controller;
 
 
+import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
 import com.example.aucison_service.dto.mypage.ResponseOrderDetailsDto;
 import com.example.aucison_service.service.member.MypageService;
@@ -26,11 +27,11 @@ public class MypageController {
 //        return ResponseEntity.status(HttpStatus.OK).body(mypageService.getOrderHistoryList(email));
 //    }
     @GetMapping("/mp/buy")  //주문내역 조회
-    public ResponseEntity getOrderInfo(Authentication authentication) {
+    public ApiResponse<?> getOrderInfo(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
 
-        return ResponseEntity.status(HttpStatus.OK).body(mypageService.getOrderHistoryList(email));
+        return ApiResponse.createSuccess(mypageService.getOrderHistoryList(email));
     }
 
     @GetMapping("/mp/buy/{historiesId}")
