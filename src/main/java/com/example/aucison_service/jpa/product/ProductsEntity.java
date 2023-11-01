@@ -27,7 +27,7 @@ public class ProductsEntity extends BaseTimeEntity {
     private String name;            //상품명
 
     @Column(name = "kind", nullable = false)
-    private String kind;            // 상품분류(일반(hand) / 핸드메이드(nonhand)
+    private String kind;            // 상품분류(일반(NORM) / 핸드메이드(HAND)
 
     @Column(name = "category", nullable = false)
     private String category;        // 경매여부(경매(AUCS) / 비경매(SALE))
@@ -51,12 +51,12 @@ public class ProductsEntity extends BaseTimeEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aucs_infos_id")
-    private Aucs_infosEntity aucs_infosEntity;
+    private AucsInfosEntity aucsInfosEntity;
 
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sale_infos_id")
-    private Sale_infosEntity sale_infosEntity;
+    private SaleInfosEntity saleInfosEntity;
 
     @OneToMany(mappedBy = "productsEntity")
     List<PostsEntity> postsEntities = new ArrayList<>();
