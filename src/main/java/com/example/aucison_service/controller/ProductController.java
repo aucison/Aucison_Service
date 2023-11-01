@@ -41,29 +41,35 @@ public class ProductController {
 
 
 
-    @GetMapping("/auc/nothand/list")
-    public ResponseEntity<List<AucsProductResponseDto>> getAllAucNothandProducts() {
-        List<AucsProductResponseDto> products = productService.getAllAucNothandProducts();
+    //모든 경매(AUCS) + 핸드메이드(HAND) 상품 반환
+    @GetMapping("/aucs/hand/list")
+    public ResponseEntity<List<AucsProductResponseDto>> getAllAucsHandProducts() {
+        List<AucsProductResponseDto> products = productService.getAllAucsHandProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping("/auc/hand/list")
-    public ResponseEntity<List<AucsProductResponseDto>> getAllAucHandProducts() {
-        List<AucsProductResponseDto> products = productService.getAllAucHandProducts();
+
+    //모든 경매(AUCS) + 일반(NORM) 상품 반환
+    @GetMapping("/aucs/norm/list")
+    public ResponseEntity<List<AucsProductResponseDto>> getAllAucsNormProducts() {
+        List<AucsProductResponseDto> products = productService.getAllAucsNormProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping("/nor/nothand/list")
-    public ResponseEntity<List<SaleProductResponseDto>> getAllNorNothandProducts() {
-        List<SaleProductResponseDto> products = productService.getAllNorNothandProducts();
+    //모든 비경매(SALE) + 핸드메이드(HAND) 상품 반환
+    @GetMapping("/sale/hand/list")
+    public ResponseEntity<List<SaleProductResponseDto>> getAllSaleHandProducts() {
+        List<SaleProductResponseDto> products = productService.getAllSaleHandProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping("/nor/hand/list")
-    public ResponseEntity<List<SaleProductResponseDto>> getAllNorHandProducts() {
-        List<SaleProductResponseDto> products = productService.getAllNorHandProducts();
+    //모든 비경매(SALE) + 일반(NORM) 상품 반환
+    @GetMapping("/sale/norm/list")
+    public ResponseEntity<List<SaleProductResponseDto>> getAllSaleNormProducts() {
+        List<SaleProductResponseDto> products = productService.getAllSaleNormProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
 
 
     //ApiResponse형태로 변경하기

@@ -57,6 +57,8 @@ public class ProductServiceImpl implements ProductService{
     // -> AucProductResponseDto객체를 빌드화함
     // -> 최종적으로 변환된 AucProductResponseDto객체들을 리스트로 모아 반환
 
+
+    //현재 이하 4개의 서비스에 N+1문제 발생 가능성 높음 -> 곧 해결 예정
     //모든 경매(AUCS) + 핸드메이드(HAND) 상품 반환
     public List<AucsProductResponseDto> getAllAucsHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "HAND");
@@ -70,13 +72,15 @@ public class ProductServiceImpl implements ProductService{
                         .information(product.getInformation())
                         .summary(product.getSummary())
                         .brand(product.getBrand())
-                        .start_price(product.getAucsInfosEntity().getStartPrice())
+                        .startPrice(product.getAucsInfosEntity().getStartPrice())
                         .end(product.getAucsInfosEntity().getEnd())
-                        .bids_code(product.getAucsInfosEntity().getBidsCode())
+                        .bidsCode(product.getAucsInfosEntity().getBidsCode())
                         .build()
         ).collect(Collectors.toList());
     }
 
+
+    //모든 경매(AUCS) + 일반(NORM) 상품 반환
     public List<AucsProductResponseDto> getAllAucsNormProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "NORM");
         if (products.isEmpty()) {
@@ -89,13 +93,15 @@ public class ProductServiceImpl implements ProductService{
                         .information(product.getInformation())
                         .summary(product.getSummary())
                         .brand(product.getBrand())
-                        .start_price(product.getAucsInfosEntity().getStartPrice())
+                        .startPrice(product.getAucsInfosEntity().getStartPrice())
                         .end(product.getAucsInfosEntity().getEnd())
-                        .bids_code(product.getAucsInfosEntity().getBidsCode())
+                        .bidsCode(product.getAucsInfosEntity().getBidsCode())
                         .build()
         ).collect(Collectors.toList());
     }
 
+
+    //모든 비경매(SALE) + 핸드메이드(HAND) 상품 반환
     public List<SaleProductResponseDto> getAllSaleHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("SALE", "HAND");
         if (products.isEmpty()) {
@@ -113,6 +119,7 @@ public class ProductServiceImpl implements ProductService{
         ).collect(Collectors.toList());
     }
 
+    //모든 비경매(SALE) + 일반(NORM) 상품 반환
     public List<SaleProductResponseDto> getAllSaleNormProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("SALE", "NORM");
         if (products.isEmpty()) {
@@ -275,9 +282,9 @@ public class ProductServiceImpl implements ProductService{
 
         // 경매 상품 추가정보
         if ("auc".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
-            builder.start_price(product.getAucsInfosEntity().getStartPrice())
+            builder.startPrice(product.getAucsInfosEntity().getStartPrice())
                     .end(product.getAucsInfosEntity().getEnd())
-                    .bids_code(product.getAucsInfosEntity().getBidsCode());
+                    .bidsCode(product.getAucsInfosEntity().getBidsCode());
         }
 
         // 비경매 상품 추가정보
