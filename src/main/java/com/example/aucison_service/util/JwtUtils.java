@@ -5,6 +5,8 @@ import com.example.aucison_service.dto.auth.GoogleLoginDto;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -15,6 +17,8 @@ import java.util.Date;
 
 @Component
 public class JwtUtils {
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+
     @Value("${token.access-token-time}")
     private long accessTokenTime;
     @Value("${token.refresh-token-time}")
@@ -76,22 +80,42 @@ public class JwtUtils {
     // 토큰 검증 코드
     public boolean validateToken(String token) {
         try {
+            logger.info("Validating token1: {}", token);  // 토큰 로깅
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            logger.info("Validating token2: {}", token);  // 토큰 로깅
             return true;
         } catch (SignatureException e) {
-            // JWT의 서명 검증에 실패했을 때의 처리
+            logger.error("Invalid JWT signature.", e);
             throw new RuntimeException("Invalid JWT signature.");
         } catch (MalformedJwtException e) {
-            // JWT 형식 오류
+            logger.error("Invalid JWT token.", e);
             throw new RuntimeException("Invalid JWT token.");
         } catch (ExpiredJwtException e) {
-            // JWT 유효기간 만료
+            logger.error("Expired JWT token.", e);
             throw new RuntimeException("Expired JWT token.");
         } catch (IllegalArgumentException e) {
-            // claimsJws가 비어있을 때, 예를 들어 토큰이 비어있는 경우
+            logger.error("Empty JWT token.", e);
             throw new RuntimeException("Empty JWT token.");
         }
     }
+//    public boolean validateToken(String token) {
+//        try {
+//            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+//            return true;
+//        } catch (SignatureException e) {
+//            // JWT의 서명 검증에 실패했을 때의 처리
+//            throw new RuntimeException("Invalid JWT signature.");
+//        } catch (MalformedJwtException e) {
+//            // JWT 형식 오류
+//            throw new RuntimeException("Invalid JWT token.");
+//        } catch (ExpiredJwtException e) {
+//            // JWT 유효기간 만료
+//            throw new RuntimeException("Expired JWT token.");
+//        } catch (IllegalArgumentException e) {
+//            // claimsJws가 비어있을 때, 예를 들어 토큰이 비어있는 경우
+//            throw new RuntimeException("Empty JWT token.");
+//        }
+//    }
 
     /*
     // 모노리틱에서는  JWT 토큰이 자체 만료 메커니즘을 가지고 있기 때문에
@@ -132,8 +156,13 @@ public class JwtUtils {
     public String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
 
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
+//        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+//            return headerAuth.substring(7);
+//        }
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {  //유효할 경우
+            String token = headerAuth.substring(7);
+            logger.info("Extracted JWT: " + token);  // 로깅 추가
+            return token;
         }
 
         return null;
