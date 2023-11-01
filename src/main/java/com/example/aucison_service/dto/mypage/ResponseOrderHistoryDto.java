@@ -23,7 +23,7 @@ public class ResponseOrderHistoryDto {
     private String createdTime;  //주문일자(formatter로 인한 string 형 변환)
     private OrderStatus status;  //주문상태
 
-    private Float price; //구매 가격 or 실시간 가격
+    private Float price; //구매 가격
 
 //    private Long historiesId; // 주문 내역 고유 번호
 //    private String name; // 상품명

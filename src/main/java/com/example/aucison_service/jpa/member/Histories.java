@@ -3,6 +3,7 @@ package com.example.aucison_service.jpa.member;
 import com.example.aucison_service.enums.Category;
 import com.example.aucison_service.enums.Kind;
 import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OrderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Getter
 @Entity
 @Table(name = "histories")
@@ -22,9 +21,9 @@ public class Histories { // 사용자 구매/판매 내역
     @Column(name = "histories_id")
     private Long id; // 사용자 구매/판매 내역 id
 
-    @Column(name = "order_status", nullable = false)
+    @Column(name = "order_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus; // 상태 분류(구매/판매)
+    private OrderType orderType; // 상태 분류(구매/판매)
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -42,6 +41,8 @@ public class Histories { // 사용자 구매/판매 내역
 
     @Column(nullable = false)
     private Float price; // 구매/판매 가격
+    @Column(name = "orders_id", nullable = false)
+    private Long ordersId;;    //주문번호
 
     @ManyToOne
     @JoinColumn(name = "members_info_id") // 연관관계 주인
