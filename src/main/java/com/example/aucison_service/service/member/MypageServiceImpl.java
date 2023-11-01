@@ -25,6 +25,7 @@ public class MypageServiceImpl implements MypageService {
     @Override
     public List<ResponseOrderHistoryDto> getOrderHistoryList(String email) {
         MembersEntity membersEntity = membersRepository.findByEmail(email);
+
         return historiesRepository.findByMembersInfo(membersInfoRepository.findByMembersEntity(membersEntity))
                 .stream()
                 .filter(historiesEntity -> historiesEntity.getOrderStatus() == OrderStatus.BUY)

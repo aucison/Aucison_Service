@@ -8,19 +8,28 @@ import com.example.aucison_service.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/")
+@RequestMapping("/member-service")
 public class MypageController {
 
     private final JwtUtils jwtUtils;
     private final MypageService mypageService;
 
-    @GetMapping("/mp/buy")
-    public ResponseEntity getOrderInfo(@RequestHeader("accessToken") String accessToken) {
-        String email = jwtUtils.getEmailFromToken(accessToken);
+//    @GetMapping("/mp/buy")
+//    public ResponseEntity getOrderInfo(@RequestHeader("accessToken") String accessToken) {
+//        String email = jwtUtils.getEmailFromToken(accessToken);
+//        return ResponseEntity.status(HttpStatus.OK).body(mypageService.getOrderHistoryList(email));
+//    }
+    @GetMapping("/mp/buy")  //주문내역 조회
+    public ResponseEntity getOrderInfo(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
         return ResponseEntity.status(HttpStatus.OK).body(mypageService.getOrderHistoryList(email));
     }
 
