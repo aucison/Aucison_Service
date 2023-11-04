@@ -5,6 +5,10 @@ import com.example.aucison_service.dto.auth.GoogleLoginDto;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -15,6 +19,8 @@ import java.util.Date;
 
 @Component
 public class JwtUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     @Value("${token.access-token-time}")
     private long accessTokenTime;
     @Value("${token.refresh-token-time}")
@@ -76,7 +82,9 @@ public class JwtUtils {
     // 토큰 검증 코드
     public boolean validateToken(String token) {
         try {
+            logger.info("Validating token1: {}", token);  // 토큰 로깅
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            logger.info("Validating token2: {}", token);  // 토큰 로깅
             return true;
         } catch (SignatureException e) {
             // JWT의 서명 검증에 실패했을 때의 처리
@@ -133,6 +141,8 @@ public class JwtUtils {
         String headerAuth = request.getHeader("Authorization");
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            String token = headerAuth.substring(7);
+            logger.info("Extracted JWT: " + token);  // 로깅 추가
             return headerAuth.substring(7);
         }
 
