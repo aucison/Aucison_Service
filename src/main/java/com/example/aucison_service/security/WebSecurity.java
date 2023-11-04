@@ -2,18 +2,24 @@ package com.example.aucison_service.security;
 
 
 import com.example.aucison_service.service.member.GoogleAuthService;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -27,20 +33,14 @@ import java.util.List;
 public class WebSecurity {
 
     private final GoogleAuthService googleAuthService;
-    private final OidcUserService oidcUserService;
 
     // 생성자를 통한 의존성 주입
+    @Autowired
     public WebSecurity(GoogleAuthService googleAuthService) {
         this.googleAuthService = googleAuthService;
-        this.oidcUserService = oidcUserService();
     }
 
 
-    // 빈 주입
-    @Bean
-    public OidcUserService oidcUserService() {
-        return new OidcUserService();
-    }
 
     // Spring Security Filter Chain 설정
     @Bean
@@ -49,37 +49,42 @@ public class WebSecurity {
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // X-Frame-Options 헤더 비활성화
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**", "/oauth2/**").permitAll() // OAuth2 로그인 경로 허용
-                        .anyRequest().authenticated() // 나머지 요청은 모두 인증 요구
+                        .requestMatchers(new AntPathRequestMatcher("/auth/**", HttpMethod.GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/oauth2/**", HttpMethod.GET.name())).permitAll()
+                        .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .oidcUserService(this::processOidcUser)
-                        )
-                        .successHandler(this::successHandler)
-                );
+                .oauth2Login(oauth2Login ->
+                        oauth2Login
+                                .userInfoEndpoint(userInfoEndpoint ->
+                                        userInfoEndpoint
+                                                .userService(this.oauth2UserService())
+                                )
+                                .successHandler(this::successHandler));
+
 
         return http.build();
     }
 
-    private OidcUser processOidcUser(OidcUserRequest userRequest) {
+    @Bean
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+        return new DefaultOAuth2UserService() {
+            @Override
+            public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+                OAuth2User oAuth2User = super.loadUser(userRequest);
 
+                // Google에서 받아온 사용자 정보를 가져옵니다.
+                String idTokenValue = userRequest.getAccessToken().getTokenValue();
+                // 여기에서 idTokenValue를 사용하여 GoogleAuthService를 통해 사용자를 인증하고
+                // 데이터베이스에 저장할 수 있습니다.
+                // 예를 들면:
+                // googleAuthService.processGoogleUser(idTokenValue);
 
-        // Google에서 받아온 사용자 정보를 가져옵니다.
-        OidcUser oidcUser = oidcUserService.loadUser(userRequest);
-
-        // Google에서 받아온 정보로 사용자를 인증하고 데이터베이스에 저장합니다.
-        GoogleIdToken.Payload payload = new GoogleIdToken.Payload();
-        payload.setEmail(oidcUser.getEmail());
-        payload.setSubject(oidcUser.getEmail());
-        payload.set("name", oidcUser.getFullName());
-
-        // 사용자 인증 및 데이터베이스에 저장
-        googleAuthService.authenticateUser(payload);
-
-        // 인증 후 OidcUser 반환
-        return oidcUser;
+                // 인증 후 OAuth2User 반환
+                return oAuth2User;
+            }
+        };
     }
+
     private void successHandler(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Authentication authentication) throws IOException {

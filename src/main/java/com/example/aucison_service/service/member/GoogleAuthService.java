@@ -30,8 +30,8 @@ public class GoogleAuthService {
     private final MembersRepository membersRepository;
 
     @Autowired
-    public GoogleAuthService(@Value("${google.oauth2.client-id}") String clientId,
-                             @Value("${google.oauth2.client-secret}") String clientSecret,
+    public GoogleAuthService(@Value("${spring.security.oauth2.client.registration.google.client-id}") String clientId,
+                             @Value("${spring.security.oauth2.client.registration.google.client-secret}") String clientSecret,
                              MembersRepository membersRepository ) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;

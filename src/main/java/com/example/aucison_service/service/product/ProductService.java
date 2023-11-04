@@ -18,10 +18,10 @@ public interface ProductService {
 
     void registerProduct(ProductRegisterRequestDto dto);
 
-    ProductSearchResponseDto searchProductByName(String name, String email);
+    //ProductSearchResponseDto searchProductByName(String name, String email);
 
     //상품 상세 정보 조회하기
-    ProductDetailResponseDto getProductDetail(String product_code);
+    //ProductDetailResponseDto getProductDetail(String product_code);
 
 
 
