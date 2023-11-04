@@ -41,10 +41,11 @@ public class MembersEntity {
     private List<Wishes> wishes;
 
     @Builder
-    public MembersEntity(String email, String name, String nickname) {
+    public MembersEntity(String email, String name, String nickname, Role role) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
+        this.role = role;
     }
 
     public void updateFromGoogle(GoogleIdToken.Payload payload) {
