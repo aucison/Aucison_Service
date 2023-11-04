@@ -1,5 +1,6 @@
 package com.example.aucison_service.service.member;
 
+import com.example.aucison_service.dto.auth.LoginResponseDto;
 import com.example.aucison_service.enums.Role;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
@@ -56,6 +57,20 @@ public class GoogleAuthService {
         }
     }
 
+    // 로그인 응답 DTO를 생성하여 반환하는 메소드
+    public LoginResponseDto getLoginResponseDto(String idTokenString) {
+        GoogleIdToken googleIdToken = verifyToken(idTokenString);
+        MembersEntity user = authenticateUser(googleIdToken.getPayload());
+
+        return LoginResponseDto.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .nickname(user.getNickname())
+                .role(user.getRole())
+                .build();
+    }
+
     // ID 토큰에서 사용자 정보를 추출하여 MembersEntity에 저장하는 메소드
     @Transactional
     public MembersEntity authenticateUser(GoogleIdToken.Payload payload) {
@@ -105,6 +120,16 @@ public class GoogleAuthService {
     // 사용자 정보를 데이터베이스에 저장하는 메소드
     private MembersEntity saveUser(MembersEntity user) {
         return membersRepository.save(user);
+    }
+
+    public boolean deleteUser(Long id) {
+        Optional<MembersEntity> userOptional = membersRepository.findById(id);
+        if (userOptional.isPresent()) {
+            MembersEntity user = userOptional.get();
+            membersRepository.delete(user);
+            return true;
+        }
+        return false;
     }
 }
 

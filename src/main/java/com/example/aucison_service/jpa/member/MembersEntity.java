@@ -28,7 +28,6 @@ public class MembersEntity {
     @Column(nullable = false)
     private String name;    //구글 이름
 
-    @Column(nullable = true)
     private String nickname;    //닉네임
 
     @Enumerated(EnumType.STRING)
