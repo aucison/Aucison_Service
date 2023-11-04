@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -26,18 +27,26 @@ import java.util.List;
 public class WebSecurity {
 
     private final GoogleAuthService googleAuthService;
+    private final OidcUserService oidcUserService;
 
     // 생성자를 통한 의존성 주입
     public WebSecurity(GoogleAuthService googleAuthService) {
         this.googleAuthService = googleAuthService;
+        this.oidcUserService = oidcUserService();
     }
 
+
+    // 빈 주입
+    @Bean
+    public OidcUserService oidcUserService() {
+        return new OidcUserService();
+    }
 
     // Spring Security Filter Chain 설정
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
-        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // X-Frame-Options 헤더를 비활성화
+        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // X-Frame-Options 헤더 비활성화
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**", "/oauth2/**").permitAll() // OAuth2 로그인 경로 허용
@@ -51,24 +60,26 @@ public class WebSecurity {
                 );
 
         return http.build();
-
-        return http.build();
-
-
-
     }
 
-    private OidcUser processOidcUser(OidcUserRequest userRequest, OidcUser oidcUser) {
-        // 이곳에서 Google에서 받아온 정보를 바탕으로 사용자 인증 처리를 합니다.
+    private OidcUser processOidcUser(OidcUserRequest userRequest) {
+
+
+        // Google에서 받아온 사용자 정보를 가져옵니다.
+        OidcUser oidcUser = oidcUserService.loadUser(userRequest);
+
+        // Google에서 받아온 정보로 사용자를 인증하고 데이터베이스에 저장합니다.
         GoogleIdToken.Payload payload = new GoogleIdToken.Payload();
         payload.setEmail(oidcUser.getEmail());
-        payload.setSubject(oidcUser.getEmail()); // Subject를 email로 설정
+        payload.setSubject(oidcUser.getEmail());
         payload.set("name", oidcUser.getFullName());
 
+        // 사용자 인증 및 데이터베이스에 저장
         googleAuthService.authenticateUser(payload);
+
+        // 인증 후 OidcUser 반환
         return oidcUser;
     }
-
     private void successHandler(HttpServletRequest request,
                                 HttpServletResponse response,
                                 Authentication authentication) throws IOException {
