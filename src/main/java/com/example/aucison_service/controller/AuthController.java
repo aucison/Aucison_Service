@@ -29,12 +29,33 @@ public class AuthController {
         this.tokenProvider = tokenProvider;
     }
 
+<<<<<<< HEAD
     // 구글 로그인을 처리하는 엔드포인트
     @PostMapping("/google/login")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleRequestDto googleRequestDto) {
         try {
             GoogleIdToken googleIdToken = googleAuthService.verifyToken(googleRequestDto.getIdToken());
             MembersEntity user = googleAuthService.authenticateUser(googleIdToken.getPayload());
+=======
+
+
+    // 구글 로그인
+    // 구글 로그인 처리
+//    @PostMapping("/google/login")
+//    public ResponseEntity<?> authenticateGoogleUser(@RequestBody GoogleRequestDto requestDto) {
+//        GoogleResponseDto responseDto = authService.authenticateGoogleUser(requestDto);
+//        return ResponseEntity.ok(responseDto);
+//    }
+
+    // 구글 로그인 처리
+    // 변경: POST에서 GET으로 변경 및 @RequestBody에서 @RequestParam으로 변경
+    @GetMapping("/google/login")
+    public ResponseEntity<?> authenticateGoogleUser(@RequestParam String idToken) {
+        GoogleRequestDto requestDto = new GoogleRequestDto(idToken);
+        GoogleResponseDto responseDto = authService.authenticateGoogleUser(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+>>>>>>> 2e63f1b1f26e4ab9eb36edde5b8afffb3a65c5cd
 
             // JWT 토큰 생성
             String token = tokenProvider.createToken(user.getEmail(), user.getRole());

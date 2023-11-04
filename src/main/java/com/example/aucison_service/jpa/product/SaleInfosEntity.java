@@ -10,24 +10,24 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "nor_infos")
-public class Sale_infosEntity extends BaseTimeEntity {
+@Table(name = "sale_infos")
+public class SaleInfosEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sale_infos_id")
-    private Long sale_infos_id;       //PK
+    private Long saleInfosId;       //PK
 
 
     @Column(name = "price", nullable = false)
     private float price;     //등록 가격
 
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "sale_infosEntity")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "saleInfosEntity")
     private ProductsEntity productsEntity;
 
     @Builder
-    public Sale_infosEntity(float price, ProductsEntity productsEntity) {
+    public SaleInfosEntity(float price, ProductsEntity productsEntity) {
         this.price = price;
         this.productsEntity=productsEntity;
     }

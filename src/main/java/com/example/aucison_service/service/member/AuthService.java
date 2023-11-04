@@ -11,11 +11,22 @@ import java.util.Map;
 public interface AuthService extends UserDetailsService {
 
 
+<<<<<<< HEAD
 //    GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
 //    void addTokenToBlacklist(String token);
 //    public boolean isTokenBlacklisted(String token);
 //    MembersInfoDto getMemberInfo(String email);
 //    void updateMemberInfo(String email, MemberUpdateDto updateDto);
+=======
+    GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
+
+//    GoogleResponseDto authenticateGoogleUser(String idToken);
+
+    void addTokenToBlacklist(String token);
+    public boolean isTokenBlacklisted(String token);
+    MembersInfoDto getMemberInfo(String email);
+    void updateMemberInfo(String email, MemberUpdateDto updateDto);
+>>>>>>> 2e63f1b1f26e4ab9eb36edde5b8afffb3a65c5cd
 
 
     //MemberDto createMember(MemberDto memberDto);

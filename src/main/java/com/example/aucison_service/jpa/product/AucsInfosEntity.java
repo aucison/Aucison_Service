@@ -7,23 +7,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "auc_infos")
-public class Aucs_infosEntity extends BaseTimeEntity {
+@Table(name = "aucs_infos")
+public class AucsInfosEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "aucs_infos_id")
-    private Long aucs_infos_id;       //PK
+    private Long aucsInfosId;       //PK
 
 
     @Column(name = "start_price", nullable = false)
-    private float start_price;     //경매 시작가
+    private float startPrice;     //경매 시작가
 
 
     @Column(name = "end", nullable = false)
@@ -31,17 +30,17 @@ public class Aucs_infosEntity extends BaseTimeEntity {
 
 
     @Column(name = "bids_code", nullable = false)
-    private String bids_code;       //실시간 가격 식별 코드
+    private String bidsCode;       //실시간 가격 식별 코드
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "aucs_infosEntity")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "aucsInfosEntity")
     private ProductsEntity productsEntity;
 
 
     @Builder
-    public Aucs_infosEntity(float start_price, Date end, String bids_code, ProductsEntity productsEntity){
-        this.start_price = start_price;
+    public AucsInfosEntity(float startPrice, Date end, String bidsCode, ProductsEntity productsEntity){
+        this.startPrice = startPrice;
         this.end = end;
-        this.bids_code=bids_code;
+        this.bidsCode=bidsCode;
         this.productsEntity=productsEntity;
     }
 }

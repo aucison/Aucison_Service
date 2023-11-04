@@ -19,10 +19,10 @@ public class AucsProductResponseDto {
     private String information;
     private String summary;
     private String brand;
-    private boolean is_wish;
+    private boolean isWish;
 
 
-    private float start_price;
+    private float startPrice;
     private Date end;
-    private String bids_code;
+    private String bidsCode;
 }

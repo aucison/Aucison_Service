@@ -28,9 +28,9 @@ public class ProductDetailResponseDto {
 
 
     // 경매상품 정보
-    private float start_price;
+    private float startPrice;
     private Date end;
-    private String bids_code;
+    private String bidsCode;
 
     // 비경매상품 정보
     private float price;

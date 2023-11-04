@@ -23,8 +23,44 @@ public class AuthServiceImpl implements AuthService {
     private final MembersImgRepository membersImgRepository;
     private final Set<String> tokenBlacklist = Collections.synchronizedSet(new HashSet<>());
 
+<<<<<<< HEAD
 //
 //    //구글 로그인 처리
+=======
+
+//    //구글 로그인 처리
+    @Override
+    @Transactional
+    public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
+        GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
+
+        // Google payload에서 이메일을 기반으로 사용자 검색 또는 생성
+        MembersEntity user = membersRepository.findByEmail(payload.getEmail());
+
+        if (user == null) {
+            user = new MembersEntity();
+            user.updateFromGoogle(payload);
+            membersRepository.save(user);
+        }
+
+
+        // 사용자에 대한 JWT 토큰 생성
+        GoogleLoginDto googleLoginDto = GoogleLoginDto.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .build();
+
+        // JWT 토큰 생성에 필요한 정보가 있다면 GoogleLoginDto에서 가져옴
+        String accessToken = jwtUtils.createAccessToken(googleLoginDto);
+        String refreshToken = jwtUtils.createRefreshToken(googleLoginDto);
+
+        return GoogleResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+>>>>>>> 2e63f1b1f26e4ab9eb36edde5b8afffb3a65c5cd
 //    @Override
 //    public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
 //        GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
@@ -38,7 +74,10 @@ public class AuthServiceImpl implements AuthService {
 //            membersRepository.save(user);
 //        }
 //
+<<<<<<< HEAD
 //
+=======
+>>>>>>> 2e63f1b1f26e4ab9eb36edde5b8afffb3a65c5cd
 //        // 사용자에 대한 JWT 토큰 생성
 //        GoogleLoginDto googleLoginDto = GoogleLoginDto.builder()
 //                .email(user.getEmail())
@@ -54,6 +93,7 @@ public class AuthServiceImpl implements AuthService {
 //                .refreshToken(refreshToken)
 //                .build();
 //    }
+<<<<<<< HEAD
 //
 //    //로그아웃 관련 블랙리스트
 //    public void addTokenToBlacklist(String token) {
@@ -100,6 +140,54 @@ public class AuthServiceImpl implements AuthService {
 //        // phone이 존재하면 수정
 //        member.getMembersInfo().updatePhone(updateDto.getPhone());
 //    }
+=======
+
+    //로그아웃 관련 블랙리스트
+    public void addTokenToBlacklist(String token) {
+        tokenBlacklist.add(token);
+    }
+
+    //로그아웃 관련 블랙리스트
+    public boolean isTokenBlacklisted(String token) {
+        return tokenBlacklist.contains(token);
+    }
+
+
+
+    //회원 상세정보 조회 -> 현재 이미지, 배송지 안됨
+    public MembersInfoDto getMemberInfo(String email) {
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        MembersInfo membersInfo = member.getMembersInfo();  //1대 1 관계라 가능
+        if (membersInfo == null) {
+            throw new RuntimeException("MemberInfo not found for this user");
+        }
+        return MembersInfoDto.builder()
+                .email(member.getEmail())
+                .name(member.getName())
+                .nickName(member.getNickname())
+                .phone(membersInfo.getPhone())
+                .build();
+    }
+
+    //회원정보 수정 -> 현재 이미지, 배송지 안됨
+    @Transactional
+    public void updateMemberInfo(String email, MemberUpdateDto updateDto) {
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // nickname이 존재하면 수정
+        member.updateNickname(updateDto.getNickname());
+
+        // phone이 존재하면 수정
+        member.getMembersInfo().updatePhone(updateDto.getPhone());
+    }
+>>>>>>> 2e63f1b1f26e4ab9eb36edde5b8afffb3a65c5cd
 
 
     /* 임시로 구글로그인만 활성화
