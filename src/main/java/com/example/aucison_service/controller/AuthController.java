@@ -29,7 +29,36 @@ public class AuthController {
         this.tokenProvider = tokenProvider;
     }
 
+    // 구글 로그인을 처리하는 엔드포인트
+    @PostMapping("/google/login")
+    public ResponseEntity<?> googleLogin(@RequestBody GoogleRequestDto googleRequestDto) {
+        try {
+            GoogleIdToken googleIdToken = googleAuthService.verifyToken(googleRequestDto.getIdToken());
+            MembersEntity user = googleAuthService.authenticateUser(googleIdToken.getPayload());
 
+            // JWT 토큰 생성
+            String token = tokenProvider.createToken(user.getEmail(), user.getRole());
+
+            // 사용자 정보와 토큰을 포함한 DTO를 반환
+            LoginResponseDto responseDto = LoginResponseDto.builder()
+                    .userId(user.getId())
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .nickname(user.getNickname())
+                    .role(user.getRole())
+                    .build();
+
+            // JWT와 사용자 정보를 포함한 DTO를 응답 바디로 설정
+            GoogleResponseDto responseBody = GoogleResponseDto.builder()
+                    .accessToken(token)
+                    // refreshToken 및 기타 필요한 필드를 적절히 설정할 수 있음
+                    .build();
+
+            return ResponseEntity.ok().body(responseBody);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
 
     // 구글 로그아웃을 처리하는 엔드포인트
     @PostMapping("/google/logout")
