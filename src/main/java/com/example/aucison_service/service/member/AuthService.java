@@ -11,7 +11,7 @@ import java.util.Map;
 public interface AuthService extends UserDetailsService {
 
 
-//    GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
+//    GoogleTokenResponseDto authenticateGoogleUser(GoogleTokenRequestDto requestDto);
 //    void addTokenToBlacklist(String token);
 //    public boolean isTokenBlacklisted(String token);
 //    MembersInfoDto getMemberInfo(String email);

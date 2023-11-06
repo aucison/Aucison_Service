@@ -21,7 +21,7 @@ public class AuthServiceImpl implements AuthService {
 //
 //    @Override
 //    @Transactional
-//    public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
+//    public GoogleTokenResponseDto authenticateGoogleUser(GoogleTokenRequestDto requestDto) {
 //        GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
 //
 //        // Google payload에서 이메일을 기반으로 사용자 검색 또는 생성
@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
 //        String accessToken = jwtUtils.createAccessToken(googleLoginDto);
 //        String refreshToken = jwtUtils.createRefreshToken(googleLoginDto);
 //
-//        return GoogleResponseDto.builder()
+//        return GoogleTokenResponseDto.builder()
 //                .accessToken(accessToken)
 //                .refreshToken(refreshToken)
 //                .build();

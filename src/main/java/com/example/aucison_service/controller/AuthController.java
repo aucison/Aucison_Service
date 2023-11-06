@@ -6,7 +6,6 @@ import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -31,9 +30,9 @@ public class AuthController {
 
     // 구글 로그인을 처리하는 엔드포인트
     @PostMapping("/google/login")
-    public ResponseEntity<?> googleLogin(@RequestBody GoogleRequestDto googleRequestDto) {
+    public ResponseEntity<?> googleLogin(@RequestBody GoogleTokenRequestDto googleTokenRequestDto) {
         try {
-            GoogleIdToken googleIdToken = googleAuthService.verifyToken(googleRequestDto.getIdToken());
+            GoogleIdToken googleIdToken = googleAuthService.verifyToken(googleTokenRequestDto.getIdToken());
             MembersEntity user = googleAuthService.authenticateUser(googleIdToken.getPayload());
 
             // JWT 토큰 생성
@@ -49,7 +48,7 @@ public class AuthController {
                     .build();
 
             // JWT와 사용자 정보를 포함한 DTO를 응답 바디로 설정
-            GoogleResponseDto responseBody = GoogleResponseDto.builder()
+            GoogleTokenResponseDto responseBody = GoogleTokenResponseDto.builder()
                     .accessToken(token)
                     // refreshToken 및 기타 필요한 필드를 적절히 설정할 수 있음
                     .build();

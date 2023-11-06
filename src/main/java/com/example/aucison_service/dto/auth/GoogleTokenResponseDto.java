@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoogleResponseDto {
+public class GoogleTokenResponseDto {
     private String accessToken;
     private String refreshToken;
     private String tokenType;
