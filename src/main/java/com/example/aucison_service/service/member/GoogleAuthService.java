@@ -1,6 +1,7 @@
 package com.example.aucison_service.service.member;
 
-import com.example.aucison_service.dto.auth.LoginResponseDto;
+import com.example.aucison_service.dto.auth.GoogleTokenRequestDto;
+import com.example.aucison_service.dto.auth.GoogleTokenResponseDto;
 import com.example.aucison_service.enums.Role;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
@@ -10,129 +11,146 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service
 public class GoogleAuthService {
 
-    // Google OAuth2 정보
-    private final String clientId;
-    private final String clientSecret;
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String clientId;
 
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String clientSecret;
+
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+    private String redirectUri;
+
+
+    private final WebClient webClient;
     private final MembersRepository membersRepository;
 
     @Autowired
-    public GoogleAuthService(@Value("${spring.security.oauth2.client.registration.google.client-id}") String clientId,
-                             @Value("${spring.security.oauth2.client.registration.google.client-secret}") String clientSecret,
-                             MembersRepository membersRepository ) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+    public GoogleAuthService(WebClient.Builder webClientBuilder, MembersRepository membersRepository) {
+        this.webClient = webClientBuilder.build();
         this.membersRepository = membersRepository;
     }
 
 
-    // Google ID 토큰을 검증하는 메소드
-    public GoogleIdToken verifyToken(String idTokenString) {
+    public String createGoogleAuthorizationURL() {
+        // Build the Google OAuth URL
+        return "https://accounts.google.com/o/oauth2/v2/auth?" + "client_id=" + clientId +
+                "&redirect_uri=" + redirectUri +
+                "&response_type=code" +
+                "&scope=openid%20email%20profile" +
+                "&access_type=offline";
+    }
+
+    public Mono<OAuth2AuthenticationToken> exchangeCodeForToken(String code) {
+        GoogleTokenRequestDto tokenRequest = GoogleTokenRequestDto.builder()
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .code(code)
+                .redirectUri(redirectUri)
+                .grantType("authorization_code")
+                .build();
+
+        return webClient.post()
+                .uri("https://oauth2.googleapis.com/token")
+                .bodyValue(tokenRequest)
+                .retrieve()
+                .onStatus(HttpStatus::isError, response -> Mono.error(new ResponseStatusException(response.statusCode(), "Error while exchanging code for token")))
+                .bodyToMono(GoogleTokenResponseDto.class)
+                .map(tokenResponse -> {
+                    String idToken = tokenResponse.getIdToken();
+                    GoogleIdToken.Payload payload = decodeGoogleIdToken(idToken);
+
+                    // UserDetails 대신 OAuth2User를 사용합니다.
+                    OAuth2User oAuth2User = createOAuth2User(payload);
+
+                    // OAuth2User를 OAuth2AuthenticationToken에 넘깁니다.
+                    return new OAuth2AuthenticationToken(oAuth2User, Collections.emptyList(), "google");
+                });
+    }
+
+
+    public Mono<MembersEntity> registerOrLoginUser(OAuth2AuthenticationToken authentication) {
+        // Extract email from authentication
+        String email = authentication.getName(); // Assuming email is the name in UserDetails
+
+        // Find existing user by email or create a new one
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    // Extract more information from authentication if necessary
+                    String name = authentication.getPrincipal().getAttribute("name");
+                    // Create a new user entity
+                    MembersEntity newMember = new MembersEntity(email, name, null, Role.ROLE_CUSTOMER);
+                    // Save the new member to the database
+                    return membersRepository.save(newMember);
+                });
+
+        return Mono.just(member);
+    }
+
+    private UserDetails createUserDetails(GoogleIdToken.Payload payload) {
+        // 여기서는 예시로, 단순한 UserDetails의 구현체를 사용하고 있음
+        // 실제로는 더 복잡한 로직이 필요할 수 있음
+        return User.withUsername(payload.getEmail())
+                .password("")
+                .authorities(Collections.emptyList())
+                .build();
+    }
+
+    private GoogleIdToken.Payload decodeGoogleIdToken(String idTokenString) {
+        // GoogleIdTokenVerifier를 사용하여 idToken을 검증하고 파싱
+        // 실제 환경에서는 HTTPS를 통한 검증이 필요
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singletonList(clientId))
+                // 이 부분은 실제로 필요한 검증을 추가해야 함
                 .build();
 
+        GoogleIdToken idToken;
         try {
-            GoogleIdToken idToken = verifier.verify(idTokenString);
-            if (idToken != null) {
-                return idToken;
-            } else {
-                throw new InvalidTokenException("ID token is null");
-            }
-        } catch (GeneralSecurityException | IOException e) {
-            throw new InvalidTokenException("Invalid ID token", e);
+            idToken = verifier.verify(idTokenString);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("ID Token cannot be verified", e);
         }
-    }
 
-    // 로그인 응답 DTO를 생성하여 반환하는 메소드
-    public LoginResponseDto getLoginResponseDto(String idTokenString) {
-        GoogleIdToken googleIdToken = verifyToken(idTokenString);
-        MembersEntity user = authenticateUser(googleIdToken.getPayload());
-
-        return LoginResponseDto.builder()
-                .userId(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .role(user.getRole())
-                .build();
-    }
-
-    // ID 토큰에서 사용자 정보를 추출하여 MembersEntity에 저장하는 메소드
-    @Transactional
-    public MembersEntity authenticateUser(GoogleIdToken.Payload payload) {
-        // 사용자 확인 및 생성
-        MembersEntity user = ensureUserExists(payload);
-
-        // 사용자 정보 업데이트
-        updateUserWithGoogleData(user, payload);
-
-        // 사용자 저장
-        return saveUser(user);
-    }
-
-    // 사용자가 존재하지 않을 경우 새로 생성하고
-    // 이미 존재하는 경우에는 해당 사용자 객체를 반환
-    private MembersEntity ensureUserExists(GoogleIdToken.Payload payload) {
-        return findByEmail(payload.getEmail())
-                .orElseGet(() -> createNewUser(payload));
-    }
-
-
-    // Google에서 제공한 정보를 사용하여 사용자의 정보를 업데이트
-    private void updateUserWithGoogleData(MembersEntity user, GoogleIdToken.Payload payload) {
-        user.updateFromGoogle(payload);
-    }
-
-
-    // 이메일로 기존 사용자를 조회하는 메소드
-    private Optional<MembersEntity> findByEmail(String email) {
-        return membersRepository.findByEmail(email);
-    }
-
-    // 새 사용자를 생성하는 메소드
-    private MembersEntity createNewUser(GoogleIdToken.Payload payload) {
-        String email = payload.getEmail();
-        String name = (String) payload.get("name");
-        String nickname = email.contains("@") ? email.substring(0, email.indexOf("@")) : name + "_google";
-
-        return MembersEntity.builder()
-                .email(email)
-                .name(name)
-                .nickname(nickname) // 이메일 앞부분 또는 이름에 '_google'을 붙여 초기 닉네임 설정
-                .role(Role.ROLE_CUSTOMER) // 기본 역할 ROLE_CUSTOMER로 설정
-                .build();
-    }
-
-    // 사용자 정보를 데이터베이스에 저장하는 메소드
-    private MembersEntity saveUser(MembersEntity user) {
-        return membersRepository.save(user);
-    }
-
-    public boolean deleteUser(Long id) {
-        Optional<MembersEntity> userOptional = membersRepository.findById(id);
-        if (userOptional.isPresent()) {
-            MembersEntity user = userOptional.get();
-            membersRepository.delete(user);
-            return true;
+        if (idToken == null) {
+            throw new IllegalArgumentException("ID Token is invalid");
         }
-        return false;
+
+        return idToken.getPayload();
+    }
+
+    private OAuth2User createOAuth2User(GoogleIdToken.Payload payload) {
+        // 여기서는 예시로, 단순한 OAuth2User의 구현체를 사용하고 있음
+        // 실제로는 더 복잡한 로직이 필요할 수 있음
+        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSOTMER"));
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("sub", payload.getSubject()); // Google 사용자 고유 ID
+        attributes.put("email", payload.getEmail());
+        attributes.put("name", payload.get("name"));
+
+        return new DefaultOAuth2User(authorities, attributes, "email");
     }
 }
-
 
 
 
