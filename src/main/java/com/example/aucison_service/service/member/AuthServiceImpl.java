@@ -26,8 +26,9 @@ public class AuthServiceImpl implements AuthService {
     private final Set<String> tokenBlacklist = Collections.synchronizedSet(new HashSet<>());
 
 
-    //구글 로그인 처리
+//    //구글 로그인 처리
     @Override
+    @Transactional
     public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
         GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
 
@@ -56,6 +57,35 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+//    @Override
+//    public GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto) {
+//        GoogleIdToken.Payload payload = googleService.verify(requestDto.getIdToken());
+//
+//        // Google payload에서 이메일을 기반으로 사용자 검색 또는 생성
+//        MembersEntity user = membersRepository.findByEmail(payload.getEmail());
+//
+//        if (user == null) {
+//            user = new MembersEntity();
+//            user.updateFromGoogle(payload);
+//            membersRepository.save(user);
+//        }
+//
+//        // 사용자에 대한 JWT 토큰 생성
+//        GoogleLoginDto googleLoginDto = GoogleLoginDto.builder()
+//                .email(user.getEmail())
+//                .name(user.getName())
+//                .build();
+//
+//        // JWT 토큰 생성에 필요한 정보가 있다면 GoogleLoginDto에서 가져옴
+//        String accessToken = jwtUtils.createAccessToken(googleLoginDto);
+//        String refreshToken = jwtUtils.createRefreshToken(googleLoginDto);
+//
+//        return GoogleResponseDto.builder()
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .build();
+//    }
 
     //로그아웃 관련 블랙리스트
     public void addTokenToBlacklist(String token) {

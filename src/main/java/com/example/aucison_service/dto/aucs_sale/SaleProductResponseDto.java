@@ -19,7 +19,7 @@ public class SaleProductResponseDto {
     private String information;
     private String summary;
     private String brand;
-    private boolean is_wish;
+    private boolean isWish;
 
 
 

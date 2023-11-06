@@ -32,9 +32,9 @@ public class ProductRegisterRequestDto {
     private List<MultipartFile> images; // 사용자로부터 받을 이미지 리스트
 
     // 경매상품 정보
-    private float start_price;
+    private float startPrice;
     private Date end;
-    private String bids_code;
+    private String bidsCode;
 
     // 비경매상품 정보
     private float price;

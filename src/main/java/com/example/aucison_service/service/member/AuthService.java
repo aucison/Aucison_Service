@@ -12,6 +12,9 @@ public interface AuthService extends UserDetailsService {
 
 
     GoogleResponseDto authenticateGoogleUser(GoogleRequestDto requestDto);
+
+//    GoogleResponseDto authenticateGoogleUser(String idToken);
+
     void addTokenToBlacklist(String token);
     public boolean isTokenBlacklisted(String token);
     MembersInfoDto getMemberInfo(String email);

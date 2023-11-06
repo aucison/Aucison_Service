@@ -34,8 +34,17 @@ public class AuthController {
 
     // 구글 로그인
     // 구글 로그인 처리
-    @PostMapping("/google/login")
-    public ResponseEntity<?> authenticateGoogleUser(@RequestBody GoogleRequestDto requestDto) {
+//    @PostMapping("/google/login")
+//    public ResponseEntity<?> authenticateGoogleUser(@RequestBody GoogleRequestDto requestDto) {
+//        GoogleResponseDto responseDto = authService.authenticateGoogleUser(requestDto);
+//        return ResponseEntity.ok(responseDto);
+//    }
+
+    // 구글 로그인 처리
+    // 변경: POST에서 GET으로 변경 및 @RequestBody에서 @RequestParam으로 변경
+    @GetMapping("/google/login")
+    public ResponseEntity<?> authenticateGoogleUser(@RequestParam String idToken) {
+        GoogleRequestDto requestDto = new GoogleRequestDto(idToken);
         GoogleResponseDto responseDto = authService.authenticateGoogleUser(requestDto);
         return ResponseEntity.ok(responseDto);
     }
