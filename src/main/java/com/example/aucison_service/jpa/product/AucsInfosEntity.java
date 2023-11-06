@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -43,4 +44,13 @@ public class AucsInfosEntity extends BaseTimeEntity {
         this.bidsCode=bidsCode;
         this.productsEntity=productsEntity;
     }
+
+    // 경매 시간 연장
+    public void extendAuctionEndTimeByMinutes(int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.getEnd());
+        calendar.add(Calendar.MINUTE, minutes);
+        this.end = calendar.getTime(); // end 필드를 private로 가정하고 setter 대신 직접 접근
+    }
+
 }
