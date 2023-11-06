@@ -27,9 +27,9 @@ public class MypageController {
 //        return ResponseEntity.status(HttpStatus.OK).body(mypageService.getOrderHistoryList(email));
 //    }
     @GetMapping("/mp/buy")  //주문내역 조회
-    public ApiResponse<?> getOrderInfo(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+    public ApiResponse<?> getOrderInfo(@RequestParam("email") String email) {  //token 대신 이메일 사용(임시)
+//        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//        String email = userDetails.getUsername();
 
         return ApiResponse.createSuccess(mypageService.getOrderHistoryList(email));
     }
@@ -41,6 +41,7 @@ public class MypageController {
                 email(jwtUtils.getEmailFromToken(accessToken)).historiesId(historiesId).build());
         return ResponseEntity.status(HttpStatus.OK).body(responseOrderDetailsDto);
     }
+
 
     @GetMapping("/mp/sell")
     public ResponseEntity getSellInfo(@RequestHeader("accessToken") String accessToken) {
