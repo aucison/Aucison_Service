@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoogleRequestDto {
-    private String idToken;
+    private String accessToken;
 
 
 }
