@@ -28,7 +28,6 @@ public class MembersEntity {
     @Column(nullable = false)
     private String name;    //구글 이름
 
-    @Column(nullable = true)
     private String nickname;    //닉네임
 
     @Enumerated(EnumType.STRING)
@@ -41,10 +40,11 @@ public class MembersEntity {
     private List<Wishes> wishes;
 
     @Builder
-    public MembersEntity(String email, String name, String nickname) {
+    public MembersEntity(String email, String name, String nickname, Role role) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
+        this.role = role;
     }
 
     public void updateFromGoogle(GoogleIdToken.Payload payload) {
