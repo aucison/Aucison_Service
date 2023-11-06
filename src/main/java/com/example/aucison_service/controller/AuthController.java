@@ -2,6 +2,8 @@ package com.example.aucison_service.controller;
 
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,9 +14,12 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final GoogleAuthService googleAuthService;
 
@@ -34,6 +39,7 @@ public class AuthController {
         String url = googleAuthService.createGoogleAuthorizationURL();   //OAuth 2.0 인증을 위한 URL을 생성
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(url));   //HTTP 헤더에 Location을 설정하여 생성된 URL로 리디렉션하도록 지시
+        logger.info("111");
         return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER); // 클라이언트에게 GET 방식으로 다른 URI로 리디렉션하라는 명령을 내림
     }
 
@@ -41,6 +47,7 @@ public class AuthController {
     // Google 콜백 처리
     @GetMapping("/google/callback")
     public Mono<ResponseEntity<?>> handleGoogleCallback(@RequestParam(name = "code") String code) {
+        logger.info("222");
         return googleAuthService.exchangeCodeForToken(code)
                 // 여기에서 JWT를 생성하고 사용자 정보를 처리하는 추가적인 로직을 적용할 수 있음
                 // 예를 들어 JWT 토큰을 생성하고 이를 클라이언트에게 반환할 수 있음
@@ -49,6 +56,12 @@ public class AuthController {
                             // 토큰 생성 및 추가 처리를 위한 로직
                             // 예를 들어, JWT 토큰 생성
                             String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
+
+                            // 성공 로그 추가
+                            logger.info("Login successful for user: {}", member.getEmail());
+
+
+
                             // 클라이언트에 반환될 응답
                             HttpHeaders headers = new HttpHeaders();
                             headers.add("Authorization", "Bearer " + jwt);
