@@ -1,5 +1,6 @@
 package com.example.aucison_service.controller;
 
+import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -44,33 +46,52 @@ public class AuthController {
     }
 
 
+
+    //임시 동기 변경
     // Google 콜백 처리
+//    @GetMapping("/google/callback")
+//    public Mono<ResponseEntity<?>> handleGoogleCallback(@RequestParam(name = "code") String code) {
+//        logger.info("222");
+//        return googleAuthService.exchangeCodeForToken(code)
+//                // 여기에서 JWT를 생성하고 사용자 정보를 처리하는 추가적인 로직을 적용할 수 있음
+//                // 예를 들어 JWT 토큰을 생성하고 이를 클라이언트에게 반환할 수 있음
+//                .flatMap(token -> googleAuthService.registerOrLoginUser(token)
+//                        .map(member -> {
+//                            // 토큰 생성 및 추가 처리를 위한 로직
+//                            // 예를 들어, JWT 토큰 생성
+//                            String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
+//
+//                            // 성공 로그 추가
+//                            logger.info("Login successful for user: {}", member.getEmail());
+//
+//
+//
+//                            // 클라이언트에 반환될 응답
+//                            HttpHeaders headers = new HttpHeaders();
+//                            headers.add("Authorization", "Bearer " + jwt);
+//                            // 사용자 정보와 JWT 토큰을 함께 반환
+//                            return new ResponseEntity<>(member, headers, HttpStatus.OK);
+//                        })
+//                );
+//    }
+
     @GetMapping("/google/callback")
-    public Mono<ResponseEntity<?>> handleGoogleCallback(@RequestParam(name = "code") String code) {
-        logger.info("222");
-        return googleAuthService.exchangeCodeForToken(code)
-                // 여기에서 JWT를 생성하고 사용자 정보를 처리하는 추가적인 로직을 적용할 수 있음
-                // 예를 들어 JWT 토큰을 생성하고 이를 클라이언트에게 반환할 수 있음
-                .flatMap(token -> googleAuthService.registerOrLoginUser(token)
-                        .map(member -> {
-                            // 토큰 생성 및 추가 처리를 위한 로직
-                            // 예를 들어, JWT 토큰 생성
-                            String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
+    public ResponseEntity<?> handleGoogleCallback(@RequestParam(name = "code") String code) {
+        try {
+            OAuth2AuthenticationToken token = googleAuthService.exchangeCodeForToken(code);
+            MembersEntity member = googleAuthService.registerOrLoginUser(token);
 
-                            // 성공 로그 추가
-                            logger.info("Login successful for user: {}", member.getEmail());
+            String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
+            logger.info("Login successful for user: {}", member.getEmail());
 
-
-
-                            // 클라이언트에 반환될 응답
-                            HttpHeaders headers = new HttpHeaders();
-                            headers.add("Authorization", "Bearer " + jwt);
-                            // 사용자 정보와 JWT 토큰을 함께 반환
-                            return new ResponseEntity<>(member, headers, HttpStatus.OK);
-                        })
-                );
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + jwt);
+            return new ResponseEntity<>(member, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error during Google callback handling", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
-
 
 //
 //    // 구글 로그아웃을 처리하는 엔드포인트
