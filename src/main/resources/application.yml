@@ -12,7 +12,18 @@ spring:
       enabled: true
 
 server:
-  port: 9876
+  port: 443
+  servlet:
+    session:
+      timeout: 30
+    ssl:
+#      enabled: true
+#      key-alias: ayostore
+#      key-store: ayostore.pkcs12
+#      key-store-password: '@ayotera@'
+#      key-password: '@ayotera@'
+#      trust-store: ayotrust.pkcs12
+#      trust-store-password: '@ayotera@'
 
 jwt:
   secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==
