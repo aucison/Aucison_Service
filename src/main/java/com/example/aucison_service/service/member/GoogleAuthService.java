@@ -50,7 +50,7 @@ public class GoogleAuthService {
     private final MembersRepository membersRepository;
 
     @Autowired
-    public GoogleAuthService(MembersRepository membersRepository,  RestTemplate restTemplate) {
+    public GoogleAuthService(MembersRepository membersRepository, RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         //this.webClient = webClientBuilder.build();
         this.membersRepository = membersRepository;
