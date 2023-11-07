@@ -12,6 +12,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -20,6 +21,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -43,12 +45,14 @@ public class GoogleAuthService {
     private String redirectUri;
 
 
-    private final WebClient webClient;
+    //private final WebClient webClient;
+    private final RestTemplate restTemplate;
     private final MembersRepository membersRepository;
 
     @Autowired
-    public GoogleAuthService(WebClient.Builder webClientBuilder, MembersRepository membersRepository) {
-        this.webClient = webClientBuilder.build();
+    public GoogleAuthService(, MembersRepository membersRepository,  RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+        //this.webClient = webClientBuilder.build();
         this.membersRepository = membersRepository;
     }
 
@@ -62,59 +66,93 @@ public class GoogleAuthService {
                 "&access_type=offline";
     }
 
-    public Mono<OAuth2AuthenticationToken> exchangeCodeForToken(String code) {
+    //임시 동기 변경
+//    public Mono<OAuth2AuthenticationToken> exchangeCodeForToken(String code) {
+//        GoogleTokenRequestDto tokenRequest = GoogleTokenRequestDto.builder()
+//                .clientId(clientId)
+//                .clientSecret(clientSecret)
+//                .code(code)
+//                .redirectUri(redirectUri)
+//                .grantType("authorization_code")
+//                .build();
+//
+//        return webClient.post()
+//                .uri("https://oauth2.googleapis.com/token")
+//                .bodyValue(tokenRequest)
+//                .retrieve()
+//                .onStatus(HttpStatus::isError, response -> Mono.error(new ResponseStatusException(response.statusCode(), "Error while exchanging code for token")))
+//                .bodyToMono(GoogleTokenResponseDto.class)
+//                .map(tokenResponse -> {
+//                    String idToken = tokenResponse.getIdToken();
+//                    GoogleIdToken.Payload payload = decodeGoogleIdToken(idToken);
+//
+//                    // UserDetails 대신 OAuth2User를 사용합니다.
+//                    OAuth2User oAuth2User = createOAuth2User(payload);
+//
+//                    // OAuth2User를 OAuth2AuthenticationToken에 넘깁니다.
+//                    return new OAuth2AuthenticationToken(oAuth2User, Collections.emptyList(), "google");
+//                });
+//    }
+    public OAuth2AuthenticationToken exchangeCodeForToken(String code) {
         GoogleTokenRequestDto tokenRequest = GoogleTokenRequestDto.builder()
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .code(code)
-                .redirectUri(redirectUri)
-                .grantType("authorization_code")
+                // ... tokenRequest 필드 초기화 ...
                 .build();
 
-        return webClient.post()
-                .uri("https://oauth2.googleapis.com/token")
-                .bodyValue(tokenRequest)
-                .retrieve()
-                .onStatus(HttpStatus::isError, response -> Mono.error(new ResponseStatusException(response.statusCode(), "Error while exchanging code for token")))
-                .bodyToMono(GoogleTokenResponseDto.class)
-                .map(tokenResponse -> {
-                    String idToken = tokenResponse.getIdToken();
-                    GoogleIdToken.Payload payload = decodeGoogleIdToken(idToken);
+        ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(
+                "https://oauth2.googleapis.com/token", tokenRequest, GoogleTokenResponseDto.class);
 
-                    // UserDetails 대신 OAuth2User를 사용합니다.
-                    OAuth2User oAuth2User = createOAuth2User(payload);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new ResponseStatusException(
+                    response.getStatusCode(), "Error while exchanging code for token");
+        }
 
-                    // OAuth2User를 OAuth2AuthenticationToken에 넘깁니다.
-                    return new OAuth2AuthenticationToken(oAuth2User, Collections.emptyList(), "google");
-                });
+        GoogleTokenResponseDto tokenResponse = response.getBody();
+        String idToken = tokenResponse.getIdToken();
+        GoogleIdToken.Payload payload = decodeGoogleIdToken(idToken);
+
+        OAuth2User oAuth2User = createOAuth2User(payload);
+
+        return new OAuth2AuthenticationToken(oAuth2User, Collections.emptyList(), "google");
     }
 
 
-    public Mono<MembersEntity> registerOrLoginUser(OAuth2AuthenticationToken authentication) {
-        // Extract email from authentication
+    //임시 동기 변경
+//    public Mono<MembersEntity> registerOrLoginUser(OAuth2AuthenticationToken authentication) {
+//        // Extract email from authentication
+//        String email = authentication.getName(); // Assuming email is the name in UserDetails
+//
+//        // Find existing user by email or create a new one
+//        MembersEntity member = membersRepository.findByEmail(email)
+//                .orElseGet(() -> {
+//                    // Extract more information from authentication if necessary
+//                    String name = authentication.getPrincipal().getAttribute("name");
+//                    // Create a new user entity
+//                    MembersEntity newMember = new MembersEntity(email, name, null, Role.ROLE_CUSTOMER);
+//                    // Save the new member to the database
+//                    return membersRepository.save(newMember);
+//                });
+//
+//        return Mono.just(member);
+//    }
+//
+//    private UserDetails createUserDetails(GoogleIdToken.Payload payload) {
+//        // 여기서는 예시로, 단순한 UserDetails의 구현체를 사용하고 있음
+//        // 실제로는 더 복잡한 로직이 필요할 수 있음
+//        return User.withUsername(payload.getEmail())
+//                .password("")
+//                .authorities(Collections.emptyList())
+//                .build();
+//    }
+
+    public MembersEntity registerOrLoginUser(OAuth2AuthenticationToken authentication) {
         String email = authentication.getName(); // Assuming email is the name in UserDetails
 
-        // Find existing user by email or create a new one
-        MembersEntity member = membersRepository.findByEmail(email)
+        return membersRepository.findByEmail(email)
                 .orElseGet(() -> {
-                    // Extract more information from authentication if necessary
                     String name = authentication.getPrincipal().getAttribute("name");
-                    // Create a new user entity
                     MembersEntity newMember = new MembersEntity(email, name, null, Role.ROLE_CUSTOMER);
-                    // Save the new member to the database
                     return membersRepository.save(newMember);
                 });
-
-        return Mono.just(member);
-    }
-
-    private UserDetails createUserDetails(GoogleIdToken.Payload payload) {
-        // 여기서는 예시로, 단순한 UserDetails의 구현체를 사용하고 있음
-        // 실제로는 더 복잡한 로직이 필요할 수 있음
-        return User.withUsername(payload.getEmail())
-                .password("")
-                .authorities(Collections.emptyList())
-                .build();
     }
 
     private GoogleIdToken.Payload decodeGoogleIdToken(String idTokenString) {
