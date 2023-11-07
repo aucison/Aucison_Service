@@ -19,7 +19,7 @@ public enum Role implements GrantedAuthority {
 
     @Override
     public String getAuthority() {
-        return this.role; // 이 부분은 역할 문자열을 반환하도록 수정되었습니다.
+        return this.role; // 이 부분 역할 문자열을 반환하도록 수정
     }
 }
 
