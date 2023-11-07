@@ -42,8 +42,8 @@ public class SecurityConfig {
                         .authorizedClientService(authorizedClientService())
                 )
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/auth/**", HttpMethod.GET.name())).permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/need/auth/**")).authenticated()
+                        .anyRequest().permitAll()
                 );
         return http.build();
     }

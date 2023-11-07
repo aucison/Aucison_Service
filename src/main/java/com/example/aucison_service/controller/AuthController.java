@@ -38,6 +38,7 @@ public class AuthController {
     // Google 로그인 페이지로 리디렉션
     @GetMapping("/login/google")
     public ResponseEntity<?> redirectToGoogle() {
+        logger.info("000");
         String url = googleAuthService.createGoogleAuthorizationURL();   //OAuth 2.0 인증을 위한 URL을 생성
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(url));   //HTTP 헤더에 Location을 설정하여 생성된 URL로 리디렉션하도록 지시
@@ -45,6 +46,11 @@ public class AuthController {
         return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER); // 클라이언트에게 GET 방식으로 다른 URI로 리디렉션하라는 명령을 내림
     }
 
+
+    @GetMapping("/t4")
+    public void testT4() {
+        logger.info("777");
+    }
 
 
     //임시 동기 변경

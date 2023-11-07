@@ -100,9 +100,15 @@ public class GoogleAuthService {
     @Transactional
     public OAuth2AuthenticationToken exchangeCodeForToken(String code) {
         logger.info("exchangeCodeForToken1");
+
         GoogleTokenRequestDto tokenRequest = GoogleTokenRequestDto.builder()
-                // ... tokenRequest 필드 초기화 ...
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .code(code)
+                .redirectUri(redirectUri)
+                .grantType("authorization_code") // 이 부분을 추가합니다.
                 .build();
+
         logger.info("exchangeCodeForToken2");
         ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(
                 "https://oauth2.googleapis.com/token", tokenRequest, GoogleTokenResponseDto.class);
