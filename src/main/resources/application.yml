@@ -3,7 +3,7 @@ spring:
     database: mysql
     show-sql: 'true'
   profiles:
-    include: aws, google
+    include: aws, google, https
 #  redis:
 #    host: localhost
 #    port: 6379
@@ -11,8 +11,8 @@ spring:
     console:
       enabled: true
 
-#server:
-#  port: 443
+server:
+  port: 443
 
 
 jwt:
@@ -23,5 +23,5 @@ logging:
   level:
     root: info
 
-server:
-  port: 9876
+#server:
+#  port: 9876

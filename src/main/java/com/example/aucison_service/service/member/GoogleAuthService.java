@@ -186,7 +186,7 @@ public class GoogleAuthService {
         logger.info("decodeGoogleIdToken1");
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singletonList(clientId))
-                // 이 부분은 실제로 필요한 검증을 추가해야 함
+                .setIssuer("https://accounts.google.com")
                 .build();
 
         GoogleIdToken idToken;
