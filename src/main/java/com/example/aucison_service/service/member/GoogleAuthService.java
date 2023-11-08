@@ -10,12 +10,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -26,6 +26,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -99,31 +101,65 @@ public class GoogleAuthService {
 
     @Transactional
     public OAuth2AuthenticationToken exchangeCodeForToken(String code) {
-        logger.info("exchangeCodeForToken1");
+        logger.info("exchangeCodeForToken - Received code: {}", code); // 여기에 코드 값을 로깅합니다.
 
+        // 요청 정보를 로깅합니다. 여기서는 단순히 code 값을 로깅하지만,
+        // 실제로는 요청 IP, 헤더 등 추가 정보를 로깅할 수 있습니다.
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            String ipAddress = request.getRemoteAddr();
+            logger.info("Request info - IP: {}, Code: {}", ipAddress, code);
+        } catch (Exception e) {
+            logger.error("Failed to log request info", e);
+        }
+
+        // GoogleTokenRequestDto 객체를 생성합니다.
         GoogleTokenRequestDto tokenRequest = GoogleTokenRequestDto.builder()
                 .clientId(clientId)
                 .clientSecret(clientSecret)
                 .code(code)
                 .redirectUri(redirectUri)
-                .grantType("authorization_code") // 이 부분을 추가합니다.
+                .grantType("authorization_code") // 이 필드는 "authorization_code"로 설정해야 합니다.
                 .build();
 
-        logger.info("exchangeCodeForToken2");
+        // RestTemplate을 사용하여 Google에 토큰 요청을 보냅니다.
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(tokenRequest.toFormUrlEncoded(), headers);
+
         ResponseEntity<GoogleTokenResponseDto> response = restTemplate.postForEntity(
-                "https://oauth2.googleapis.com/token", tokenRequest, GoogleTokenResponseDto.class);
+                "https://oauth2.googleapis.com/token", requestEntity, GoogleTokenResponseDto.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
+            logger.error("Non-successful response received: {}", response.getStatusCode());
             throw new ResponseStatusException(
                     response.getStatusCode(), "Error while exchanging code for token");
         }
-        logger.info("exchangeCodeForToken3");
-        GoogleTokenResponseDto tokenResponse = response.getBody();
-        String idToken = tokenResponse.getIdToken();
-        GoogleIdToken.Payload payload = decodeGoogleIdToken(idToken);
 
+        // 응답을 로그에 기록하고 필요한 정보를 추출합니다.
+        GoogleTokenResponseDto tokenResponse = response.getBody();
+        if (tokenResponse != null) {
+            logger.info("exchangeCodeForToken - Token response: {}", tokenResponse);
+            String idToken = tokenResponse.getIdToken();
+            if (idToken != null) {
+                logger.info("exchangeCodeForToken - ID Token is present");
+            } else {
+                logger.error("exchangeCodeForToken - ID Token is null in the response");
+                throw new IllegalArgumentException("ID 토큰이 null입니다.");
+            }
+        } else {
+            logger.error("exchangeCodeForToken - Response body is null");
+            throw new IllegalStateException("Response body is null");
+        }
+
+        // Google의 ID 토큰을 디코딩하여 사용자 정보를 얻습니다.
+        GoogleIdToken.Payload payload = decodeGoogleIdToken(tokenResponse.getIdToken());
+
+        // OAuth2 사용자를 생성합니다.
         OAuth2User oAuth2User = createOAuth2User(payload);
 
+        // OAuth2 인증 토큰을 생성하고 반환합니다.
         return new OAuth2AuthenticationToken(oAuth2User, Collections.emptyList(), "google");
     }
 
@@ -181,6 +217,9 @@ public class GoogleAuthService {
 
 
     private GoogleIdToken.Payload decodeGoogleIdToken(String idTokenString) {
+        if (idTokenString == null) {
+            throw new IllegalArgumentException("ID 토큰이 null입니다.");
+        }
         // GoogleIdTokenVerifier를 사용하여 idToken을 검증하고 파싱
         // 실제 환경에서는 HTTPS를 통한 검증이 필요
         logger.info("decodeGoogleIdToken1");
@@ -194,6 +233,7 @@ public class GoogleAuthService {
             logger.info("decodeGoogleIdToken2");
             idToken = verifier.verify(idTokenString);
         } catch (Exception e) {
+            logger.error("ID Token verification failed: ", e);
             throw new IllegalArgumentException("ID Token cannot be verified", e);
         }
 
