@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -86,13 +85,13 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
         MembersEntity membersEntity = membersRepository.findByEmail(email);
-        MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
+        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
 
         //배송지 정보 가져오기
         AddrInfoResponseDto addresses = getShippingInfo(productsId, email, addrName);
 
         //credit 정보 가져오기
-        float currentCredit = membersInfo.getCredit();
+        float currentCredit = membersInfoEntity.getCredit();
 
         //등록 가격(판매) 가져오기
         SaleInfosEntity saleInfosEntity = saleInfosRepository.findByProductsEntity(product);
@@ -154,13 +153,13 @@ public class PaymentsServiceImpl implements PaymentsService {
         MembersEntity membersEntity = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
-        MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
+        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
 
         //배송지 정보 가져오기
         AddrInfoResponseDto addresses = getShippingInfo(productsId, email, addrName);
 
         //credit 정보 가져오기
-        float currentCredit = membersInfo.getCredit();
+        float currentCredit = membersInfoEntity.getCredit();
 
         //현재 credit에서 경매 가격을 차감
         float newCredit = currentCredit - nowPrice;
@@ -206,19 +205,19 @@ public class PaymentsServiceImpl implements PaymentsService {
         //AddrInfoResponseDto addrInfoResponseDto = memberServiceClient.getShippingInfo(email, addrName);
         MembersEntity membersEntity = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-        MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
-        Addresses addresses = addressesRepository.findByMembersInfoAndAddr_name(membersInfo, addrName);
+        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
+        AddressesEntity addressesEntity = addressesRepository.findByMembersInfoAndAddr_name(membersInfoEntity, addrName);
 
-        if (addresses == null) {
+        if (addressesEntity == null) {
             throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
         }
         return AddrInfoResponseDto.builder()
-                .addrName(addresses.getAddr_name())
-                .name(addresses.getName())
-                .tel(addresses.getTel())
-                .zipCode(addresses.getZip_num())
-                .addr(addresses.getAddr())
-                .addrDetail(addresses.getAddr_detail())
+                .addrName(addressesEntity.getAddr_name())
+                .name(addressesEntity.getName())
+                .tel(addressesEntity.getTel())
+                .zipCode(addressesEntity.getZip_num())
+                .addr(addressesEntity.getAddr())
+                .addrDetail(addressesEntity.getAddr_detail())
                 .build();
     }
 
@@ -268,9 +267,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         // credit 정보 가져오기
         MembersEntity membersEntity = membersRepository.findByEmail(paymentsRequestDto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-        MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
+        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
 
-        float currentCredit = membersInfo.getCredit();
+        float currentCredit = membersInfoEntity.getCredit();
         float updatedCredit = currentCredit - paymentsRequestDto.getPrice();
 
         // 결제 금액을 차감한 credit 정보 업데이트
@@ -278,7 +277,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 //                .email(paymentsRequestDto.getEmail())
 //                .credit(updatedCredit)
 //                .build();
-        membersInfo.updateCredit(updatedCredit);
+        membersInfoEntity.updateCredit(updatedCredit);
 
         return order.getOrdersId();
     }
@@ -333,9 +332,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         // credit 정보 가져오기
         MembersEntity membersEntity = membersRepository.findByEmail(paymentsRequestDto.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-        MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
+        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
 
-        float currentCredit = membersInfo.getCredit();
+        float currentCredit = membersInfoEntity.getCredit();
         float updatedCredit = currentCredit - paymentsRequestDto.getPrice();
 
         //결제 금액을 차감한 credit 정보 업데이트
@@ -343,7 +342,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 //                .email(paymentsRequestDto.getEmail())
 //                .credit(updatedCredit)
 //                .build();
-        membersInfo.updateCredit(updatedCredit);
+        membersInfoEntity.updateCredit(updatedCredit);
 
         //경매 미낙찰에 따른 환불
         //상품 id로 해당 상품 주문 정보를 모두 찾음
@@ -360,11 +359,11 @@ public class PaymentsServiceImpl implements PaymentsService {
                 float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
                 //credit 정보 가져오기
-                currentCredit = membersInfo.getCredit();
+                currentCredit = membersInfoEntity.getCredit();
                 updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
 
                 // credit 업데이트 요청
-                membersInfo.updateCredit(updatedCredit);
+                membersInfoEntity.updateCredit(updatedCredit);
 
                 // 환불 정보 저장
                 Refunds refund = Refunds.builder()

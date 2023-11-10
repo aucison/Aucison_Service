@@ -1,7 +1,5 @@
 package com.example.aucison_service.jpa.member;
 
-
-import com.example.aucison_service.dto.auth.MembersInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,12 +13,12 @@ import java.util.Date;
 @Builder
 @Getter
 @Entity
-@Table(name = "members_img")
-public class MembersImg { // 사용자 프로필 사진
+@Table(name = "histories_img")
+public class HistoriesImgEntity { // 상품 사진
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "members_imgs_id")
+    @Column(name = "histories_imgs_id")
     private Long id; // 사용자 프로필 사진 id
 
     @Column(nullable = false)
@@ -48,11 +46,6 @@ public class MembersImg { // 사용자 프로필 사진
     private Date createdAt; // 이미지 생성일
 
     @OneToOne
-    @JoinColumn(name = "members_info_id") // 연관관계 주인
-    private MembersInfo membersInfo; // 사용자 추가 정보
-
-    public void updateInfo(MembersInfo membersInfo, MembersInfoDto membersInfoDto) {
-        this.url = membersInfoDto.getImgUrl();
-        this.membersInfo = membersInfo;
-    }
+    @JoinColumn(name = "histories_id") // 연관관계 주인
+    private HistoriesEntity historiesEntity; // 사용자 구매/판매 내역
 }

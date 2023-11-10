@@ -1,7 +1,7 @@
 package com.example.aucison_service.dto.mypage;
 
 import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.jpa.member.Histories;
+import com.example.aucison_service.jpa.member.HistoriesEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -21,15 +21,15 @@ public class ResponseOrderHistoryDto {
     private Float price; // 비경매 상품일 때 등록 가격
     private Float nowPrice; // 경매 상품일 때 실시간 가격
     
-    public ResponseOrderHistoryDto(Histories histories) {
-        this.historiesId = histories.getId();
-        this.name = histories.getName();
-        this.info = histories.getInfo();
+    public ResponseOrderHistoryDto(HistoriesEntity historiesEntity) {
+        this.historiesId = historiesEntity.getId();
+        this.name = historiesEntity.getName();
+        this.info = historiesEntity.getInfo();
         // imgUrl - HistoriesImg에서 주입
-        this.category = histories.getCategory();
+        this.category = historiesEntity.getCategory();
         // 주문 일자 - Product Server에서 주입
         // 주문 상태 - Product Server에서 주입
-        this.price = histories.getPrice();// 해결 필요
-        this.nowPrice = histories.getPrice();// 해결 필요<경매/비경매>구분
+        this.price = historiesEntity.getPrice();// 해결 필요
+        this.nowPrice = historiesEntity.getPrice();// 해결 필요<경매/비경매>구분
     }
 }

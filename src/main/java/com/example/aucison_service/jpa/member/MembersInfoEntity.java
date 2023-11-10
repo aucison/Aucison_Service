@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "members_info")
-public class MembersInfo { // 사용자 추가 정보
+public class MembersInfoEntity { // 사용자 추가 정보
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,15 +36,15 @@ public class MembersInfo { // 사용자 추가 정보
     private MembersEntity membersEntity; // 사용자
 
     @OneToOne(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
-    private MembersImg membersImg;
+    private MembersImgEntity membersImgEntity;
 
     @OneToMany(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
-    private List<Addresses> addressesList;
+    private List<AddressesEntity> addressesEntityList;
 
     @OneToMany(mappedBy = "membersInfo", fetch = FetchType.LAZY) // 양방향 매핑
-    private List<Histories> historiesList;
+    private List<HistoriesEntity> historiesEntityList;
 
-    public MembersInfo updateInfo(MembersEntity membersEntity, MembersInfoDto membersInfoDto) {
+    public MembersInfoEntity updateInfo(MembersEntity membersEntity, MembersInfoDto membersInfoDto) {
         this.phone = membersInfoDto.getPhone();
         this.subEmail = membersInfoDto.getSubEmail();
         this.membersEntity = membersEntity;

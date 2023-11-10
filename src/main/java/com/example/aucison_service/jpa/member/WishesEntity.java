@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "wishes")
-public class Wishes { // 찜
+public class WishesEntity { // 찜
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

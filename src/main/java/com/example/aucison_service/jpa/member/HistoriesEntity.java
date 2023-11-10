@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Entity
-@Table(name = "histories")
-public class Histories { // 사용자 구매/판매 내역
+@Table(name = "historiesEntity")
+public class HistoriesEntity { // 사용자 구매/판매 내역
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,8 +45,8 @@ public class Histories { // 사용자 구매/판매 내역
 
     @ManyToOne
     @JoinColumn(name = "members_info_id") // 연관관계 주인
-    private MembersInfo membersInfo; // 사용자 추가 정보
+    private MembersInfoEntity membersInfoEntity; // 사용자 추가 정보
 
     @OneToOne(mappedBy = "histories", fetch = FetchType.LAZY) // 양방향 매핑
-    private HistoriesImg historiesImg;
+    private HistoriesImgEntity historiesImgEntity;
 }

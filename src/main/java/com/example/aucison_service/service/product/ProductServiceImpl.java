@@ -4,19 +4,14 @@ package com.example.aucison_service.service.product;
 
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
-import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
-import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
-import com.example.aucison_service.jpa.member.Wishes;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -214,7 +209,7 @@ public class ProductServiceImpl implements ProductService{
 //
 //        // 사용자의 찜 목록 조회
 //        //        List<Long> wishedProductIds = memberServiceClient.getWishesProductIdsByEmail(email);
-//        List<Wishes> userWishes = wishesRepository.findByMembersEntity(member);
+//        List<WishesEntity> userWishes = wishesRepository.findByMembersEntity(member);
 //        // 사용자의 찜 목록에서 상품 ID 확인
 //        userWishStatus = userWishes.stream()
 //                .anyMatch(wish -> wish.getProductId().equals(product.getProductsId()));

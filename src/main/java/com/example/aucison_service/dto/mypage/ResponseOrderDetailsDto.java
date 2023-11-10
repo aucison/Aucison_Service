@@ -2,7 +2,7 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.jpa.member.Histories;
+import com.example.aucison_service.jpa.member.HistoriesEntity;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -32,12 +32,12 @@ public class ResponseOrderDetailsDto {
     private Boolean isStarted; // 배송 시작 여부
     private List<ResponseBidsHistoryDto> bidsHistory; // 응찰 내역 리스트
 
-    public ResponseOrderDetailsDto(Histories histories) {
-        this.historiesId = histories.getId();
-        this.prodName = histories.getName();
-        this.info = histories.getInfo();
-        this.category = histories.getCategory();
-        this.price = histories.getPrice();// 경매/비경매 이슈 해결
-        this.nowPrice = histories.getPrice();// 경매/비경매 이슈 해결
+    public ResponseOrderDetailsDto(HistoriesEntity historiesEntity) {
+        this.historiesId = historiesEntity.getId();
+        this.prodName = historiesEntity.getName();
+        this.info = historiesEntity.getInfo();
+        this.category = historiesEntity.getCategory();
+        this.price = historiesEntity.getPrice();// 경매/비경매 이슈 해결
+        this.nowPrice = historiesEntity.getPrice();// 경매/비경매 이슈 해결
     }
 }
