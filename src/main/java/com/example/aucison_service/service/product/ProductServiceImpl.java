@@ -2,6 +2,7 @@ package com.example.aucison_service.service.product;
 
 
 
+import com.example.aucison_service.controller.AuthController;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
@@ -14,7 +15,11 @@ import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.Wishes;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl implements ProductService{
 
-
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     ProductsRepository productsRepository;
     SaleInfosRepository sale_infosRepository;
     AucsInfosRepository aucs_infosRepository;
@@ -63,6 +68,7 @@ public class ProductServiceImpl implements ProductService{
     public List<AucsProductResponseDto> getAllAucsHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "HAND");
         if (products.isEmpty()) {
+            logger.info("RODUCT_NOT_EXIST: 1");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
         return products.stream().map(product ->
@@ -84,6 +90,7 @@ public class ProductServiceImpl implements ProductService{
     public List<AucsProductResponseDto> getAllAucsNormProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "NORM");
         if (products.isEmpty()) {
+            logger.info("RODUCT_NOT_EXIST: 2");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
         return products.stream().map(product ->
@@ -105,6 +112,7 @@ public class ProductServiceImpl implements ProductService{
     public List<SaleProductResponseDto> getAllSaleHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("SALE", "HAND");
         if (products.isEmpty()) {
+            logger.info("RODUCT_NOT_EXIST: 3");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
         return products.stream().map(product ->
@@ -123,6 +131,7 @@ public class ProductServiceImpl implements ProductService{
     public List<SaleProductResponseDto> getAllSaleNormProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("SALE", "NORM");
         if (products.isEmpty()) {
+            logger.info("RODUCT_NOT_EXIST: 4");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
         return products.stream().map(product ->
@@ -139,12 +148,15 @@ public class ProductServiceImpl implements ProductService{
 
 
     @Override
-    public void registerProduct(ProductRegisterRequestDto dto) {
+    public void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal OAuth2User principal) {
         //상품 등록 서비스 로직
 
-        // member-service로부터 이메일을 가져옴 -> dto에서 추출
-        // 추후 인증인가 방식으로 수정 필요할 수 있음
-        String email = dto.getEmail();
+        if (principal == null) {
+            logger.info("에러 발생함!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String email = principal.getAttribute("email");
 
         //ProductsEntity를 먼저 저장을 한다.
         ProductsEntity product = ProductsEntity.builder()
@@ -153,7 +165,7 @@ public class ProductServiceImpl implements ProductService{
                 .information(dto.getInformation())
                 .summary(dto.getSummary())
                 .brand(dto.getBrand())
-                .email(email) // 가져온 이메일을 설정
+                .email(email) //  OAuth2 인증을 통해 가져온 이메일 설정
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
 

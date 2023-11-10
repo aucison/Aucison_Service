@@ -46,13 +46,6 @@ public class AuthController {
         return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER); // 클라이언트에게 GET 방식으로 다른 URI로 리디렉션하라는 명령을 내림
     }
 
-
-    @GetMapping("/t4")
-    public void testT4() {
-        logger.info("777");
-    }
-
-
     //임시 동기 변경
     // Google 콜백 처리
 //    @GetMapping("/google/callback")
@@ -85,10 +78,18 @@ public class AuthController {
     public ResponseEntity<?> handleGoogleCallback(@RequestParam(name = "code") String code) {
         try {
             OAuth2AuthenticationToken token = googleAuthService.exchangeCodeForToken(code);
+            if (token == null) {
+                logger.error("OAuth2AuthenticationToken is null after exchange");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error in token exchange");
+            }
+
             MembersEntity member = googleAuthService.registerOrLoginUser(token);
 
             String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
             logger.info("Login successful for user: {}", member.getEmail());
+
+            // JWT 토큰 값을 로그로 출력
+            logger.info("Generated JWT Token: {}", jwt);
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "Bearer " + jwt);
