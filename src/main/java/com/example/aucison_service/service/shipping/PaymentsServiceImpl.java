@@ -151,7 +151,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         float nowPrice = bid.getNowPrice();
 
         //AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
-        MembersEntity membersEntity = membersRepository.findByEmail(email);
+        MembersEntity membersEntity = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+
         MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
 
         //배송지 정보 가져오기
@@ -202,7 +204,8 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     public AddrInfoResponseDto getShippingInfo(Long productsId, String email, String addrName) {  //배송지명으로 배송지 조회
         //AddrInfoResponseDto addrInfoResponseDto = memberServiceClient.getShippingInfo(email, addrName);
-        MembersEntity membersEntity = membersRepository.findByEmail(email);
+        MembersEntity membersEntity = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
         MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
         Addresses addresses = addressesRepository.findByMembersInfoAndAddr_name(membersInfo, addrName);
 
@@ -263,7 +266,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         delivery = deliveriesRepository.save(delivery);
 
         // credit 정보 가져오기
-        MembersEntity membersEntity = membersRepository.findByEmail(paymentsRequestDto.getEmail());
+        MembersEntity membersEntity = membersRepository.findByEmail(paymentsRequestDto.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
         MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
 
         float currentCredit = membersInfo.getCredit();
@@ -327,7 +331,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //         TODO: msa 통신 부분 대체 필요
         // credit 정보 가져오기
-        MembersEntity membersEntity = membersRepository.findByEmail(paymentsRequestDto.getEmail());
+        MembersEntity membersEntity = membersRepository.findByEmail(paymentsRequestDto.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
         MembersInfo membersInfo = membersInfoRepository.findByMembersEntity(membersEntity);
 
         float currentCredit = membersInfo.getCredit();
