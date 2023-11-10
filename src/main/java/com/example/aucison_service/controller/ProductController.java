@@ -5,13 +5,17 @@ package com.example.aucison_service.controller;
 import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
+import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.service.product.ProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,7 +35,7 @@ public class ProductController {
     //결합도 감소 - 클래스간의 결합도가 낮아져서 유지보수가 쉬움
     //자동 설정과 설정의 중앙화 : 예를 들어 Environment 객체를 통해 애플리케이션의 환경 설정에 쉽게 접근
 
-
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final ProductService productService;
 
     @Autowired
@@ -70,17 +74,17 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-
-
-    //ApiResponse형태로 변경하기
-
-    //apiresponse를 사용할 경우 일관성이 높아지고 가독성이 높아진다
-    //다만 reponseentity를 사용할 경우 좀 더 세부적인 컨트롤이 가능하다
-
-//    @GetMapping("/auc/nothand/list")
-//    public ApiResponse<List<AucsProductResponseDto>> getAllAucNothandProducts() {
-//        List<AucsProductResponseDto> products = productService.getAllAucsNormProducts();
-//        return ApiResponse.createSuccess(products);
-//    }
+    //상품등록
+    @PostMapping("/product/register")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> registerProduct(@RequestBody ProductRegisterRequestDto dto,
+                                             @AuthenticationPrincipal OAuth2User principal) {
+//        if (principal == null) {
+//            logger.error("Authentication failed: principal is null");
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+//        }
+        productService.registerProduct(dto, principal);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 
 }

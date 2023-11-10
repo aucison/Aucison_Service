@@ -29,7 +29,7 @@ public class ProductRegisterRequestDto {
     private String email;
 
     //이미지 등록
-    private List<MultipartFile> images; // 사용자로부터 받을 이미지 리스트
+    //private List<MultipartFile> images; // 사용자로부터 받을 이미지 리스트
 
     // 경매상품 정보
     private float startPrice;
