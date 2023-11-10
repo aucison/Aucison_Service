@@ -71,15 +71,15 @@ public class AuthServiceImpl implements AuthService {
 //            throw new RuntimeException("User not found");
 //        }
 //
-//        MembersInfo membersInfo = member.getMembersInfo();  //1대 1 관계라 가능
-//        if (membersInfo == null) {
+//        MembersInfoEntity membersInfoEntity = member.getMembersInfoEntity();  //1대 1 관계라 가능
+//        if (membersInfoEntity == null) {
 //            throw new RuntimeException("MemberInfo not found for this user");
 //        }
 //        return MembersInfoDto.builder()
 //                .email(member.getEmail())
 //                .name(member.getName())
 //                .nickName(member.getNickname())
-//                .phone(membersInfo.getPhone())
+//                .phone(membersInfoEntity.getPhone())
 //                .build();
 //    }
 //
@@ -95,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
 //        member.updateNickname(updateDto.getNickname());
 //
 //        // phone이 존재하면 수정
-//        member.getMembersInfo().updatePhone(updateDto.getPhone());
+//        member.getMembersInfoEntity().updatePhone(updateDto.getPhone());
 //    }
 
 //
@@ -118,15 +118,15 @@ public class AuthServiceImpl implements AuthService {
 //            throw new RuntimeException("User not found");
 //        }
 //
-//        MembersInfo membersInfo = member.getMembersInfo();  //1대 1 관계라 가능
-//        if (membersInfo == null) {
+//        MembersInfoEntity membersInfoEntity = member.getMembersInfoEntity();  //1대 1 관계라 가능
+//        if (membersInfoEntity == null) {
 //            throw new RuntimeException("MemberInfo not found for this user");
 //        }
 //        return MembersInfoDto.builder()
 //                .email(member.getEmail())
 //                .name(member.getName())
 //                .nickName(member.getNickname())
-//                .phone(membersInfo.getPhone())
+//                .phone(membersInfoEntity.getPhone())
 //                .build();
 //    }
 //

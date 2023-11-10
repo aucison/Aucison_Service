@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface WishesRepository extends JpaRepository<Wishes, Long> {
-    List<Wishes> findByMembersEntity(MembersEntity membersEntity);
+public interface WishesRepository extends JpaRepository<WishesEntity, Long> {
+    List<WishesEntity> findByMembersEntity(MembersEntity membersEntity);
 }
