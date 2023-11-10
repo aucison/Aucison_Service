@@ -1,6 +1,7 @@
 package com.example.aucison_service.controller;
 
 
+import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
 import com.example.aucison_service.dto.mypage.ResponseOrderDetailsDto;
 import com.example.aucison_service.service.member.MypageService;
@@ -19,14 +20,14 @@ public class MypageController {
 
     private final MypageService mypageService;
 
-    @GetMapping("/buy")
-    public ResponseEntity getOrderInfo(@AuthenticationPrincipal OAuth2User principal) {
+    @GetMapping("/buy") //구매 내역 조회
+    public ApiResponse<?> getOrderInfo(@AuthenticationPrincipal OAuth2User principal) {
         // principal에서 이메일 가져오기
         String email = principal.getAttribute("email");
-        return ResponseEntity.status(HttpStatus.OK).body(mypageService.getOrderHistoryList(email));
+        return ApiResponse.createSuccess(mypageService.getOrderInfo(email));
     }
 
-    @GetMapping("/buy/{historiesId}")
+    @GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
     public ResponseEntity getOrderDetail(@PathVariable("historiesId") Long historiesId,
                                          @RequestHeader("accessToken") String accessToken) throws Exception {
         ResponseOrderDetailsDto responseOrderDetailsDto = mypageService.getOrderDetails(RequestOrderDetailsDto.builder().
@@ -34,7 +35,7 @@ public class MypageController {
         return ResponseEntity.status(HttpStatus.OK).body(responseOrderDetailsDto);
     }
 
-    @GetMapping("/sell")
+    @GetMapping("/sell")    //판매 내역 조회
     public ResponseEntity getSellInfo(@RequestHeader("accessToken") String accessToken) {
         String email = jwtUtils.getEmailFromToken(accessToken);
         return ResponseEntity.status(HttpStatus.OK).body(mypageService.getSellHistoryList(email));
