@@ -57,4 +57,10 @@ public class MembersInfo { // 사용자 추가 정보
             this.phone = phone;
         }
     }
+
+    public void updateCredit(Float newCredit) {
+        if (newCredit != null && newCredit >= 0) { // 유효성 검사, credit이 null이 아니고 음수가 아니어야 함
+            this.credit = newCredit;
+        }
+    }
 }
