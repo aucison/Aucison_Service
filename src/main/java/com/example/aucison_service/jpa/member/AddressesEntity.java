@@ -19,8 +19,8 @@ public class AddressesEntity { // 주소
     @Column(name = "addresses_id")
     private Long id; // 주소 id
 
-    @Column(nullable = false)
-    private String addr_name; // 배송지명(사용자 지정값)
+    @Column(name = "addr_name", nullable = false)
+    private String addrName; // 배송지명(사용자 지정값)
 
     @Column(nullable = false)
     private String zip_num; // 우편번호
