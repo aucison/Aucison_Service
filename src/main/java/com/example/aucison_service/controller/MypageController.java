@@ -30,7 +30,7 @@ public class MypageController {
     @GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
     public ApiResponse<?> getOrderDetail(@PathVariable("historiesId") Long historiesId,
                                             @RequestParam Long ordersId,
-                                            @AuthenticationPrincipal OAuth2User principal) {
+                                            @AuthenticationPrincipal OAuth2User principal) throws Exception {
         String email = principal.getAttribute("email");
         RequestOrderDetailsDto requestDto = RequestOrderDetailsDto.builder()
                 .email(email)
