@@ -4,15 +4,19 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class VirtualPaymentResponseDto {
     //가상 결제 페이지 조회 시 사용하는 dto
-    private String category;    //상품 종류(경매/비경매)
+    private String category;    //경매 여부(경매/판매)
+
     private String productName; //상품명
-    private MultipartFile productImg; //상품 사진
+    private String productImg; //상품 사진
     private float nowPrice; //(경매) 응찰가
     private float price;    //(비경매) 등록가격
+
     private String addrName;    //배송지명
     private String name;    //받는분 이름
     private String tel; //받는분 전화번호
