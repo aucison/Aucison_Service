@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class RequestOrderDetailsDto {
     private String email;
-    //private Long ordersId; // 이거 수정이 필요합니다..없애야할듯..
+    private Long ordersId;
     private Long historiesId;
 }

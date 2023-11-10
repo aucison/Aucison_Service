@@ -28,11 +28,17 @@ public class MypageController {
     }
 
     @GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
-    public ResponseEntity getOrderDetail(@PathVariable("historiesId") Long historiesId,
-                                         @RequestHeader("accessToken") String accessToken) throws Exception {
-        ResponseOrderDetailsDto responseOrderDetailsDto = mypageService.getOrderDetails(RequestOrderDetailsDto.builder().
-                email(jwtUtils.getEmailFromToken(accessToken)).historiesId(historiesId).build());
-        return ResponseEntity.status(HttpStatus.OK).body(responseOrderDetailsDto);
+    public ApiResponse<?> getOrderDetail(@PathVariable("historiesId") Long historiesId,
+                                            @RequestParam Long ordersId,
+                                            @AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        RequestOrderDetailsDto requestDto = RequestOrderDetailsDto.builder()
+                .email(email)
+                .ordersId(ordersId)
+                .historiesId(historiesId)
+                .build();
+
+        return ApiResponse.createSuccess(mypageService.getOrderDetail(requestDto));
     }
 
     @GetMapping("/sell")    //판매 내역 조회

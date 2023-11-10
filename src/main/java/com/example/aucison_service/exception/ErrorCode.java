@@ -22,6 +22,7 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     // Histories 관련 에러 코드들
     HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "주문/판매 내역을 찾을 수 없습니다."),
+    HISTORY_IMG_NOT_FOUND(HttpStatus.NOT_FOUND, "주문/판매 내역 사진을 찾을 수 없습니다."),
 
     // Deliveries 관련 에러 코드들
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "배송지 정보를 찾을 수 없습니다."),
@@ -32,6 +33,7 @@ public enum ErrorCode {
     ORDER_SAVE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "주문 정보 저장에 실패했습니다."),
 
     // Payments 관련 에러 코드들
+    END_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상품의 경매 종료 날짜를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 카테고리(경매/판매)가 존재하지 않습니다."),
     AUCTION_ENDED(HttpStatus.FORBIDDEN, "경매가 이미 종료되었습니다."),
     INSUFFICIENT_CREDIT(HttpStatus.BAD_REQUEST, "잔액이 부족합니다."),
