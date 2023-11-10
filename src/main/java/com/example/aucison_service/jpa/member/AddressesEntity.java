@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "addresses")
-public class Addresses { // 주소
+public class AddressesEntity { // 주소
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +39,5 @@ public class Addresses { // 주소
 
     @ManyToOne
     @JoinColumn(name = "members_info_id") // 연관관계 주인
-    private MembersInfo membersInfo; // 사용자 추가 정보
+    private MembersInfoEntity membersInfoEntity; // 사용자 추가 정보
 }

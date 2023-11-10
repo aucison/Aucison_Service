@@ -34,10 +34,10 @@ public class MembersEntity {
     private Role role;
 
     @OneToOne(mappedBy = "membersEntity", fetch = FetchType.LAZY)
-    private MembersInfo membersInfo;
+    private MembersInfoEntity membersInfoEntity;
 
     @OneToMany(mappedBy = "membersEntity", fetch = FetchType.LAZY)
-    private List<Wishes> wishes;
+    private List<WishesEntity> wishes;
 
     @Builder
     public MembersEntity(String email, String name, String nickname, Role role) {

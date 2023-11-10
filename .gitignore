@@ -37,6 +37,7 @@ build/
 src/main/resources/application-aws.yml
 src/main/resources/application-google.yml
 src/main/resources/application-https.yml
+src/main/resources/application-test.yml
 src/main/resources/keystore.p12
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,java,maven
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,java,maven

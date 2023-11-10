@@ -2,7 +2,7 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.jpa.member.Histories;
+import com.example.aucison_service.jpa.member.HistoriesEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -21,12 +21,12 @@ public class ResponseSellHistoryDto {
     private Float price; // 비경매 상품일 때 등록 가격
     private Float nowPrice; // 경매 상품일 때 실시간 가격
 
-    public ResponseSellHistoryDto(Histories histories) {
-        this.historiesId = histories.getId();
-        this.name = histories.getName();
-        this.info = histories.getInfo();
-        this.category = histories.getCategory();
-        this.price = histories.getPrice(); ////경매/비경매 개선 필요
-        this.nowPrice = histories.getPrice(); ////경매/비경매 개선 필요
+    public ResponseSellHistoryDto(HistoriesEntity historiesEntity) {
+        this.historiesId = historiesEntity.getId();
+        this.name = historiesEntity.getName();
+        this.info = historiesEntity.getInfo();
+        this.category = historiesEntity.getCategory();
+        this.price = historiesEntity.getPrice(); ////경매/비경매 개선 필요
+        this.nowPrice = historiesEntity.getPrice(); ////경매/비경매 개선 필요
     }
 }

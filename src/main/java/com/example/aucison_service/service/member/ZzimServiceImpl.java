@@ -3,7 +3,7 @@
 //
 //import com.example.aucison_service.dto.zzim.ResponseZzimHistoryDto;
 //import com.example.aucison_service.jpa.member.MembersRepository;
-//import com.example.aucison_service.jpa.member.Wishes;
+//import com.example.aucison_service.jpa.member.WishesEntity;
 //import com.example.aucison_service.jpa.member.WishesRepository;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@
 //    @Override
 //    @Transactional
 //    public void deleteZzim(Long wishesId) throws Exception {
-//        Optional<Wishes> wishes = wishesRepository.findById(wishesId);
+//        Optional<WishesEntity> wishes = wishesRepository.findById(wishesId);
 //        if(wishes == null) {
 //            throw new RuntimeException("error");
 //        }

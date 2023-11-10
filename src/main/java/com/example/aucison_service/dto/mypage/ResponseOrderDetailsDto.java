@@ -2,42 +2,49 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.jpa.member.Histories;
+import com.example.aucison_service.enums.OrderStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
-import javax.swing.plaf.nimbus.State;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@RequiredArgsConstructor
+@Builder
 public class ResponseOrderDetailsDto {
-    //private Long ordersId; // 주문 고유 번호///////////이거 냅두던지..삭제하던지...수정필요
-    private Long historiesId;
-    private String prodName; // 상품명
-    private String info; // 상품 상세 정보
-    private String imgUrl; // 이미지//////////////수정필요?
-    private Category category; // 경매 여부(경매/비경매)
-    private Date ordersAt; // 주문일자////////////수정필요?
-    private State state; // 주문 상태(결제/배송)
-    private Float price; // 비경매 상품일 때 등록 가격
-    private Float nowPrice; // 경매 상품일 때 실시간 가격
-    private String receiver; // 받는 사람
-    private String addrName; // 배송지명
-    private String addr; // 주소
-    private String addrDetail; // 상세주소
-    private String tel; // 받는 사람 전화번호
-    private Boolean isCompleted; // 배송 완료 여부
-    private Boolean isStarted; // 배송 시작 여부
-    private List<ResponseBidsHistoryDto> bidsHistory; // 응찰 내역 리스트
+    private String productName; // 상품명
+    private String productDescription; // 상품 한줄 설명
+    private String productImgUrl; // 상품 이미지
+    private Category category; // 경매 여부
 
-    public ResponseOrderDetailsDto(Histories histories) {
-        this.historiesId = histories.getId();
-        this.prodName = histories.getName();
-        this.info = histories.getInfo();
-        this.category = histories.getCategory();
-        this.price = histories.getPrice();// 경매/비경매 이슈 해결
-        this.nowPrice = histories.getPrice();// 경매/비경매 이슈 해결
+    private Long ordersId; // 주문번호
+    private String orderDate; // 주문일자 또는 마감일자
+    private OrderStatus status; // 주문상태
+    private float price; // 구매 가격
+
+    // AddressInfo와 BidDetails는 각각의 DTO로 분리할 수도 있습니다.
+    private AddressInfo addressInfo; // 배송지 정보
+    private List<BidDetails> bidDetails; // 입찰 내역
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class AddressInfo {
+        private String addrName;
+        private String recipient;
+        private String zipCode;
+        private String address;
+        private String addressDetail;
+        private String contactNumber;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class BidDetails {
+        private OrderStatus bidStatus;
+        private LocalDateTime bidTime;
     }
 }
+

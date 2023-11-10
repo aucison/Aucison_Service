@@ -27,14 +27,14 @@ public class Bids extends BaseTimeEntity { //실시간 응찰 내역
     private float nowPrice;    //응찰가격
 
     @Column(name = "status", nullable = false)
-    private Enum status;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
+    private OrderStatus status;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
 
     @Column(name = "bids_code", nullable = false)
     private String bidsCode;    //응찰 고유 코드
 
     @Builder
     public Bids(Long productsId, String email,
-                float nowPrice, Enum status, String bidsCode) {
+                float nowPrice, OrderStatus status, String bidsCode) {
         this.productsId = productsId;
         this.email = email;
         this.nowPrice = nowPrice;
