@@ -11,6 +11,8 @@ import com.example.aucison_service.enums.OrderType;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.*;
+import com.example.aucison_service.jpa.product.ProductsEntity;
+import com.example.aucison_service.jpa.product.ProductsRepository;
 import com.example.aucison_service.jpa.shipping.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,12 +34,14 @@ public class MypageServiceImpl implements MypageService {
     private final AuctionEndDatesRepository auctionEndDatesRepository;
     private  final DeliveriesRepository deliveriesRepository;
     private final BidsRepository bidsRepository;
+    private final ProductsRepository productsRepository;
 
     @Autowired
     public MypageServiceImpl(HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
                              MembersInfoRepository membersInfoRepository, MembersRepository membersRepository,
                              OrdersRepository ordersRepository, AuctionEndDatesRepository auctionEndDatesRepository,
-                             DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository) {
+                             DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
+                             ProductsRepository productsRepository) {
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
         this.membersInfoRepository = membersInfoRepository;
@@ -46,6 +50,7 @@ public class MypageServiceImpl implements MypageService {
         this.auctionEndDatesRepository = auctionEndDatesRepository;
         this.deliveriesRepository = deliveriesRepository;
         this.bidsRepository = bidsRepository;
+        this.productsRepository = productsRepository;
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
@@ -86,7 +91,7 @@ public class MypageServiceImpl implements MypageService {
     }
 
 
-    //판매 상품 상세 조회
+    //구매 상품 상세 조회
     @Override
     public ResponseOrderDetailsDto getOrderDetail(RequestOrderDetailsDto requestOrderDetailsDto) {
 
@@ -219,19 +224,54 @@ public class MypageServiceImpl implements MypageService {
                 .build();
     }
 
-//    // 판매 내역 조회
-//    @Override
-//    public List<ResponseSellHistoryDto> getSellInfo(String email) {
-//        MembersEntity membersEntity = membersRepository.findByEmail(email);
-//        return historiesRepository.findByMembersInfo(membersInfoRepository.findByMembersEntity(membersEntity))
-//                .stream()
-//                .filter(historiesEntity -> historiesEntity.getOrderStatus() == OrderStatus.SELL)
-//                .map(historiesEntity -> {
-//                    ResponseSellHistoryDto responseSellHistoryDto = new ResponseSellHistoryDto(historiesEntity);
-//                    responseSellHistoryDto.setImgUrl(membersImgRepository.findByMembersInfo
-//                            (membersInfoRepository.findByMembersEntity(membersEntity)).getUrl());
-//                    //responseSellHistoryDto.setState("product-server에서 받아오기");
-//                    return responseSellHistoryDto;
-//                }).collect(Collectors.toList());
-//    }
+    // 판매 내역 조회
+    @Override
+    public List<ResponseSellHistoryDto> getSellInfo(String email) {
+//        MembersEntity members = membersRepository.findByEmail(email)
+//                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        //'판매' 에 해당하는 histories 조회
+        List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntity_MembersEntity_EmailAndAndOrderType(email, OrderType.SELL);
+
+        return sellHistories.stream()
+                .map(this::buildResponseSellHistoryDto)
+                .filter(Objects::nonNull) // Filter out nulls if any
+                .collect(Collectors.toList());
+    }
+
+    private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity history) {
+        Orders orders = ordersRepository.findById(history.getOrdersId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // '경매' 이고 '낙찰' 일 때 또는 '판매' 이고 '주문완료' 일 때
+        if ((history.getCategory() == Category.AUC && orders.getStatus() == OrderStatus.WINNING_BID) ||
+                (history.getCategory() == Category.NOR && orders.getStatus() == OrderStatus.ORDER_COMPLETED)) {
+            //TODO: productsRepository에 메서드 추가?
+            ProductsEntity product = productsRepository.findById(orders.getProductsId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+            HistoriesImgEntity historyImg = historiesImgRepository.findByHistoriesEntity(history);
+            if (historyImg == null) {
+                throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+            }
+
+            //등록 날짜, 판매 날짜
+            String createdDate = product.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String soldDate = orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            return ResponseSellHistoryDto.builder()
+                    .productName(history.getName())
+                    .productDescription(history.getInfo())
+                    .productImgUrl(historyImg.getUrl())
+                    .category(history.getCategory())
+                    .createdDate(createdDate)
+                    .soldDate(soldDate)
+                    .ordersId(orders.getOrdersId())
+                    .status(orders.getStatus())
+                    .price(history.getPrice())
+                    .build();
+        }
+        return null; // Return null if not meeting the criteria
+    }
 }

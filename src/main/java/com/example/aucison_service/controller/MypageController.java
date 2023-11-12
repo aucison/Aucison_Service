@@ -3,11 +3,8 @@ package com.example.aucison_service.controller;
 
 import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
-import com.example.aucison_service.dto.mypage.ResponseOrderDetailsDto;
 import com.example.aucison_service.service.member.MypageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -41,9 +38,9 @@ public class MypageController {
         return ApiResponse.createSuccess(mypageService.getOrderDetail(requestDto));
     }
 
-//    @GetMapping("/sell")    //판매 내역 조회
-//    public ResponseEntity getSellInfo(@RequestHeader("accessToken") String accessToken) {
-//        String email = jwtUtils.getEmailFromToken(accessToken);
-//        return ResponseEntity.status(HttpStatus.OK).body(mypageService.getSellHistoryList(email));
-//    }
+    @GetMapping("/sell")    //판매 내역 조회
+    public ApiResponse<?> getSellInfo(@AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        return ApiResponse.createSuccess(mypageService.getSellInfo(email));
+    }
 }
