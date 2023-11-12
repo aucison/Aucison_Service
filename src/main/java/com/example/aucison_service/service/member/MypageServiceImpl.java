@@ -1,10 +1,7 @@
 package com.example.aucison_service.service.member;
 
 
-import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
-import com.example.aucison_service.dto.mypage.ResponseOrderDetailsDto;
-import com.example.aucison_service.dto.mypage.ResponseOrderHistoryDto;
-import com.example.aucison_service.dto.mypage.ResponseSellHistoryDto;
+import com.example.aucison_service.dto.mypage.*;
 import com.example.aucison_service.enums.Category;
 import com.example.aucison_service.enums.OrderStatus;
 import com.example.aucison_service.enums.OrderType;
@@ -35,13 +32,14 @@ public class MypageServiceImpl implements MypageService {
     private  final DeliveriesRepository deliveriesRepository;
     private final BidsRepository bidsRepository;
     private final ProductsRepository productsRepository;
+    private final AddressesRepository addressesRepository;
 
     @Autowired
     public MypageServiceImpl(HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
                              MembersInfoRepository membersInfoRepository, MembersRepository membersRepository,
                              OrdersRepository ordersRepository, AuctionEndDatesRepository auctionEndDatesRepository,
                              DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
-                             ProductsRepository productsRepository) {
+                             ProductsRepository productsRepository, AddressesRepository addressesRepository) {
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
         this.membersInfoRepository = membersInfoRepository;
@@ -51,6 +49,7 @@ public class MypageServiceImpl implements MypageService {
         this.deliveriesRepository = deliveriesRepository;
         this.bidsRepository = bidsRepository;
         this.productsRepository = productsRepository;
+        this.addressesRepository = addressesRepository;
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
@@ -273,5 +272,27 @@ public class MypageServiceImpl implements MypageService {
                     .build();
         }
         return null; // Return null if not meeting the criteria
+    }
+
+
+    //배송지 조회
+    @Override
+    public List<ResponseAddressDto> getAddressInfo(String email) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        List<AddressesEntity> addresses = addressesRepository.findAllByMembersInfoEntity(membersInfo);
+
+        return addresses.stream()
+                .map(address -> ResponseAddressDto.builder()
+                        .addrName(address.getAddrName())
+                        .name(address.getName())
+                        .zipNum(address.getZipNum())
+                        .addr(address.getAddr())
+                        .addrDetail(address.getAddrDetail())
+                        .tel(address.getTel())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

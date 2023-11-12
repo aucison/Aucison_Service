@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/mp")
 public class MypageController {
 
-
     private final MypageService mypageService;
 
     @GetMapping("/buy") //구매 내역 조회
@@ -42,5 +41,11 @@ public class MypageController {
     public ApiResponse<?> getSellInfo(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         return ApiResponse.createSuccess(mypageService.getSellInfo(email));
+    }
+
+    @GetMapping("/address") // 회원 정보 조회
+    public ApiResponse<?> getAddressInfo(@AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        return ApiResponse.createSuccess(mypageService.getAddressInfo(email));
     }
 }
