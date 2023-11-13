@@ -23,7 +23,8 @@ public class SaleInfosEntity extends BaseTimeEntity {
     private float price;     //등록 가격
 
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "saleInfosEntity")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "products_id")
     private ProductsEntity productsEntity;
 
     @Builder

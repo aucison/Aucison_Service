@@ -49,13 +49,10 @@ public class ProductsEntity extends BaseTimeEntity {
     private String email;     //판매자(msa 통신)
 
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "aucs_infos_id")
+    @OneToOne(mappedBy = "productsEntity",  cascade = CascadeType.ALL)
     private AucsInfosEntity aucsInfosEntity;
 
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sale_infos_id")
+    @OneToOne(mappedBy = "productsEntity",  cascade = CascadeType.ALL)
     private SaleInfosEntity saleInfosEntity;
 
     @OneToMany(mappedBy = "productsEntity")
