@@ -160,6 +160,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal OAuth2User principal) {
         //상품 등록 서비스 로직
 
@@ -192,8 +193,8 @@ public class ProductServiceImpl implements ProductService{
 //                product.addImage(imageEntity);
 //            }
 //        }
-
         productsRepository.save(product);
+
 
         //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장
         if ("AUCS".equals(dto.getCategory())) {
@@ -215,6 +216,7 @@ public class ProductServiceImpl implements ProductService{
 
             sale_infosRepository.save(norInfo);
         }
+
     }
 
 //    @Override
