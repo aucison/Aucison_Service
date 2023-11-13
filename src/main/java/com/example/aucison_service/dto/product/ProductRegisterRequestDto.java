@@ -20,7 +20,7 @@ public class ProductRegisterRequestDto {
     private String name;
     private String kind;
     private String category;
-    private LocalDateTime createdTime;
+    //private LocalDateTime createdTime;
     private String information;
     private String summary;
     private String brand;

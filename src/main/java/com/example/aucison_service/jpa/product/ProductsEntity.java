@@ -33,9 +33,8 @@ public class ProductsEntity extends BaseTimeEntity {
     @Column(name = "category", nullable = false)
     private String category;        // 경매여부(경매(AUCS) / 비경매(SALE))
 
-    @Column(name = "createdTime", nullable = false)
-    private LocalDateTime createdTime;        //등록 시간
-
+//    @Column(name = "createdTime", nullable = false)
+//    private LocalDateTime createdTime;        //등록 시간 ->이게 주석인게 맞다네??, 상속만 받으면 됨
     @Column(name = "information", nullable = false)
     private String information;     //상품 정보
 
@@ -66,12 +65,11 @@ public class ProductsEntity extends BaseTimeEntity {
     private List<ProductImgEntity> images = new ArrayList<>();
 
     @Builder
-    public ProductsEntity(String name, String kind, String category,LocalDateTime createdTime,
+    public ProductsEntity(String name, String kind, String category,
                           String information, String summary, String brand, String email) {
         this.name = name;
         this.kind = kind;
         this.category = category;
-        this.createdTime = createdTime;
         this.information = information;
         this.summary = summary;
         this.brand = brand;
