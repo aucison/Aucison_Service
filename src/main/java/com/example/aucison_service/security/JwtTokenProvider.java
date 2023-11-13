@@ -3,6 +3,7 @@ package com.example.aucison_service.security;
 import com.example.aucison_service.enums.Role;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
+import com.example.aucison_service.service.member.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,11 +20,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 @Component
 public class JwtTokenProvider {
@@ -33,6 +35,9 @@ public class JwtTokenProvider {
 
     @Value("${jwt.expiration}")
     private long validityInMilliseconds;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService; // 사용자 정보를 조회하는 서비스
 
     public String createToken(String username, Role role) {
         Claims claims = Jwts.claims().setSubject(username);
@@ -47,6 +52,20 @@ public class JwtTokenProvider {
                 .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+    }
+
+    public OAuth2User getOAuth2User(String token) {
+        String email = getEmailFromToken(token);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("email", email);
+        // 추가로 필요한 사용자 속성을 attributes 맵에 추가합니다.
+        // 예를 들어, 이름이나 역할 등을 추가할 수 있습니다.
+
+        List<GrantedAuthority> authorities = Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_USER") // 실제 역할에 맞게 설정
+        );
+
+        return new DefaultOAuth2User(authorities, attributes, "email");
     }
 
     public String getEmailFromToken(String token) {
@@ -79,13 +98,9 @@ public class JwtTokenProvider {
 
     // Authentication 객체 생성
     public Authentication getAuthentication(String token) {
-        try {
-            UserDetails userDetails = new User(getEmailFromToken(token), "", getAuthorities(token));
-            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-        } catch (Exception e) {
-            logger.error("Authentication error: ", e);
-            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+        String email = getEmailFromToken(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email); // 데이터베이스에서 사용자 정보 조회
+        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 
     // 토큰에서 권한 정보 가져오기
