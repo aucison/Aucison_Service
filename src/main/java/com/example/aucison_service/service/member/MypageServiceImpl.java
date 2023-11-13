@@ -256,7 +256,7 @@ public class MypageServiceImpl implements MypageService {
             }
 
             //등록 날짜, 판매 날짜
-            String createdDate = product.getCreatedTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String createdDate = product.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             String soldDate = orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             return ResponseSellHistoryDto.builder()
