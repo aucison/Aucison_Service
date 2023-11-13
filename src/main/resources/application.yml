@@ -4,8 +4,8 @@ spring:
     show-sql: 'true'
   profiles:
 
-    include: aws, google, https
-#    include: test
+#    include: aws, google, https
+    include: test
 
 
 #  redis:

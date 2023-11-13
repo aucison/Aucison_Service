@@ -11,14 +11,18 @@ import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,26 +62,37 @@ public class ProductServiceImpl implements ProductService{
     // -> 최종적으로 변환된 AucProductResponseDto객체들을 리스트로 모아 반환
 
 
+    @PersistenceContext
+    private EntityManager entityManager;
     //현재 이하 4개의 서비스에 N+1문제 발생 가능성 높음 -> 곧 해결 예정
     //모든 경매(AUCS) + 핸드메이드(HAND) 상품 반환
+    @Transactional(readOnly = true)
     public List<AucsProductResponseDto> getAllAucsHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "HAND");
         if (products.isEmpty()) {
-            logger.info("RODUCT_NOT_EXIST: 1");
+            logger.info("PRODUCT_NOT_EXIST: 1");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
-        return products.stream().map(product ->
-                AucsProductResponseDto.builder()
-                        .name(product.getName())
-                        .createdTime(product.getCreatedTime())
-                        .information(product.getInformation())
-                        .summary(product.getSummary())
-                        .brand(product.getBrand())
-                        .startPrice(product.getAucsInfosEntity().getStartPrice())
-                        .end(product.getAucsInfosEntity().getEnd())
-                        .bidsCode(product.getAucsInfosEntity().getBidsCode())
-                        .build()
-        ).collect(Collectors.toList());
+
+        return products.stream()
+                .peek(product -> {
+                    if (product.getAucsInfosEntity() == null) {
+                        entityManager.refresh(product);
+                    }
+                })
+                .map(product -> {
+                    AucsInfosEntity aucsInfo = product.getAucsInfosEntity();
+                    return AucsProductResponseDto.builder()
+                            .name(product.getName())
+                            .information(product.getInformation())
+                            .summary(product.getSummary())
+                            .brand(product.getBrand())
+                            .startPrice(aucsInfo.getStartPrice())
+                            .end(aucsInfo.getEnd())
+                            .bidsCode(aucsInfo.getBidsCode())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
 
@@ -91,7 +106,6 @@ public class ProductServiceImpl implements ProductService{
         return products.stream().map(product ->
                 AucsProductResponseDto.builder()
                         .name(product.getName())
-                        .createdTime(product.getCreatedTime())
                         .information(product.getInformation())
                         .summary(product.getSummary())
                         .brand(product.getBrand())
@@ -113,7 +127,6 @@ public class ProductServiceImpl implements ProductService{
         return products.stream().map(product ->
                 SaleProductResponseDto.builder()
                         .name(product.getName())
-                        .createdTime(product.getCreatedTime())
                         .information(product.getInformation())
                         .summary(product.getSummary())
                         .brand(product.getBrand())
@@ -132,7 +145,6 @@ public class ProductServiceImpl implements ProductService{
         return products.stream().map(product ->
                 SaleProductResponseDto.builder()
                         .name(product.getName())
-                        .createdTime(product.getCreatedTime())
                         .information(product.getInformation())
                         .summary(product.getSummary())
                         .brand(product.getBrand())
@@ -141,6 +153,11 @@ public class ProductServiceImpl implements ProductService{
         ).collect(Collectors.toList());
     }
 
+
+    //경매 코드 생성
+    public String generateBidsCode() {
+        return UUID.randomUUID().toString();
+    }
 
     @Override
     public void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal OAuth2User principal) {
@@ -156,6 +173,7 @@ public class ProductServiceImpl implements ProductService{
         //ProductsEntity를 먼저 저장을 한다.
         ProductsEntity product = ProductsEntity.builder()
                 .name(dto.getName())
+                .kind(dto.getKind())
                 .category(dto.getCategory())
                 .information(dto.getInformation())
                 .summary(dto.getSummary())
@@ -177,12 +195,13 @@ public class ProductServiceImpl implements ProductService{
 
         productsRepository.save(product);
 
-        //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장한다.
+        //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장
         if ("AUCS".equals(dto.getCategory())) {
+            String bidsCode = generateBidsCode(); // 고유한 bidsCode 생성
             AucsInfosEntity aucInfo = AucsInfosEntity.builder()
                     .startPrice(dto.getStartPrice())
                     .end(dto.getEnd())
-                    .bidsCode(dto.getBidsCode())
+                    .bidsCode(bidsCode)
                     .productsEntity(product)
                     .build();
 

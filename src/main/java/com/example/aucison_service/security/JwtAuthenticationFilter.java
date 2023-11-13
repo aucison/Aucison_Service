@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -31,8 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = jwtTokenProvider.resolveToken(request);
             logger.info("JwtAuthenticationFilter - Token: {}", token); // 토큰 로그 추가
             if (token != null && jwtTokenProvider.validateToken(token)) {
-                Authentication auth = jwtTokenProvider.getAuthentication(token);
-                logger.info("JwtAuthenticationFilter - Authentication successful, setting security context"); // 인증 성공 로그
+                OAuth2User oAuth2User = jwtTokenProvider.getOAuth2User(token);
+                Authentication auth = new UsernamePasswordAuthenticationToken(oAuth2User, token, oAuth2User.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (Exception e) {
