@@ -1,10 +1,7 @@
 package com.example.aucison_service.service.member;
 
 
-import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
-import com.example.aucison_service.dto.mypage.ResponseOrderDetailsDto;
-import com.example.aucison_service.dto.mypage.ResponseOrderHistoryDto;
-import com.example.aucison_service.dto.mypage.ResponseSellHistoryDto;
+import com.example.aucison_service.dto.mypage.*;
 
 import java.util.List;
 
@@ -15,6 +12,8 @@ public interface MypageService {
     ResponseOrderDetailsDto getOrderDetail(RequestOrderDetailsDto requestOrderDetailsDto) throws Exception;
     // 판매 내역 조회
     List<ResponseSellHistoryDto> getSellInfo(String email);
+    // 배송지 조회
+    List<ResponseAddressDto> getAddressInfo(String email);
     // 회원 정보 조회
     //MemberInfoDto getMemberDetails(Long membersId) throws Exception;
     // 회원 정보 수정
