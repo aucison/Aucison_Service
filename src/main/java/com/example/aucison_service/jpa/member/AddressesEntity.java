@@ -1,5 +1,6 @@
 package com.example.aucison_service.jpa.member;
 
+import com.example.aucison_service.dto.mypage.RequestUpdateAddressDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Entity
-@Table(name = "addresses")
+@Table(name = "addresses", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"addr_name", "members_info_id"}) // 회원별로 배송지명이 유니크하게
+})
 public class AddressesEntity { // 주소
 
     @Id
@@ -40,4 +43,14 @@ public class AddressesEntity { // 주소
     @ManyToOne
     @JoinColumn(name = "members_info_id") // 연관관계 주인
     private MembersInfoEntity membersInfoEntity; // 사용자 추가 정보
+
+    // 업데이트 메소드
+    public void update(RequestUpdateAddressDto updateAddressDto) {
+        if (updateAddressDto.getAddrName() != null) this.addrName = updateAddressDto.getAddrName();
+        if (updateAddressDto.getZipNum() != null) this.zipNum = updateAddressDto.getZipNum();
+        if (updateAddressDto.getAddr() != null) this.addr = updateAddressDto.getAddr();
+        if (updateAddressDto.getAddrDetail() != null) this.addrDetail = updateAddressDto.getAddrDetail();
+        if (updateAddressDto.getName() != null) this.name = updateAddressDto.getName();
+        if (updateAddressDto.getTel() != null) this.tel = updateAddressDto.getTel();
+    }
 }

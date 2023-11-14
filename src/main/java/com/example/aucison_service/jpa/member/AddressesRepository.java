@@ -9,4 +9,5 @@ import java.util.List;
 public interface AddressesRepository extends JpaRepository<AddressesEntity, Long> {
     AddressesEntity findByMembersInfoEntityAndAddrName(MembersInfoEntity membersInfoEntity, String addrName);
     List<AddressesEntity> findAllByMembersInfoEntity(MembersInfoEntity membersInfoEntity);
+    boolean existsByAddrNameAndMembersInfoEntity(String addrName, MembersInfoEntity membersInfo);
 }

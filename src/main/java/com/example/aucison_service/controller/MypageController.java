@@ -2,7 +2,9 @@ package com.example.aucison_service.controller;
 
 
 import com.example.aucison_service.dto.ApiResponse;
+import com.example.aucison_service.dto.mypage.RequestAddressDto;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
+import com.example.aucison_service.dto.mypage.RequestUpdateAddressDto;
 import com.example.aucison_service.service.member.MypageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,9 +45,40 @@ public class MypageController {
         return ApiResponse.createSuccess(mypageService.getSellInfo(email));
     }
 
-    @GetMapping("/address") // 회원 정보 조회
+    @GetMapping("/address") // 회원 정보 조회(배송지 조회)
     public ApiResponse<?> getAddressInfo(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         return ApiResponse.createSuccess(mypageService.getAddressInfo(email));
     }
+
+    // 배송지 등록
+    @PostMapping("/address")
+    public ApiResponse<?> addAddress(@AuthenticationPrincipal OAuth2User principal,
+                                     @RequestBody RequestAddressDto requestAddressDto) {
+        String email = principal.getAttribute("email");
+        mypageService.addAddress(email, requestAddressDto);
+        return ApiResponse.createSuccessWithNoData("배송지 등록 성공");
+    }
+
+    // 배송지 삭제
+    @DeleteMapping("/address")
+    public ApiResponse<?> deleteAddress(@AuthenticationPrincipal OAuth2User principal,
+                                        @RequestParam String addrName) {
+        String email = principal.getAttribute("email");
+        mypageService.deleteAddress(email, addrName);
+        return ApiResponse.createSuccessWithNoData("배송지 삭제 성공");
+    }
+
+    //배송지 수정
+    @PatchMapping("/address") // 배송지 수정
+    public ApiResponse<?> updateAddress(@AuthenticationPrincipal OAuth2User principal,
+                                        @RequestParam String addrName,
+                                        @RequestBody RequestUpdateAddressDto requestUpdateAddressDto) {
+        String email = principal.getAttribute("email");
+        mypageService.updateAddressByEmailAndAddrName(email, addrName, requestUpdateAddressDto);
+        return ApiResponse.createSuccessWithNoData("배송지 수정 성공");
+    }
+    // 택배 팝업
+    // 회원 정보 조회
+    // 회원 정보 수정
 }

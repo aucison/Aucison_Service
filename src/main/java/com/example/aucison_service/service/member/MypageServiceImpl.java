@@ -295,4 +295,58 @@ public class MypageServiceImpl implements MypageService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    //배송지 등록
+    @Override
+    public void addAddress(String email, RequestAddressDto requestAddressDto) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        // 동일한 배송지명이 있는지 검사
+        if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
+            throw new AppException(ErrorCode.ADDRESS_NAME_ALREADY_EXISTS); // 배송지명이 이미 존재하면 예외 발생
+        }
+
+        AddressesEntity address = AddressesEntity.builder()
+                .addrName(requestAddressDto.getAddrName())
+                .zipNum(requestAddressDto.getZipNum())
+                .addr(requestAddressDto.getAddr())
+                .addrDetail(requestAddressDto.getAddrDetail())
+                .name(requestAddressDto.getName())
+                .tel(requestAddressDto.getTel())
+                .membersInfoEntity(membersInfo)
+                .build();
+
+        addressesRepository.save(address);
+    }
+
+    @Override
+    public void deleteAddress(String email, String addrName) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+
+        addressesRepository.delete(address);
+    }
+
+    //배송지 수정
+    @Override
+    public void updateAddressByEmailAndAddrName(String email, String addrName, RequestUpdateAddressDto requestUpdateAddressDto) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+
+        // 엔티티의 update 메소드를 호출하여 주소 정보 업데이트
+        address.update(requestUpdateAddressDto);
+
+        addressesRepository.save(address);
+    }
 }

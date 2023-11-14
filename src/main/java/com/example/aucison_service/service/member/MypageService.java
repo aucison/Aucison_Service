@@ -14,6 +14,12 @@ public interface MypageService {
     List<ResponseSellHistoryDto> getSellInfo(String email);
     // 배송지 조회
     List<ResponseAddressDto> getAddressInfo(String email);
+    // 배송지 등록
+    void addAddress(String email, RequestAddressDto requestAddressDto);
+    // 배송지 삭제
+    void deleteAddress(String email, String addrName);
+    // 배송지 수정
+    void updateAddressByEmailAndAddrName(String email, String addrName, RequestUpdateAddressDto requestUpdateAddressDto);
     // 회원 정보 조회
     //MemberInfoDto getMemberDetails(Long membersId) throws Exception;
     // 회원 정보 수정
