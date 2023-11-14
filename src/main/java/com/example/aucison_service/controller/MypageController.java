@@ -78,7 +78,17 @@ public class MypageController {
         mypageService.updateAddressByEmailAndAddrName(email, addrName, requestUpdateAddressDto);
         return ApiResponse.createSuccessWithNoData("배송지 수정 성공");
     }
+
     // 택배 팝업
+
     // 회원 정보 조회
+    //credit 정보도 들어가야 할 것 같은데 피그마 상에서 빠져있음
+    @GetMapping("/profile") // 회원 정보 조회
+    public ApiResponse<?> getMemberProfile(@AuthenticationPrincipal OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        return ApiResponse.createSuccess(mypageService.getMemberProfile(email));
+    }
+
     // 회원 정보 수정
+    // TODO: s3 적용
 }
