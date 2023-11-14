@@ -91,7 +91,7 @@ public class ProductController {
     }
 
 
-    //상품 거맥
+    //상품 검색
     @GetMapping("/search")
     public ResponseEntity<ProductSearchResponseDto> searchProductByName(@RequestParam String name) {//쿼리 파라미터 방식(Query Parameter) -> 테스트 ?name=th
         try {
