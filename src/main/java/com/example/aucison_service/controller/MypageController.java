@@ -2,6 +2,7 @@ package com.example.aucison_service.controller;
 
 
 import com.example.aucison_service.dto.ApiResponse;
+import com.example.aucison_service.dto.mypage.RequestAddressDto;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
 import com.example.aucison_service.service.member.MypageService;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +44,23 @@ public class MypageController {
         return ApiResponse.createSuccess(mypageService.getSellInfo(email));
     }
 
-    @GetMapping("/address") // 회원 정보 조회
+    @GetMapping("/address") // 회원 정보 조회(배송지 조회)
     public ApiResponse<?> getAddressInfo(@AuthenticationPrincipal OAuth2User principal) {
         String email = principal.getAttribute("email");
         return ApiResponse.createSuccess(mypageService.getAddressInfo(email));
     }
+
+    // 배송지 등록
+    @PostMapping("/address") // 배송지 등록
+    public ApiResponse<?> addAddress(@AuthenticationPrincipal OAuth2User principal,
+                                     @RequestBody RequestAddressDto requestAddressDto) {
+        String email = principal.getAttribute("email");
+        mypageService.addAddress(email, requestAddressDto);
+        return ApiResponse.createSuccessWithNoData("배송지 등록 성공");
+    }
+    // 배송지 삭제
+    // 배송지 수정
+    // 택배 팝업
+    // 회원 정보 조회
+    // 회원 정보 수정
 }

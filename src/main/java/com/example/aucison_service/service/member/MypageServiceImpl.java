@@ -295,4 +295,26 @@ public class MypageServiceImpl implements MypageService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    //배송지 등록
+    @Override
+    public void addAddress(String email, RequestAddressDto requestAddressDto) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        AddressesEntity address = AddressesEntity.builder()
+                .addrName(requestAddressDto.getAddrName())
+                .zipNum(requestAddressDto.getZipNum())
+                .addr(requestAddressDto.getAddr())
+                .addrDetail(requestAddressDto.getAddrDetail())
+                .name(requestAddressDto.getName())
+                .tel(requestAddressDto.getTel())
+                .membersInfoEntity(membersInfo)
+                .build();
+
+        addressesRepository.save(address);
+    }
+
+    //배송지 수정
 }
