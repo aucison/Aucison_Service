@@ -76,6 +76,7 @@ public class MypageServiceImpl implements MypageService {
                                 .orElseThrow(() -> new AppException(ErrorCode.IMG_NOT_FOUND)); // 이미지 조회, 없으면 예외 발생
 
                         return ResponseOrderHistoryDto.builder()
+                                .historiesId(historiesEntity.getId())
                                 .productName(historiesEntity.getName())
                                 .productImgUrl(historiesImg.getUrl())
                                 .productDescription(historiesEntity.getInfo())
@@ -353,6 +354,7 @@ public class MypageServiceImpl implements MypageService {
         addressesRepository.save(address);
     }
 
+    //회원 정보 조회
     @Override
     public ResponseMemberProfileDto getMemberProfile(String email) {
         MembersEntity member = membersRepository.findByEmail(email)

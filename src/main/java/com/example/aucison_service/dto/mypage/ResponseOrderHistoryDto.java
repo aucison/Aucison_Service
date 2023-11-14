@@ -14,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class ResponseOrderHistoryDto {
+    private Long historiesId;
     private String productName; // 상품명
     private String productDescription; // 상품 한줄 설명
     private String productImgUrl; // 상품 이미지
