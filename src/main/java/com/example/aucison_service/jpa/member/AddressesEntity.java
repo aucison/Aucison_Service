@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Entity
-@Table(name = "addresses")
+@Table(name = "addresses", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"addr_name", "members_info_id"}) // 회원별로 배송지명이 유니크하게
+})
 public class AddressesEntity { // 주소
 
     @Id

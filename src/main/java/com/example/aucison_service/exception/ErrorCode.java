@@ -28,6 +28,7 @@ public enum ErrorCode {
     // Histories 관련 에러 코드들
     HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "주문/판매 내역을 찾을 수 없습니다."),
     HISTORY_IMG_NOT_FOUND(HttpStatus.NOT_FOUND, "주문/판매 내역 사진을 찾을 수 없습니다."),
+    ADDRESS_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "해당 배송지명은 이미 사용 중입니다."),
 
 
     // Deliveries 관련 에러 코드들

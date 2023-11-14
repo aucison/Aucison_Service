@@ -58,7 +58,16 @@ public class MypageController {
         mypageService.addAddress(email, requestAddressDto);
         return ApiResponse.createSuccessWithNoData("배송지 등록 성공");
     }
+
     // 배송지 삭제
+    @DeleteMapping("/address") // 배송지 삭제
+    public ApiResponse<?> deleteAddress(@AuthenticationPrincipal OAuth2User principal,
+                                        @RequestParam String addrName) {
+        String email = principal.getAttribute("email");
+        mypageService.deleteAddress(email, addrName);
+        return ApiResponse.createSuccessWithNoData("배송지 삭제 성공");
+    }
+
     // 배송지 수정
     // 택배 팝업
     // 회원 정보 조회

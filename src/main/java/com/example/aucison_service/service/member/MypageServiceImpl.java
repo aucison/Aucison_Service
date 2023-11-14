@@ -303,6 +303,12 @@ public class MypageServiceImpl implements MypageService {
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
         MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        // 동일한 배송지명이 있는지 검사
+        if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
+            throw new AppException(ErrorCode.ADDRESS_NAME_ALREADY_EXISTS); // 배송지명이 이미 존재하면 예외 발생
+        }
+
         AddressesEntity address = AddressesEntity.builder()
                 .addrName(requestAddressDto.getAddrName())
                 .zipNum(requestAddressDto.getZipNum())
@@ -314,6 +320,18 @@ public class MypageServiceImpl implements MypageService {
                 .build();
 
         addressesRepository.save(address);
+    }
+
+    @Override
+    public void deleteAddress(String email, String addrName) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+
+        addressesRepository.delete(address);
     }
 
     //배송지 수정
