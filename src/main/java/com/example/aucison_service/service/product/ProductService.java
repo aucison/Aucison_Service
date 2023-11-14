@@ -20,10 +20,10 @@ public interface ProductService {
 
     void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal OAuth2User principal);
 
-    //ProductSearchResponseDto searchProductByName(String name, String email);
+    ProductSearchResponseDto searchProductByName(String name);
 
     //상품 상세 정보 조회하기
-    //ProductDetailResponseDto getProductDetail(String product_code);
+    ProductDetailResponseDto getProductDetail(Long productsId);
 
 
 

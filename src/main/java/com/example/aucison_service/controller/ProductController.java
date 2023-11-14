@@ -5,7 +5,10 @@ package com.example.aucison_service.controller;
 import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
+import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
+import com.example.aucison_service.dto.search.ProductSearchRequestDto;
+import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.service.product.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,4 +90,40 @@ public class ProductController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+
+    //상품 검색
+    @GetMapping("/search")
+    public ResponseEntity<ProductSearchResponseDto> searchProductByName(@RequestParam String name) {//쿼리 파라미터 방식(Query Parameter) -> 테스트 ?name=th
+        try {
+            // 서비스 계층을 통한 상품 검색 로직 수행
+            ProductSearchResponseDto response = productService.searchProductByName(name);
+
+            if (response == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            // 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    // 상품 상세 정보 조회
+    @GetMapping("/detail/{productId}")
+    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId) {    //경로변수 방식(Path Variable) -> 테스트 /123
+        try {
+            ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
+
+            if (productDetail == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            return new ResponseEntity<>(productDetail, HttpStatus.OK);
+        } catch (Exception e) {
+            // 예외 처리, 예를 들어 로깅이나 에러 메시지 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
