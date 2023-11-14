@@ -88,5 +88,7 @@ public class MypageController {
         String email = principal.getAttribute("email");
         return ApiResponse.createSuccess(mypageService.getMemberProfile(email));
     }
+
     // 회원 정보 수정
+    // TODO: s3 적용
 }
