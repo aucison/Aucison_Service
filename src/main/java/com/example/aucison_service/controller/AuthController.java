@@ -1,5 +1,6 @@
 package com.example.aucison_service.controller;
 
+import com.example.aucison_service.dto.auth.AuthResponseDto;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
@@ -91,9 +92,9 @@ public class AuthController {
             // JWT 토큰 값을 로그로 출력
             logger.info("Generated JWT Token: {}", jwt);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + jwt);
-            return new ResponseEntity<>(member, headers, HttpStatus.OK);
+            AuthResponseDto responseDto = new AuthResponseDto(member, jwt);
+
+            return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             logger.error("Error during Google callback handling", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
