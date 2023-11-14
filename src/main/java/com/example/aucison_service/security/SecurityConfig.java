@@ -16,8 +16,12 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 
 import java.util.Arrays;
@@ -47,10 +51,23 @@ public class SecurityConfig {
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtTokenProvider);
     }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화
+                .addFilterBefore(corsFilter(), ChannelProcessingFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .clientRegistrationRepository(clientRegistrationRepository())
                         .authorizedClientService(authorizedClientService())
@@ -58,7 +75,8 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(jwtAuthenticationProvider)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/need/auth/**")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/product/register")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/login/google", "/api/auth/google/callback")).permitAll() // 구글 로그인 관련 경로 허용
                         .anyRequest().permitAll()
                 );
         return http.build();
