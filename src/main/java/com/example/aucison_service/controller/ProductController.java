@@ -6,6 +6,8 @@ import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
+import com.example.aucison_service.dto.search.ProductSearchRequestDto;
+import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.service.product.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,4 +89,22 @@ public class ProductController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+
+    //상품 거맥
+    @GetMapping("/search")
+    public ResponseEntity<ProductSearchResponseDto> searchProductByName(@RequestParam String name) {
+        try {
+            // 서비스 계층을 통한 상품 검색 로직 수행
+            ProductSearchResponseDto response = productService.searchProductByName(name, null);
+
+            if (response == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            // 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
