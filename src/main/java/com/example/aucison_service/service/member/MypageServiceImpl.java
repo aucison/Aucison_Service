@@ -33,13 +33,15 @@ public class MypageServiceImpl implements MypageService {
     private final BidsRepository bidsRepository;
     private final ProductsRepository productsRepository;
     private final AddressesRepository addressesRepository;
+    private final MembersImgRepository membersImgRepository;
 
     @Autowired
     public MypageServiceImpl(HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
                              MembersInfoRepository membersInfoRepository, MembersRepository membersRepository,
                              OrdersRepository ordersRepository, AuctionEndDatesRepository auctionEndDatesRepository,
                              DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
-                             ProductsRepository productsRepository, AddressesRepository addressesRepository) {
+                             ProductsRepository productsRepository, AddressesRepository addressesRepository,
+                             MembersImgRepository membersImgRepository) {
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
         this.membersInfoRepository = membersInfoRepository;
@@ -50,6 +52,7 @@ public class MypageServiceImpl implements MypageService {
         this.bidsRepository = bidsRepository;
         this.productsRepository = productsRepository;
         this.addressesRepository = addressesRepository;
+        this.membersImgRepository = membersImgRepository;
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
@@ -349,4 +352,23 @@ public class MypageServiceImpl implements MypageService {
 
         addressesRepository.save(address);
     }
+
+    @Override
+    public ResponseMemberProfileDto getMemberProfile(String email) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        MembersImgEntity membersImg = membersImgRepository.findByMembersInfoEntity(membersInfo);
+
+        return ResponseMemberProfileDto.builder()
+                .profileUrl(membersImg.getUrl())
+                .nickname(member.getNickname())
+                .email(membersInfo.getSubEmail())
+                .phone(membersInfo.getPhone())
+                .build();
+    }
+
+
 }

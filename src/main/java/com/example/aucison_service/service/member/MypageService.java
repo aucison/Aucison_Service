@@ -21,7 +21,7 @@ public interface MypageService {
     // 배송지 수정
     void updateAddressByEmailAndAddrName(String email, String addrName, RequestUpdateAddressDto requestUpdateAddressDto);
     // 회원 정보 조회
-    //MemberInfoDto getMemberDetails(Long membersId) throws Exception;
+    ResponseMemberProfileDto getMemberProfile(String email);
     // 회원 정보 수정
     //void patchMemberDetails(RequestMembersInfoDto requestMembersInfoDto);
 }
