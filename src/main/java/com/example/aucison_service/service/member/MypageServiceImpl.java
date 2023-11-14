@@ -335,4 +335,18 @@ public class MypageServiceImpl implements MypageService {
     }
 
     //배송지 수정
+    @Override
+    public void updateAddressByEmailAndAddrName(String email, String addrName, RequestUpdateAddressDto requestUpdateAddressDto) {
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+
+        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+
+        // 엔티티의 update 메소드를 호출하여 주소 정보 업데이트
+        address.update(requestUpdateAddressDto);
+
+        addressesRepository.save(address);
+    }
 }

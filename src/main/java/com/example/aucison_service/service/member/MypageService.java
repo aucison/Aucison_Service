@@ -19,6 +19,7 @@ public interface MypageService {
     // 배송지 삭제
     void deleteAddress(String email, String addrName);
     // 배송지 수정
+    void updateAddressByEmailAndAddrName(String email, String addrName, RequestUpdateAddressDto requestUpdateAddressDto);
     // 회원 정보 조회
     //MemberInfoDto getMemberDetails(Long membersId) throws Exception;
     // 회원 정보 수정
