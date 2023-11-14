@@ -9,9 +9,9 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
     //List<ProductsEntity> findByCategory(String auc);    //이게 맞나?? 잘 모르겠음
 
-//    ProductsEntity findByName(String name);
-//
     List<ProductsEntity> findByCategoryAndKind(String category, String kind);
 
     ProductsEntity findByName(String name);
+
+    ProductsEntity findByProductsId(Long productsId);
 }

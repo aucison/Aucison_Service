@@ -20,7 +20,7 @@ public class ProductDetailResponseDto {
     private String name;
     private String kind;
     private String category;
-    private LocalDateTime createdTime;
+//    private LocalDateTime createdTime;
     private String information;
     private String summary;
     private String brand;
@@ -30,7 +30,7 @@ public class ProductDetailResponseDto {
     // 경매상품 정보
     private float startPrice;
     private Date end;
-    private String bidsCode;
+    private float high;
 
     // 비경매상품 정보
     private float price;

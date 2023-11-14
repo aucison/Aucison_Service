@@ -5,6 +5,7 @@ package com.example.aucison_service.service.product;
 import com.example.aucison_service.controller.AuthController;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
+import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.exception.AppException;
@@ -221,7 +222,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductSearchResponseDto searchProductByName(String name, String email) {
+    public ProductSearchResponseDto searchProductByName(String name) {
         //상품 검색 결과 반환
         //현재 기술적 한개로 검색시 정확히 일치하는 단 한개만을 보여줄 수 있음
 
@@ -263,45 +264,41 @@ public class ProductServiceImpl implements ProductService{
 
     }
 
-//    @Override
-//    public ProductDetailResponseDto getProductDetail(String product_code) {
-//
-//        //단일 상품에 대한 상품의 상세 정보를 제공
-//
-//        //추후 posts, comments도 여기서 제공하게 할 수도 있음
-//
-//        //수정해야함
-//        //ProductsEntity product = productsRepository.findByProductsCode(product_code);
-//
-//        if (product == null) {
-//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-//        }
-//
-//        ProductDetailResponseDto.ProductDetailResponseDtoBuilder builder = ProductDetailResponseDto.builder()
-//                .name(product.getName())
-//                .category(product.getCategory())
-//                .createdTime(product.getCreatedTime())
-//                .information(product.getInformation())
-//                .summary(product.getSummary())
-//                .brand(product.getBrand());
-//
-//        // 경매 상품 추가정보
-//        if ("auc".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
-//            builder.startPrice(product.getAucsInfosEntity().getStartPrice())
-//                    .end(product.getAucsInfosEntity().getEnd())
-//                    .bidsCode(product.getAucsInfosEntity().getBidsCode());
-//        }
-//
-//        // 비경매 상품 추가정보
-//        if ("nor".equals(product.getCategory()) && product.getSaleInfosEntity() != null) {
-//            builder.price(product.getSaleInfosEntity().getPrice());
-//        }
-//
-//        return builder.build();
-//
-//
-//        //게시판 정보들은 따로 보내준다
-//
-//    }
+    @Override
+    public ProductDetailResponseDto getProductDetail(Long productsId) {
+
+
+        ProductsEntity product = productsRepository.findByProductsId(productsId);
+
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        ProductDetailResponseDto.ProductDetailResponseDtoBuilder builder = ProductDetailResponseDto.builder()
+                .name(product.getName())
+                .kind(product.getKind())
+                .category(product.getCategory())
+                .information(product.getInformation())
+                .summary(product.getSummary())
+                .brand(product.getBrand());
+
+        // 경매 상품 추가정보
+        if ("AUCS".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
+            builder.startPrice(product.getAucsInfosEntity().getStartPrice())
+                    .end(product.getAucsInfosEntity().getEnd())
+                    .high(product.getAucsInfosEntity().getStartPrice());
+        }
+
+        // 비경매 상품 추가정보
+        if ("SALE".equals(product.getCategory()) && product.getSaleInfosEntity() != null) {
+            builder.price(product.getSaleInfosEntity().getPrice());
+        }
+
+        return builder.build();
+
+
+        //게시판 정보들은 따로 보내준다
+
+    }
 
 }
