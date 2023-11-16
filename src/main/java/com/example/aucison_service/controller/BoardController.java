@@ -6,6 +6,9 @@ import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.board.*;
 import com.example.aucison_service.service.product.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,30 +36,36 @@ public class BoardController {
 
      */
 
-    //위를 변경
+    //해당 상품의 게시물 및 댓글 조회
     @GetMapping("/detail/{products_id}/board")
-    public ApiResponse<List<PostListResponseDto>> getBoardByProductId(@PathVariable Long products_id){
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<List<PostListResponseDto>> getBoardByProductId(@PathVariable Long products_id,
+                                                                      @AuthenticationPrincipal OAuth2User principal){
 
-        return ApiResponse.createSuccess(boardService.getBoardByProductId(products_id));
+        return ApiResponse.createSuccess(boardService.getBoardByProductId(products_id, principal));
     }
 
 
     // 상품 개별 조회에서 게시물 작성
     // post도 마치 get처럼 짠다 이방식은
     @PostMapping("/detail/{products_id}/board")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<PostCRUDResponseDto> createPost(@PathVariable("products_id") Long productId,
-                                                       @RequestBody PostRegistRequestDto postRegistRequestDto) {
+                                                       @RequestBody PostRegistRequestDto postRegistRequestDto,
+                                                       @AuthenticationPrincipal OAuth2User principal) {
 
-        return ApiResponse.createSuccess(boardService.registPost(productId, postRegistRequestDto));
+        return ApiResponse.createSuccess(boardService.registPost(productId, postRegistRequestDto, principal));
     }
 
     // 상품 개별 조회에서 게시물에 댓글 작성
     @PostMapping("/detail/{products_id}/board/{posts_id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> createComment(@PathVariable("products_id") Long productId,
                                         @PathVariable("posts_id") Long postId,
-                                        @RequestBody CommentRegistRequestDto commentRegistRequestDto) {
+                                        @RequestBody CommentRegistRequestDto commentRegistRequestDto,
+                                        @AuthenticationPrincipal OAuth2User principal) {
 
-        return ApiResponse.createSuccess(boardService.registComment(postId, commentRegistRequestDto));
+        return ApiResponse.createSuccess(boardService.registComment(postId, commentRegistRequestDto, principal));
     }
 
     @PutMapping("/detail/{products_id}/board/{posts_id}")

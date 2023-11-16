@@ -23,8 +23,6 @@ public class CommentsEntity extends BaseTimeEntity {
     @Column(name = "content", nullable = false)
     private String content;             //답변
 
-    @Column(name = "createdTime", nullable = false)
-    private LocalDateTime createdTime;            //댓글 등록시간
 
     @Column(name = "email", nullable = false)
     private String email;        //답변 작성자 식별 코드
@@ -44,9 +42,8 @@ public class CommentsEntity extends BaseTimeEntity {
 
 
     @Builder
-    public CommentsEntity(String content, LocalDateTime createdTime, String email, PostsEntity postsEntity){
+    public CommentsEntity(String content, String email, PostsEntity postsEntity){
         this.content = content;
-        this.createdTime = createdTime;
         this.email = email;
         this.postsEntity = postsEntity;
     }

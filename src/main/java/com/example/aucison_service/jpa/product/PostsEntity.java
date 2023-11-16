@@ -28,9 +28,6 @@ public class PostsEntity extends BaseTimeEntity {
     @Column(name = "content", nullable = false)
     private String content;             //내용
 
-    @Column(name = "createdTime", nullable = false)
-    private LocalDateTime createdTime;          //등록시간
-
     @Column(name = "email", nullable = false)
     private String email;        //게시글 등록자
 
@@ -50,10 +47,9 @@ public class PostsEntity extends BaseTimeEntity {
 
 
     @Builder
-    public PostsEntity(String title, String content, LocalDateTime createdTime, String email, ProductsEntity productsEntity){
+    public PostsEntity(String title, String content,  String email, ProductsEntity productsEntity){
         this.title = title;
         this.content = content;
-        this.createdTime = createdTime;
         this.email = email;
         this.productsEntity = productsEntity;
     }

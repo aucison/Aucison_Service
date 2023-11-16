@@ -13,7 +13,7 @@ public class PostRegistRequestDto {
 
     private String title;               // 제목
     private String content;             //내용
-    private LocalDateTime createdTime;          //등록시간
+
 
     //게시글 등록자 누군지 알아야 함
     private String email;
