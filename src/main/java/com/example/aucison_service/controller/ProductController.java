@@ -82,10 +82,6 @@ public class ProductController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> registerProduct(@RequestBody ProductRegisterRequestDto dto,
                                              @AuthenticationPrincipal OAuth2User principal) {
-//        if (principal == null) {
-//            logger.error("Authentication failed: principal is null");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
-//        }
         productService.registerProduct(dto, principal);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

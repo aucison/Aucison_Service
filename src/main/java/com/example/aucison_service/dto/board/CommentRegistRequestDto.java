@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentRegistRequestDto {
     private String content;             //답변
-    private LocalDateTime createdTime;            //댓글 등록시간
 
     //게시글 등록자 누군지 알아야 함
     private String email;
