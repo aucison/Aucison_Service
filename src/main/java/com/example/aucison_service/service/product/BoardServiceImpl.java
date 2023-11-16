@@ -1,11 +1,15 @@
 package com.example.aucison_service.service.product;
 
 
+import com.example.aucison_service.controller.AuthController;
 import com.example.aucison_service.dto.board.*;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.product.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class BoardServiceImpl implements BoardService{
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     PostsRepository postsRepository;
     CommentsRepository commentsRepository;
 
@@ -69,9 +74,14 @@ public class BoardServiceImpl implements BoardService{
 
 
     @Override
-    public List<PostListResponseDto> getBoardByProductId(Long productId, OAuth2User principal){
+    public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal OAuth2User principal){
 
         String userEmail = principal.getAttribute("email");
+
+        if (principal == null) {
+            logger.info("인증되지 않은 사용자입니다!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
 
         List<PostsEntity> postsEntities = postsRepository.findByProductsEntity_ProductsId(productId);
 
@@ -105,7 +115,7 @@ public class BoardServiceImpl implements BoardService{
     //최대한 간결하고 직관성있고 통일성있게...
     @Transactional
     @Override
-    public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto, OAuth2User principal){
+    public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto,@AuthenticationPrincipal OAuth2User principal){
         ProductsEntity product = productsRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -117,6 +127,10 @@ public class BoardServiceImpl implements BoardService{
         }
 
         String email = principal.getAttribute("email");
+        if (principal == null) {
+            logger.info("인증되지 않은 사용자입니다!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
 
 
         PostsEntity post = PostsEntity.builder()
@@ -142,7 +156,7 @@ public class BoardServiceImpl implements BoardService{
 
     @Transactional
     @Override
-    public CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto, OAuth2User principal){
+    public CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto, @AuthenticationPrincipal OAuth2User principal){
 
         PostsEntity postEntity = postsRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
@@ -153,6 +167,11 @@ public class BoardServiceImpl implements BoardService{
         }
 
         String email = principal.getAttribute("email");
+
+        if (principal == null) {
+            logger.info("인증되지 않은 사용자입니다!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
 
         CommentsEntity comment = CommentsEntity.builder()
                 .content(dto.getContent())

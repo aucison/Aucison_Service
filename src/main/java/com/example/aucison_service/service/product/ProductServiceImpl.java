@@ -167,7 +167,7 @@ public class ProductServiceImpl implements ProductService{
         //상품 등록 서비스 로직
 
         if (principal == null) {
-            logger.info("에러 발생함!");
+            logger.info("인증되지 않은 사용자입니다!");
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
