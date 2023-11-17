@@ -1,5 +1,7 @@
 package com.example.aucison_service.service.s3;
 
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -21,14 +23,19 @@ public class S3Service {
     private String bucketName;
 
     //파일 업로드 메소드
-    public void uploadFileToS3Bucket(MultipartFile file, String folderName) throws IOException {
-        String fileName = folderName + "/" + file.getOriginalFilename();
-        s3Client.putObject(PutObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(fileName)
-                        .build(),
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+    public void uploadFileToS3Bucket(MultipartFile file, String folderName) {
+        try {
+            String fileName = folderName + "/" + file.getOriginalFilename();
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileName)
+                            .build(),
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.IMAGE_PROCESSING_FAIL);
+        }
     }
+
 
     // 파일 삭제 메소드
     public void deleteFileFromS3Bucket(String fileName, String folderName) {
