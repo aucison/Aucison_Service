@@ -59,6 +59,21 @@ public class GoogleAuthService {
         this.membersRepository = membersRepository;
     }
 
+
+    public String determineRedirectUrl(HttpServletRequest request) {
+        // 클라이언트의 도메인을 확인하여 적절한 리디렉션 URL 결정
+        String clientDomain = request.getHeader("Referer");
+        if (clientDomain != null) {
+            if (clientDomain.startsWith("https://localhost:3000")) {
+                return "https://localhost:3000/home";
+            } else if (clientDomain.startsWith("https://aucison.shop")) {
+                return "https://aucison.shop:443/home";
+            }
+        }
+        // 기본 리디렉션 주소
+        return "https://defaultdomain.com/home";
+    }
+
     @Transactional
     public String createGoogleAuthorizationURL() {
 
