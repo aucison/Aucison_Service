@@ -4,6 +4,7 @@ import com.example.aucison_service.dto.auth.AuthResponseDto;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.net.URI;
 
 
@@ -38,13 +40,12 @@ public class AuthController {
 
     // Google 로그인 페이지로 리디렉션
     @GetMapping("/login/google")
-    public ResponseEntity<?> redirectToGoogle() {
+    public void redirectToGoogle(HttpServletResponse response) throws IOException {
         logger.info("000");
         String url = googleAuthService.createGoogleAuthorizationURL();   //OAuth 2.0 인증을 위한 URL을 생성
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(url));   //HTTP 헤더에 Location을 설정하여 생성된 URL로 리디렉션하도록 지시
+        response.sendRedirect(url);
         logger.info("111");
-        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER); // 클라이언트에게 GET 방식으로 다른 URI로 리디렉션하라는 명령을 내림
+
     }
 
     //임시 동기 변경
@@ -74,7 +75,7 @@ public class AuthController {
 //                        })
 //                );
 //    }
-
+    @CrossOrigin(origins = "https://localhost:3000")
     @GetMapping("/google/callback")
     public ResponseEntity<?> handleGoogleCallback(@RequestParam(name = "code") String code) {
         try {
