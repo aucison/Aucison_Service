@@ -4,6 +4,7 @@ import com.example.aucison_service.dto.auth.AuthResponseDto;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +78,7 @@ public class AuthController {
 //    }
     @CrossOrigin(origins = "https://localhost:3000")
     @GetMapping("/google/callback")
-    public ResponseEntity<?> handleGoogleCallback(@RequestParam(name = "code") String code) {
+    public ResponseEntity<?> handleGoogleCallback(@RequestParam(name = "code") String code, HttpServletResponse response) {
         try {
             OAuth2AuthenticationToken token = googleAuthService.exchangeCodeForToken(code);
             if (token == null) {
@@ -93,9 +94,19 @@ public class AuthController {
             // JWT 토큰 값을 로그로 출력
             logger.info("Generated JWT Token: {}", jwt);
 
-            AuthResponseDto responseDto = new AuthResponseDto(member, jwt);
+            // JWT 토큰을 쿠키에 설정
+            Cookie jwtCookie = new Cookie("auth_token", jwt);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setSecure(true); // HTTPS 환경에서만 사용
+            jwtCookie.setPath("/"); // 쿠키가 전송될 경로 설정
+            response.addCookie(jwtCookie);
 
-            return ResponseEntity.ok(responseDto);
+            //AuthResponseDto responseDto = new AuthResponseDto(member, null);
+
+            //return ResponseEntity.ok(responseDto);
+
+            // 로그인 성공 메시지 반환
+            return ResponseEntity.ok("Login successful");
         } catch (Exception e) {
             logger.error("Error during Google callback handling", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
