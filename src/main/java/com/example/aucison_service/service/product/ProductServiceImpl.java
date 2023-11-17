@@ -13,6 +13,7 @@ import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
+import com.example.aucison_service.service.s3.S3Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
@@ -22,7 +23,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +39,7 @@ public class ProductServiceImpl implements ProductService{
     AucsInfosRepository aucs_infosRepository;
     MembersRepository membersRepository;
     WishesRepository wishesRepository;
+    S3Service s3Service;
 
 
 
@@ -43,12 +47,13 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
-                              WishesRepository wishesRepository){
+                              WishesRepository wishesRepository, S3Service s3Service){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
         this.membersRepository=membersRepository;
         this.wishesRepository=wishesRepository;
+        this.s3Service=s3Service;
     }
 
 
@@ -186,6 +191,15 @@ public class ProductServiceImpl implements ProductService{
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
 
         //이미지 저장 -> 수정해야함
+        // 이미지 업로드
+        List<MultipartFile> images = dto.getImages();
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    s3Service.uploadFileToS3Bucket(file, "product");
+                }
+            }
+        }
 //        if(dto.getImages() != null && dto.getImages().size() <= 10) { // 이미지가 10개 이하인지 확인
 //            for(MultipartFile image : dto.getImages()) {
 //                String imageUrl = s3Utils.uploadFiles(image, "product-images"); // S3에 이미지 업로드 후 URL 반환

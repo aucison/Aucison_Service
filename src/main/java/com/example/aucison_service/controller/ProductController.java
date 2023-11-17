@@ -80,7 +80,7 @@ public class ProductController {
     //상품등록
     @PostMapping("/product/register")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> registerProduct(@RequestBody ProductRegisterRequestDto dto,
+    public ResponseEntity<?> registerProduct(@ModelAttribute ProductRegisterRequestDto dto,
                                              @AuthenticationPrincipal OAuth2User principal) {
         productService.registerProduct(dto, principal);
         return new ResponseEntity<>(HttpStatus.CREATED);
