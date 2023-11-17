@@ -5,6 +5,7 @@ import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,16 +79,15 @@ public class AuthController {
 //    }
     @CrossOrigin(origins = "https://localhost:3000")
     @GetMapping("/google/callback")
-    public ResponseEntity<?> handleGoogleCallback(@RequestParam(name = "code") String code, HttpServletResponse response) {
+    public void handleGoogleCallback(@RequestParam(name = "code") String code, HttpServletResponse response, HttpServletRequest request) throws IOException {
         try {
             OAuth2AuthenticationToken token = googleAuthService.exchangeCodeForToken(code);
             if (token == null) {
-                logger.error("OAuth2AuthenticationToken is null after exchange");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error in token exchange");
+                response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error in token exchange");
+                return;
             }
 
             MembersEntity member = googleAuthService.registerOrLoginUser(token);
-
             String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
             logger.info("Login successful for user: {}", member.getEmail());
 
@@ -105,11 +105,14 @@ public class AuthController {
 
             //return ResponseEntity.ok(responseDto);
 
-            // 로그인 성공 메시지 반환
-            return ResponseEntity.ok("Login successful");
+
+            // 클라이언트의 도메인에 따라 리디렉션 주소 결정
+            String redirectUrl = googleAuthService.determineRedirectUrl(request);
+            response.sendRedirect(redirectUrl);
+
         } catch (Exception e) {
             logger.error("Error during Google callback handling", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
         }
     }
 
