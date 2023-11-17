@@ -42,7 +42,13 @@ public class AuthController {
 
     // Google 로그인 페이지로 리디렉션
     @GetMapping("/login/google")
-    public void redirectToGoogle(HttpServletResponse response) throws IOException {
+    public void redirectToGoogle(@RequestParam(name = "client_domain", required = false) String clientDomain, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (clientDomain != null) {
+            request.getSession().setAttribute("client_domain", clientDomain);
+            logger.info("Received client domain: {}", clientDomain); // 로그 추가
+        } else {
+            logger.info("No client domain received");
+        }
         logger.info("000");
         String url = googleAuthService.createGoogleAuthorizationURL();   //OAuth 2.0 인증을 위한 URL을 생성
         response.sendRedirect(url);
@@ -77,17 +83,19 @@ public class AuthController {
 //                        })
 //                );
 //    }
-    @CrossOrigin(origins = "https://localhost:3000")
+
     @GetMapping("/google/callback")
-    public void handleGoogleCallback(@RequestParam(name = "code") String code, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    public void handleGoogleCallback(@RequestParam(name = "code") String code, HttpServletRequest request, HttpServletResponse response) {
         try {
             OAuth2AuthenticationToken token = googleAuthService.exchangeCodeForToken(code);
             if (token == null) {
+                logger.error("OAuth2AuthenticationToken is null after exchange");
                 response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error in token exchange");
                 return;
             }
 
             MembersEntity member = googleAuthService.registerOrLoginUser(token);
+
             String jwt = tokenProvider.createToken(member.getEmail(), member.getRole());
             logger.info("Login successful for user: {}", member.getEmail());
 
@@ -105,17 +113,30 @@ public class AuthController {
 
             //return ResponseEntity.ok(responseDto);
 
-
-            // 클라이언트의 도메인에 따라 리디렉션 주소 결정
-            String redirectUrl = googleAuthService.determineRedirectUrl(request);
+            // 여기에서 리디렉션을 처리
+            String clientDomain = (String) request.getSession().getAttribute("client_domain");
+            String redirectUrl = determineRedirectUrl(clientDomain);
+            logger.info("Redirecting to URL: {}", redirectUrl);
             response.sendRedirect(redirectUrl);
 
+//            // 로그인 성공 메시지 반환
+//            return ResponseEntity.ok("Login successful");
         } catch (Exception e) {
             logger.error("Error during Google callback handling", e);
-            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            //return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
+    private String determineRedirectUrl(String clientDomain) {
+        if ("https://localhost:3000".equals(clientDomain)) {
+            return "https://localhost:3000/home";
+        } else if ("https://aucison.shop:443".equals(clientDomain)) {
+            return "https://aucison.shop:443/home";
+        } else {
+            return "https://aucison.shop:443/home";
+        }
+    }
 //
 //    // 구글 로그아웃을 처리하는 엔드포인트
 //    @PostMapping("/google/logout")
