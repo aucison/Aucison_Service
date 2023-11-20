@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Service
 public class S3Service {
@@ -21,6 +22,8 @@ public class S3Service {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
+    @Value("${cloud.aws.region.static}")
+    private String region;
 
     //파일 업로드 메소드
     public void uploadFileToS3Bucket(MultipartFile file, String folderName) {
@@ -46,6 +49,19 @@ public class S3Service {
                 .build());
     }
 
-
+    // 파일 업로드하고 URL 반환 메소드
+    public String uploadFileAndGetUrl(MultipartFile file, String folderName) {
+        try {
+            String fileName = folderName + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileName)
+                            .build(),
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.IMAGE_PROCESSING_FAIL);
+        }
+    }
 }
 

@@ -190,25 +190,21 @@ public class ProductServiceImpl implements ProductService{
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
 
-        //이미지 저장 -> 수정해야함
-        // 이미지 업로드
+        // 이미지 저장
         List<MultipartFile> images = dto.getImages();
-        if (images != null && !images.isEmpty()) {
+        if (images != null && !images.isEmpty() && images.size() <= 10) {
             for (MultipartFile file : images) {
                 if (!file.isEmpty()) {
-                    s3Service.uploadFileToS3Bucket(file, "product");
+                    String imageUrl = s3Service.uploadFileAndGetUrl(file, "product");
+                    ProductImgEntity productImg = ProductImgEntity.builder()
+                            .url(imageUrl)
+                            .product(product)
+                            .build();
+                    product.addImage(productImg); // 상품 엔티티에 이미지 추가
                 }
             }
         }
-//        if(dto.getImages() != null && dto.getImages().size() <= 10) { // 이미지가 10개 이하인지 확인
-//            for(MultipartFile image : dto.getImages()) {
-//                String imageUrl = s3Utils.uploadFiles(image, "product-images"); // S3에 이미지 업로드 후 URL 반환
-//                ProductImgEntity imageEntity = ProductImgEntity.builder()
-//                        .url(imageUrl)
-//                        .build();
-//                product.addImage(imageEntity);
-//            }
-//        }
+
         productsRepository.save(product);
 
 
