@@ -26,7 +26,7 @@ public class ProductSearchResponseDto {
 
     // 경매상품 정보
     //private float startPrice;
-    private Date end;   //end의 경우 사용자나 시스템 로직에 의해 명시적으로 설정해야 하므로 Date형
+    private LocalDateTime end;   //end의 경우 사용자나 시스템 로직에 의해 명시적으로 설정해야 하므로 Date형
     private float high;  //최고가 -> 현재 수정한 부분
 
     // 비경매상품 정보

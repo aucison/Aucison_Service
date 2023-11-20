@@ -89,6 +89,11 @@ public class ProductServiceImpl implements ProductService{
                 })
                 .map(product -> {
                     AucsInfosEntity aucsInfo = product.getAucsInfosEntity();
+
+                    List<String> imageUrls = product.getImages().stream()
+                            .map(ProductImgEntity::getUrl)
+                            .collect(Collectors.toList());
+
                     return AucsProductResponseDto.builder()
                             .name(product.getName())
                             .information(product.getInformation())
@@ -97,6 +102,7 @@ public class ProductServiceImpl implements ProductService{
                             .startPrice(aucsInfo.getStartPrice())
                             .end(aucsInfo.getEnd())
                             .bidsCode(aucsInfo.getBidsCode())
+                            .imageUrls(imageUrls) // 이미지 URL 목록 추가
                             .build();
                 })
                 .collect(Collectors.toList());
