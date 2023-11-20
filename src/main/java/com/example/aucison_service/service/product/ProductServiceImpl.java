@@ -116,17 +116,26 @@ public class ProductServiceImpl implements ProductService{
             logger.info("RODUCT_NOT_EXIST: 2");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
-        return products.stream().map(product ->
-                AucsProductResponseDto.builder()
-                        .name(product.getName())
-                        .information(product.getInformation())
-                        .summary(product.getSummary())
-                        .brand(product.getBrand())
-                        .startPrice(product.getAucsInfosEntity().getStartPrice())
-                        .end(product.getAucsInfosEntity().getEnd())
-                        .bidsCode(product.getAucsInfosEntity().getBidsCode())
-                        .build()
-        ).collect(Collectors.toList());
+
+        return products.stream().map(product -> {
+            AucsInfosEntity aucsInfo = product.getAucsInfosEntity();
+
+            // 이미지 URL 목록 추출
+            List<String> imageUrls = product.getImages().stream()
+                    .map(ProductImgEntity::getUrl)
+                    .collect(Collectors.toList());
+
+            return AucsProductResponseDto.builder()
+                    .name(product.getName())
+                    .information(product.getInformation())
+                    .summary(product.getSummary())
+                    .brand(product.getBrand())
+                    .startPrice(aucsInfo.getStartPrice())
+                    .end(aucsInfo.getEnd())
+                    .bidsCode(aucsInfo.getBidsCode())
+                    .imageUrls(imageUrls) // 이미지 URL 목록 추가
+                    .build();
+        }).collect(Collectors.toList());
     }
 
 
