@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -89,6 +90,13 @@ public class ProductServiceImpl implements ProductService{
                 })
                 .map(product -> {
                     AucsInfosEntity aucsInfo = product.getAucsInfosEntity();
+
+                    // 첫 번째 이미지 URL 추출 (이미지가 없는 경우 null이 될 수 있음)
+                    String firstImageUrl = product.getImages().stream()
+                            .map(ProductImgEntity::getUrl)
+                            .findFirst()
+                            .orElse(null);
+
                     return AucsProductResponseDto.builder()
                             .name(product.getName())
                             .information(product.getInformation())
@@ -97,6 +105,7 @@ public class ProductServiceImpl implements ProductService{
                             .startPrice(aucsInfo.getStartPrice())
                             .end(aucsInfo.getEnd())
                             .bidsCode(aucsInfo.getBidsCode())
+                            .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -110,17 +119,27 @@ public class ProductServiceImpl implements ProductService{
             logger.info("RODUCT_NOT_EXIST: 2");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
-        return products.stream().map(product ->
-                AucsProductResponseDto.builder()
-                        .name(product.getName())
-                        .information(product.getInformation())
-                        .summary(product.getSummary())
-                        .brand(product.getBrand())
-                        .startPrice(product.getAucsInfosEntity().getStartPrice())
-                        .end(product.getAucsInfosEntity().getEnd())
-                        .bidsCode(product.getAucsInfosEntity().getBidsCode())
-                        .build()
-        ).collect(Collectors.toList());
+
+        return products.stream().map(product -> {
+            AucsInfosEntity aucsInfo = product.getAucsInfosEntity();
+
+            // 첫 번째 이미지 URL 추출 (이미지가 없는 경우 null이 될 수 있음)
+            String firstImageUrl = product.getImages().stream()
+                    .map(ProductImgEntity::getUrl)
+                    .findFirst()
+                    .orElse(null);
+
+            return AucsProductResponseDto.builder()
+                    .name(product.getName())
+                    .information(product.getInformation())
+                    .summary(product.getSummary())
+                    .brand(product.getBrand())
+                    .startPrice(aucsInfo.getStartPrice())
+                    .end(aucsInfo.getEnd())
+                    .bidsCode(aucsInfo.getBidsCode())
+                    .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                    .build();
+        }).collect(Collectors.toList());
     }
 
 
@@ -131,15 +150,24 @@ public class ProductServiceImpl implements ProductService{
             logger.info("RODUCT_NOT_EXIST: 3");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
-        return products.stream().map(product ->
-                SaleProductResponseDto.builder()
-                        .name(product.getName())
-                        .information(product.getInformation())
-                        .summary(product.getSummary())
-                        .brand(product.getBrand())
-                        .price(product.getSaleInfosEntity().getPrice())
-                        .build()
-        ).collect(Collectors.toList());
+        return products.stream().map(product -> {
+            SaleInfosEntity saleInfo = product.getSaleInfosEntity();
+
+            // 첫 번째 이미지 URL 추출 (이미지가 없는 경우 null이 될 수 있음)
+            String firstImageUrl = product.getImages().stream()
+                    .map(ProductImgEntity::getUrl)
+                    .findFirst()
+                    .orElse(null);
+
+            return SaleProductResponseDto.builder()
+                    .name(product.getName())
+                    .information(product.getInformation())
+                    .summary(product.getSummary())
+                    .brand(product.getBrand())
+                    .price(saleInfo.getPrice())
+                    .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     //모든 비경매(SALE) + 일반(NORM) 상품 반환
@@ -149,15 +177,24 @@ public class ProductServiceImpl implements ProductService{
             logger.info("RODUCT_NOT_EXIST: 4");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
-        return products.stream().map(product ->
-                SaleProductResponseDto.builder()
-                        .name(product.getName())
-                        .information(product.getInformation())
-                        .summary(product.getSummary())
-                        .brand(product.getBrand())
-                        .price(product.getSaleInfosEntity().getPrice())
-                        .build()
-        ).collect(Collectors.toList());
+        return products.stream().map(product -> {
+            SaleInfosEntity saleInfo = product.getSaleInfosEntity();
+
+            // 첫 번째 이미지 URL 추출 (이미지가 없는 경우 null이 될 수 있음)
+            String firstImageUrl = product.getImages().stream()
+                    .map(ProductImgEntity::getUrl)
+                    .findFirst()
+                    .orElse(null);
+
+            return SaleProductResponseDto.builder()
+                    .name(product.getName())
+                    .information(product.getInformation())
+                    .summary(product.getSummary())
+                    .brand(product.getBrand())
+                    .price(saleInfo.getPrice())
+                    .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                    .build();
+        }).collect(Collectors.toList());
     }
 
 
@@ -190,25 +227,21 @@ public class ProductServiceImpl implements ProductService{
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
 
-        //이미지 저장 -> 수정해야함
-        // 이미지 업로드
+        // 이미지 저장
         List<MultipartFile> images = dto.getImages();
-        if (images != null && !images.isEmpty()) {
+        if (images != null && !images.isEmpty() && images.size() <= 10) {
             for (MultipartFile file : images) {
                 if (!file.isEmpty()) {
-                    s3Service.uploadFileToS3Bucket(file, "product");
+                    String imageUrl = s3Service.uploadFileAndGetUrl(file, "product");
+                    ProductImgEntity productImg = ProductImgEntity.builder()
+                            .url(imageUrl)
+                            .product(product)
+                            .build();
+                    product.addImage(productImg); // 상품 엔티티에 이미지 추가
                 }
             }
         }
-//        if(dto.getImages() != null && dto.getImages().size() <= 10) { // 이미지가 10개 이하인지 확인
-//            for(MultipartFile image : dto.getImages()) {
-//                String imageUrl = s3Utils.uploadFiles(image, "product-images"); // S3에 이미지 업로드 후 URL 반환
-//                ProductImgEntity imageEntity = ProductImgEntity.builder()
-//                        .url(imageUrl)
-//                        .build();
-//                product.addImage(imageEntity);
-//            }
-//        }
+
         productsRepository.save(product);
 
 

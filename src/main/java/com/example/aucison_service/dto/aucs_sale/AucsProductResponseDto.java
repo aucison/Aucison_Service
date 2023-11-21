@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,8 +22,9 @@ public class AucsProductResponseDto {
     private String brand;
     //private boolean isWish;
 
+    private String imageUrl; // 상품 이미지 URL 목록
 
     private float startPrice;
-    private Date end;
+    private LocalDateTime end;
     private String bidsCode;
 }

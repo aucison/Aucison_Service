@@ -28,12 +28,12 @@ public class ProductDetailResponseDto {
 
 
     // 경매상품 정보
-    private float startPrice;
-    private Date end;
+    private Float startPrice;
+    private LocalDateTime end;
     private float high;
 
     // 비경매상품 정보
-    private float price;
+    private Float price;
 
 
     //게시물

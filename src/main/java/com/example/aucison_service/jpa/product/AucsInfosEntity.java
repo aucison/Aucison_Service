@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -26,7 +27,7 @@ public class AucsInfosEntity extends BaseTimeEntity {
 
 
     @Column(name = "end", nullable = false)
-    private Date end;             //경매 종료일
+    private LocalDateTime end;             //경매 종료일
 
 
     @Column(name = "bids_code", nullable = false)
@@ -38,7 +39,7 @@ public class AucsInfosEntity extends BaseTimeEntity {
 
 
     @Builder
-    public AucsInfosEntity(float startPrice, Date end, String bidsCode, ProductsEntity productsEntity){
+    public AucsInfosEntity(float startPrice, LocalDateTime end, String bidsCode, ProductsEntity productsEntity){
         this.startPrice = startPrice;
         this.end = end;
         this.bidsCode=bidsCode;
