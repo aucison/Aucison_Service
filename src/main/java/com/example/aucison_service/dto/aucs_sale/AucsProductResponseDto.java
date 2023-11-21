@@ -22,7 +22,7 @@ public class AucsProductResponseDto {
     private String brand;
     //private boolean isWish;
 
-    private List<String> imageUrls; // 상품 이미지 URL 목록
+    private String imageUrl; // 상품 이미지 URL 목록
 
     private float startPrice;
     private LocalDateTime end;

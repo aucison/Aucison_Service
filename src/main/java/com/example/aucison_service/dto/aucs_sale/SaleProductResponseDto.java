@@ -20,6 +20,7 @@ public class SaleProductResponseDto {
     private String summary;
     private String brand;
     //private boolean isWish;
+    private String imageUrl;
 
 
 

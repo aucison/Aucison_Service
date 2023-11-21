@@ -134,7 +134,7 @@ public class AuthController {
         } else if ("https://aucison.shop:443".equals(clientDomain)) {
             return "https://aucison.shop:443/home";
         } else {
-            return "https://aucison.shop:443/home";
+            return "https://localhost:3000/home";
         }
     }
 //
