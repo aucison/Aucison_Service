@@ -91,6 +91,7 @@ public class AuthController {
             if (token == null) {
                 logger.error("OAuth2AuthenticationToken is null after exchange");
                 response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error in token exchange");
+                //return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error in token exchange");
                 return;
             }
 
@@ -104,10 +105,16 @@ public class AuthController {
 
             // JWT 토큰을 쿠키에 설정
             Cookie jwtCookie = new Cookie("auth_token", jwt);
-            jwtCookie.setHttpOnly(true);
+            jwtCookie.setHttpOnly(false);
             jwtCookie.setSecure(true); // HTTPS 환경에서만 사용
-            jwtCookie.setPath("/"); // 쿠키가 전송될 경로 설정
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(7 * 24 * 60 * 60); // 쿠키 유효 기간 설정 (예: 7일)
             response.addCookie(jwtCookie);
+
+            // SameSite=None; Secure를 포함하는 새로운 Set-Cookie 헤더를 직접 추가
+            String cookieHeader = String.format("auth_token=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=None",
+                    jwt, 7 * 24 * 60 * 60);
+            response.addHeader("Set-Cookie", cookieHeader);
 
             //AuthResponseDto responseDto = new AuthResponseDto(member, null);
 
@@ -118,6 +125,8 @@ public class AuthController {
             String redirectUrl = determineRedirectUrl(clientDomain);
             logger.info("Redirecting to URL: {}", redirectUrl);
             response.sendRedirect(redirectUrl);
+
+            //return ResponseEntity.ok(jwt);
 
 //            // 로그인 성공 메시지 반환
 //            return ResponseEntity.ok("Login successful");
