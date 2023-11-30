@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -32,22 +33,22 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String googleClientId;
-
-    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
-    private String googleClientSecret;
-
-    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
-    private String googleRedirectUri;
-    @Autowired
-    private CorsConfigurationSource corsConfigurationSource;
+    //    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+//    private String googleClientId;
+//
+//    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+//    private String googleClientSecret;
+//
+//    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+//    private String googleRedirectUri;
+//    @Autowired
+//    private CorsConfigurationSource corsConfigurationSource;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    private JwtAuthenticationProvider jwtAuthenticationProvider;
+//    @Autowired
+//    private JwtAuthenticationProvider jwtAuthenticationProvider;
 
     // JWT 인증 필터 빈 정의
     @Bean
@@ -57,22 +58,35 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 추가
+//                .oauth2Login(oauth2 -> oauth2
+//                        .clientRegistrationRepository(clientRegistrationRepository())
+//                        .authorizedClientService(authorizedClientService())
+//                )
+//                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+//                .authenticationProvider(jwtAuthenticationProvider)
+//                .authorizeHttpRequests(authz -> authz
+//                        .requestMatchers(new AntPathRequestMatcher("/product/register")).authenticated()
+//                        .requestMatchers(new AntPathRequestMatcher("/api/auth/login/google", "/api/auth/google/callback")).permitAll() // 구글 로그인 관련 경로 허용
+//                        .anyRequest().permitAll()
+//                );
         http
-                .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화
-                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 추가
-                .oauth2Login(oauth2 -> oauth2
-                        .clientRegistrationRepository(clientRegistrationRepository())
-                        .authorizedClientService(authorizedClientService())
-                )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .authenticationProvider(jwtAuthenticationProvider)
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/product/register")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher("/api/auth/login/google", "/api/auth/google/callback")).permitAll() // 구글 로그인 관련 경로 허용
-                        .anyRequest().permitAll()
-                );
+                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
+                .authorizeRequests(authz -> authz
+                        .requestMatchers(new AntPathRequestMatcher("/product/register")).authenticated()    //상품 등록
+                        .requestMatchers(new AntPathRequestMatcher("/detail/{products_id}/board")).authenticated()  //게시물 등록
+                        .requestMatchers(new AntPathRequestMatcher("/mp/address")).authenticated()  //배송지 등록
+                        .requestMatchers(new AntPathRequestMatcher("/payment")).authenticated()  //결제
+                        .requestMatchers("/google/callback").permitAll() // 구글 콜백 엔드포인트에 대한 접근 허용
+                        .anyRequest().permitAll())
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+
         return http.build();
     }
+}
 
 //    @Bean
 //    public ClientRegistrationRepository clientRegistrationRepository() {
@@ -95,12 +109,12 @@ public class SecurityConfig {
 //        return new InMemoryClientRegistrationRepository(clientRegistration);
 //    }
 
-    @Bean
-    public OAuth2AuthorizedClientService authorizedClientService() {
-        // OAuth2 클라이언트 서비스 설정
-        return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository());
-    }
-}
+//    @Bean
+//    public OAuth2AuthorizedClientService authorizedClientService() {
+//        // OAuth2 클라이언트 서비스 설정
+//        return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository());
+//    }
+//}
 //@Configuration
 //@EnableWebSecurity
 //public class SecurityConfig {

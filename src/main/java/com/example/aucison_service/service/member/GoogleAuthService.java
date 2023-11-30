@@ -26,14 +26,14 @@ import java.util.*;
 @Service
 public class GoogleAuthService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleAuthService.class);
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String clientId;
-
-    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
-    private String clientSecret;
-
-    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
-    private String redirectUri;
+//    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+//    private String clientId;
+//
+//    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+//    private String clientSecret;
+//
+//    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+//    private String redirectUri;
 
 
     //private final WebClient webClient;

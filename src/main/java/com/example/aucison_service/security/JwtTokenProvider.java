@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+//JWT 토큰을 생성하고 검증하는 클래스를 구현
 @Component
 public class JwtTokenProvider {
 
@@ -54,20 +55,20 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public OAuth2User getOAuth2User(String token) {
-        String email = getEmailFromToken(token);
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("email", email);
-        // 추가로 필요한 사용자 속성을 attributes 맵에 추가합니다.
-        // 예를 들어, 이름이나 역할 등을 추가할 수 있습니다.
-        logger.info("JwtTokenProvider - Extracted email from token: {}", email); // 이메일 추출 로그
-
-        List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_USER") // 실제 역할에 맞게 설정
-        );
-
-        return new DefaultOAuth2User(authorities, attributes, "email");
-    }
+//    public OAuth2User getOAuth2User(String token) {
+//        String email = getEmailFromToken(token);
+//        Map<String, Object> attributes = new HashMap<>();
+//        attributes.put("email", email);
+//        // 추가로 필요한 사용자 속성을 attributes 맵에 추가합니다.
+//        // 예를 들어, 이름이나 역할 등을 추가할 수 있습니다.
+//        logger.info("JwtTokenProvider - Extracted email from token: {}", email); // 이메일 추출 로그
+//
+//        List<GrantedAuthority> authorities = Collections.singletonList(
+//                new SimpleGrantedAuthority("ROLE_USER") // 실제 역할에 맞게 설정
+//        );
+//
+//        return new DefaultOAuth2User(authorities, attributes, "email");
+//    }
 
     public String getEmailFromToken(String token) {
         try {
@@ -98,6 +99,7 @@ public class JwtTokenProvider {
     }
 
     // Authentication 객체 생성
+    //토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
         String email = getEmailFromToken(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email); // 데이터베이스에서 사용자 정보 조회
