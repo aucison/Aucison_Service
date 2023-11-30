@@ -60,6 +60,7 @@ public class JwtTokenProvider {
         attributes.put("email", email);
         // 추가로 필요한 사용자 속성을 attributes 맵에 추가합니다.
         // 예를 들어, 이름이나 역할 등을 추가할 수 있습니다.
+        logger.info("JwtTokenProvider - Extracted email from token: {}", email); // 이메일 추출 로그
 
         List<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority("ROLE_USER") // 실제 역할에 맞게 설정
@@ -112,6 +113,7 @@ public class JwtTokenProvider {
     // HTTP 요청으로부터 JWT 토큰 추출
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
+        logger.info("resolveToken - Extracted bearerToken: {}", bearerToken);
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }

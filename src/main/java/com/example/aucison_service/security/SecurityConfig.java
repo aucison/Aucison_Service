@@ -74,26 +74,26 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
-        // 구글 OAuth2 클라이언트 등록 정보 설정
-        ClientRegistration clientRegistration = ClientRegistration
-                .withRegistrationId("google") // 등록 ID
-                .clientId(googleClientId) // 구글 클라이언트 ID
-                .clientSecret(googleClientSecret) // 구글 클라이언트 비밀번호
-                .scope(Arrays.asList("openid", "profile", "email")) // 범위
-                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth") // 인증 URI
-                .tokenUri("https://www.googleapis.com/oauth2/v4/token") // 토큰 URI
-                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo") // 사용자 정보 URI
-                .userNameAttributeName(IdTokenClaimNames.SUB) // 사용자 이름 속성 이름
-                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs") // JWK 세트 URI
-                .clientName("Google") // 클라이언트 이름
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) // 인가 부여 타입
-                .redirectUri(googleRedirectUri) // 리디렉션 URI
-                .build();
-
-        return new InMemoryClientRegistrationRepository(clientRegistration);
-    }
+//    @Bean
+//    public ClientRegistrationRepository clientRegistrationRepository() {
+//        // 구글 OAuth2 클라이언트 등록 정보 설정
+//        ClientRegistration clientRegistration = ClientRegistration
+//                .withRegistrationId("google") // 등록 ID
+//                .clientId(googleClientId) // 구글 클라이언트 ID
+//                .clientSecret(googleClientSecret) // 구글 클라이언트 비밀번호
+//                .scope(Arrays.asList("openid", "profile", "email")) // 범위
+//                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth") // 인증 URI
+//                .tokenUri("https://www.googleapis.com/oauth2/v4/token") // 토큰 URI
+//                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo") // 사용자 정보 URI
+//                .userNameAttributeName(IdTokenClaimNames.SUB) // 사용자 이름 속성 이름
+//                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs") // JWK 세트 URI
+//                .clientName("Google") // 클라이언트 이름
+//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) // 인가 부여 타입
+//                .redirectUri(googleRedirectUri) // 리디렉션 URI
+//                .build();
+//
+//        return new InMemoryClientRegistrationRepository(clientRegistration);
+//    }
 
     @Bean
     public OAuth2AuthorizedClientService authorizedClientService() {
