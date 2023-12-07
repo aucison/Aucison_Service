@@ -123,14 +123,14 @@ public class GoogleAuthService {
                     .email(email)
                     .name(name)
                     .nickname(name + "_nickname") // 닉네임 설정 예시
-                    .role(Role.ROLE_USER) // 기본 역할 설정
+                    .role(Role.ROLE_CUSTOMER) // 기본 역할 설정
                     .build();
 
             membersRepository.save(user); // 새 사용자 정보 저장
         }
 
         // JWT 토큰을 생성합니다.
-        String jwtToken = jwtTokenProvider.createToken(email, Role.ROLE_USER);
+        String jwtToken = jwtTokenProvider.createToken(email, Role.ROLE_CUSTOMER);
         // JWT 토큰 값을 로그로 출력
         logger.info("Generated JWT Token: {}", jwtToken);
 

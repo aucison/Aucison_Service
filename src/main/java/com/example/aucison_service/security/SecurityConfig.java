@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,10 +28,12 @@ import org.springframework.web.filter.CorsFilter;
 
 
 import java.util.Arrays;
+import java.util.List;
 
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // 메서드 보안 활성화
 public class SecurityConfig {
 
     //    @Value("${spring.security.oauth2.client.registration.google.client-id}")
@@ -42,13 +45,20 @@ public class SecurityConfig {
 //    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
 //    private String googleRedirectUri;
 //    @Autowired
-//    private CorsConfigurationSource corsConfigurationSource;
+    private CorsConfigurationSource corsConfigurationSource;
 
-    @Autowired
+//    @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
 //    @Autowired
-//    private JwtAuthenticationProvider jwtAuthenticationProvider;
+    private JwtAuthenticationProvider jwtAuthenticationProvider;
+
+    @Autowired
+    public SecurityConfig(CorsConfigurationSource corsConfigurationSource, JwtTokenProvider jwtTokenProvider, JwtAuthenticationProvider jwtAuthenticationProvider) {
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+    }
 
     // JWT 인증 필터 빈 정의
     @Bean
@@ -75,14 +85,17 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
-                .authorizeRequests(authz -> authz
+                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 추가
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(jwtAuthenticationProvider)
+                .authorizeHttpRequests(authz -> authz
                         .requestMatchers(new AntPathRequestMatcher("/product/register")).authenticated()    //상품 등록
                         .requestMatchers(new AntPathRequestMatcher("/detail/{products_id}/board")).authenticated()  //게시물 등록
                         .requestMatchers(new AntPathRequestMatcher("/mp/address")).authenticated()  //배송지 등록
                         .requestMatchers(new AntPathRequestMatcher("/payment")).authenticated()  //결제
-                        .requestMatchers("/google/callback").permitAll() // 구글 콜백 엔드포인트에 대한 접근 허용
+//                        .requestMatchers("/google/callback").permitAll() // 구글 콜백 엔드포인트에 대한 접근 허용
                         .anyRequest().permitAll())
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
         return http.build();
     }
