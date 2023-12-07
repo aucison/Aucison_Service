@@ -24,11 +24,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         MembersEntity member = membersRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
-        return new User(member.getEmail(), "", getAuthorities(member)); // 빈 비밀번호 사용
+//        return new User(member.getEmail(), "", getAuthorities(member)); // 빈 비밀번호 사용
+        return new MemberDetails(member); // MemberDetails 객체를 반환
     }
 
-    // 추가 메소드: 권한 정보를 설정합니다
-    private Collection<? extends GrantedAuthority> getAuthorities(MembersEntity member) {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
-    }
+//    // 추가 메소드: 권한 정보를 설정합니다
+//    private Collection<? extends GrantedAuthority> getAuthorities(MembersEntity member) {
+//        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+//    }
+
 }

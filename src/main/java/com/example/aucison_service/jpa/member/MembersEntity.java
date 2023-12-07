@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @Getter
@@ -47,10 +48,10 @@ public class MembersEntity {
         this.role = role;
     }
 
-    public void updateFromGoogle(GoogleIdToken.Payload payload) {
-        this.email = payload.getEmail();
-        this.name = (String) payload.get("name");
-        this.nickname = this.name + "_google";
+    public void updateFromGoogle(Map<String, Object> userInfo) {
+        this.email = (String) userInfo.get("email");
+        this.name = (String) userInfo.get("name");
+        //this.nickname = this.name + "_google";
     }
 
     public void updateInfo(MembersInfoDto membersInfoDto) {

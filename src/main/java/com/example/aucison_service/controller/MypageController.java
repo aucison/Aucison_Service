@@ -5,8 +5,12 @@ import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.mypage.RequestAddressDto;
 import com.example.aucison_service.dto.mypage.RequestOrderDetailsDto;
 import com.example.aucison_service.dto.mypage.RequestUpdateAddressDto;
+import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.member.MypageService;
+import com.example.aucison_service.service.member.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -52,11 +56,15 @@ public class MypageController {
     }
 
     // 배송지 등록
+    /*
+    이 코드 기준으로 코드 작성
+     */
     @PostMapping("/address")
-    public ApiResponse<?> addAddress(@AuthenticationPrincipal OAuth2User principal,
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<?> addAddress(@AuthenticationPrincipal MemberDetails principal,
                                      @RequestBody RequestAddressDto requestAddressDto) {
-        String email = principal.getAttribute("email");
-        mypageService.addAddress(email, requestAddressDto);
+        MembersEntity members = principal.getMember();
+        mypageService.addAddress(members.getEmail(), requestAddressDto);
         return ApiResponse.createSuccessWithNoData("배송지 등록 성공");
     }
 

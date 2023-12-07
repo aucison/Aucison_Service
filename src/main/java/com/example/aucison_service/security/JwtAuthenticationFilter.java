@@ -19,11 +19,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-
+    @Autowired
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    // HTTP 요청의 헤더에서 JWT를 추출하고 인증을 수행합니다.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -33,8 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = jwtTokenProvider.resolveToken(request);
             logger.info("JwtAuthenticationFilter - Token: {}", token); // 토큰 로그 추가
             if (token != null && jwtTokenProvider.validateToken(token)) {
-                OAuth2User oAuth2User = jwtTokenProvider.getOAuth2User(token);
-                Authentication auth = new UsernamePasswordAuthenticationToken(oAuth2User, token, oAuth2User.getAuthorities());
+                //OAuth2User oAuth2User = jwtTokenProvider.getOAuth2User(token);
+                //Authentication auth = new UsernamePasswordAuthenticationToken(oAuth2User, token, oAuth2User.getAuthorities());
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (Exception e) {
