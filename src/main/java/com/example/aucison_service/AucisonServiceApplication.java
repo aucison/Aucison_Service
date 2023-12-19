@@ -1,6 +1,5 @@
 package com.example.aucison_service;
 
-import com.example.aucison_service.controller.AuthController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -12,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing  //이거 활성화 해야 시간 자동...
 @SpringBootApplication
 public class AucisonServiceApplication {
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AucisonServiceApplication.class);
 
     public static void main(String[] args) {
         logger.info("main1");

@@ -2,12 +2,11 @@ package com.example.aucison_service.controller;
 
 
 
-import com.example.aucison_service.dto.ApiResponse;
+
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
-import com.example.aucison_service.dto.search.ProductSearchRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.service.product.ProductService;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ public class ProductController {
     //결합도 감소 - 클래스간의 결합도가 낮아져서 유지보수가 쉬움
     //자동 설정과 설정의 중앙화 : 예를 들어 Environment 객체를 통해 애플리케이션의 환경 설정에 쉽게 접근
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
 
     @Autowired

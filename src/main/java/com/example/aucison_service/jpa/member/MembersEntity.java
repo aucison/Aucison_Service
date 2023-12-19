@@ -25,8 +25,10 @@ public class MembersEntity {
     @Column(nullable = false)
     private String email;   //구글 이메일
 
-    @Column(nullable = false)
-    private String name;    //구글 이름
+//    @Column(nullable = false)
+//    private String name;    //구글 이름
+
+    private String password;    //비밀번호
 
     private String nickname;    //닉네임
 
@@ -39,28 +41,36 @@ public class MembersEntity {
     @OneToMany(mappedBy = "membersEntity", fetch = FetchType.LAZY)
     private List<WishesEntity> wishes;
 
+//    @Builder
+//    public MembersEntity(String email, String name, String nickname, Role role) {
+//        this.email = email;
+//        this.name = name;
+//        this.nickname = nickname;
+//        this.role = role;
+//    }
+
     @Builder
-    public MembersEntity(String email, String name, String nickname, Role role) {
+    public MembersEntity(String email, String password, String nickname, Role role) {
         this.email = email;
-        this.name = name;
+        this.password = password;
         this.nickname = nickname;
         this.role = role;
     }
 
-    public void updateFromGoogle(GoogleIdToken.Payload payload) {
-        this.email = payload.getEmail();
-        this.name = (String) payload.get("name");
-        this.nickname = this.name + "_google";
-    }
-
-    public void updateInfo(MembersInfoDto membersInfoDto) {
-        this.name = membersInfoDto.getName();
-        this.nickname = membersInfoDto.getNickName();
-    }
-
-    public void updateNickname(String nickname) {
-        if (nickname != null && !nickname.isEmpty()) {
-            this.nickname = nickname;
-        }
-    }
+//    public void updateFromGoogle(GoogleIdToken.Payload payload) {
+//        this.email = payload.getEmail();
+//        this.name = (String) payload.get("name");
+//        this.nickname = this.name + "_google";
+//    }
+//
+//    public void updateInfo(MembersInfoDto membersInfoDto) {
+//        this.name = membersInfoDto.getName();
+//        this.nickname = membersInfoDto.getNickName();
+//    }
+//
+//    public void updateNickname(String nickname) {
+//        if (nickname != null && !nickname.isEmpty()) {
+//            this.nickname = nickname;
+//        }
+//    }
 }

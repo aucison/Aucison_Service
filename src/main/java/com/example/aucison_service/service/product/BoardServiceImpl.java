@@ -1,7 +1,6 @@
 package com.example.aucison_service.service.product;
 
 
-import com.example.aucison_service.controller.AuthController;
 import com.example.aucison_service.dto.board.*;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class BoardServiceImpl implements BoardService{
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger logger = LoggerFactory.getLogger(BoardServiceImpl.class);
     PostsRepository postsRepository;
     CommentsRepository commentsRepository;
 
