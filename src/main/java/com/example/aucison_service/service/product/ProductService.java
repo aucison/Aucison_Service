@@ -6,6 +6,7 @@ import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
+import com.example.aucison_service.service.member.MemberDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -18,7 +19,7 @@ public interface ProductService {
     List<SaleProductResponseDto> getAllSaleHandProducts();
     List<SaleProductResponseDto> getAllSaleNormProducts();
 
-    void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal OAuth2User principal);
+    void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal MemberDetails principal);
 
     ProductSearchResponseDto searchProductByName(String name);
 

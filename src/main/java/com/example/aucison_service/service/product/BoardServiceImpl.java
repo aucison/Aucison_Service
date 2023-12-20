@@ -6,6 +6,7 @@ import com.example.aucison_service.dto.board.*;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.product.*;
+import com.example.aucison_service.service.member.MemberDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ public class BoardServiceImpl implements BoardService{
 
     ProductsRepository productsRepository;
 
-//    MemberServiceClient memberServiceClient;
 
     @Autowired
     public BoardServiceImpl(PostsRepository postsRepository, CommentsRepository commentsRepository,
@@ -36,52 +36,18 @@ public class BoardServiceImpl implements BoardService{
         this.postsRepository=postsRepository;
     }
 
-//    @Override
-//    public List<PostListResponseDto> getAllBoard() {
-//        //게시글, 댓글 전부 보여주는 서비스
-//
-//        //모든 게시글 다 가져오고
-//        List<PostsEntity> postsEntities = postsRepository.findAll();
-//
-//        return postsEntities.stream()
-//                .map(postEntity -> {
-//                    PostListResponseDto postListResponseDto = PostListResponseDto.builder()
-//                            .posts_id(postEntity.getPostsId())
-//                            .title(postEntity.getTitle())
-//                            .content(postEntity.getContent())
-//                            .createdTime(postEntity.getCreatedTime())
-//                            .email(postEntity.getEmail())
-//                            .build();
-//
-//                    List<CommentsEntity> commentsEntities = commentsRepository.findByPostsEntity_PostsId(postEntity.getPostsId());
-//
-//                    List<CommentListResponseDto> commentListResponseDtos = postEntity.getCommentsEntities()
-//                            .stream()
-//                            .map(commentEntity -> CommentListResponseDto.builder()
-//                                    .comments_id(commentEntity.getCommentsId())
-//                                    .content(commentEntity.getContent())
-//                                    .createdTime(commentEntity.getCreatedTime())
-//                                    .email(commentEntity.getEmail())
-//                                    .build())
-//                            .collect(Collectors.toList());
-//
-//                    postListResponseDto.setComments(commentListResponseDtos);
-//
-//                    return postListResponseDto;     //여기에 글-댓글 모두 모이게 됨
-//                })
-//                .collect(Collectors.toList());
-//    }
 
 
     @Override
-    public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal OAuth2User principal){
-
-        String userEmail = principal.getAttribute("email");
+    public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal MemberDetails principal){
 
         if (principal == null) {
-            logger.info("인증되지 않은 사용자입니다!");
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
+
+        //조회를 할 떄 인증된 정보를 가진 녀석이기는 해야하지만 등록이나 다른 행위를 하는건 아니므로 필요가 없음
+        //String userEmail = principal.getAttribute("email");
+        //String email = principal.getMember().getEmail();
 
         List<PostsEntity> postsEntities = postsRepository.findByProductsEntity_ProductsId(productId);
 
@@ -115,7 +81,11 @@ public class BoardServiceImpl implements BoardService{
     //최대한 간결하고 직관성있고 통일성있게...
     @Transactional
     @Override
-    public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto,@AuthenticationPrincipal OAuth2User principal){
+    public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto, @AuthenticationPrincipal MemberDetails principal){
+        if (principal == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         ProductsEntity product = productsRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -126,12 +96,8 @@ public class BoardServiceImpl implements BoardService{
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        String email = principal.getAttribute("email");
-        if (principal == null) {
-            logger.info("인증되지 않은 사용자입니다!");
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-
+        //String email = principal.getAttribute("email");
+        String email = principal.getMember().getEmail();
 
         PostsEntity post = PostsEntity.builder()
                 .title(dto.getTitle())
@@ -156,7 +122,11 @@ public class BoardServiceImpl implements BoardService{
 
     @Transactional
     @Override
-    public CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto, @AuthenticationPrincipal OAuth2User principal){
+    public CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto, @AuthenticationPrincipal MemberDetails principal){
+
+        if (principal == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
 
         PostsEntity postEntity = postsRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
@@ -166,12 +136,8 @@ public class BoardServiceImpl implements BoardService{
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        String email = principal.getAttribute("email");
-
-        if (principal == null) {
-            logger.info("인증되지 않은 사용자입니다!");
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        //String email = principal.getAttribute("email");
+        String email = principal.getMember().getEmail();
 
         CommentsEntity comment = CommentsEntity.builder()
                 .content(dto.getContent())
@@ -192,17 +158,10 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
-    public PostCRUDResponseDto updatePost(Long postId, PostUpdateRequestDto postRequestDto) {
+    public PostCRUDResponseDto updatePost(Long postId, PostUpdateRequestDto postRequestDto, @AuthenticationPrincipal MemberDetails principal) {
         PostsEntity postEntity = postsRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         postEntity.update(postRequestDto.getTitle(), postRequestDto.getContent());    //실제 수정 로직
-
-        /*
-        postsRepository.save(post);
-
-        return PostCRUDResponseDto.builder().posts_id(postId).build();
-
-         */
 
         PostsEntity updatedPost = postsRepository.save(postEntity);
 
@@ -217,7 +176,7 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
-    public PostCRUDResponseDto deletePost(Long postId) {
+    public PostCRUDResponseDto deletePost(Long postId, @AuthenticationPrincipal MemberDetails principal) {
         postsRepository.deleteById(postId);
         return PostCRUDResponseDto.builder().posts_id(postId).build();
     }

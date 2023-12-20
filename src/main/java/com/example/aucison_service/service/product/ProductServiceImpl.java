@@ -10,9 +10,11 @@ import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
+import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
+import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.s3.S3Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -205,7 +207,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     @Transactional
-    public void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal OAuth2User principal) {
+    public void registerProduct(ProductRegisterRequestDto dto,@AuthenticationPrincipal MemberDetails principal) {
         //상품 등록 서비스 로직
 
         if (principal == null) {
@@ -213,7 +215,9 @@ public class ProductServiceImpl implements ProductService{
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        String email = principal.getAttribute("email");
+//        String email = principal.getAttribute("email");
+        //아래 코드로 변경
+        String email = principal.getMember().getEmail();
 
         //ProductsEntity를 먼저 저장을 한다.
         ProductsEntity product = ProductsEntity.builder()

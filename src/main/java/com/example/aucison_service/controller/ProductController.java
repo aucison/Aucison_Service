@@ -9,6 +9,7 @@ import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
+import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.product.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +82,7 @@ public class ProductController {
     @PostMapping("/product/register")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> registerProduct(@ModelAttribute ProductRegisterRequestDto dto,
-                                             @AuthenticationPrincipal OAuth2User principal) {
+                                             @AuthenticationPrincipal MemberDetails principal) {
         productService.registerProduct(dto, principal);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
