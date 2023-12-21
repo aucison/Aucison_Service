@@ -18,8 +18,8 @@ public interface BoardService {
     CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto, @AuthenticationPrincipal MemberDetails principal);
     PostCRUDResponseDto updatePost(Long postId, PostUpdateRequestDto postRequestDto, @AuthenticationPrincipal MemberDetails principal);
     PostCRUDResponseDto deletePost(Long postId, @AuthenticationPrincipal MemberDetails principal);
-    CommentCRUDResponseDto updateComment(Long commentId, CommentUpdateRequestDto commentRequestDto);
-    CommentCRUDResponseDto deleteComment(Long commentId);
+    CommentCRUDResponseDto updateComment(Long commentId, CommentUpdateRequestDto commentRequestDto, @AuthenticationPrincipal MemberDetails principal);
+    CommentCRUDResponseDto deleteComment(Long commentId, @AuthenticationPrincipal MemberDetails principal);
 
 
 

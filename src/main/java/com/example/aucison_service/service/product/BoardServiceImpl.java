@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,14 +35,15 @@ public class BoardServiceImpl implements BoardService{
         this.postsRepository=postsRepository;
     }
 
-
-
-    @Override
-    public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal MemberDetails principal){
-
+    private void validatePrincipal(MemberDetails principal) {
         if (principal == null) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal MemberDetails principal){
+        validatePrincipal(principal);
 
         //조회를 할 떄 인증된 정보를 가진 녀석이기는 해야하지만 등록이나 다른 행위를 하는건 아니므로 필요가 없음
         //String userEmail = principal.getAttribute("email");
@@ -82,9 +82,7 @@ public class BoardServiceImpl implements BoardService{
     @Transactional
     @Override
     public PostCRUDResponseDto registPost(Long productId, PostRegistRequestDto dto, @AuthenticationPrincipal MemberDetails principal){
-        if (principal == null) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        validatePrincipal(principal);
 
         ProductsEntity product = productsRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -123,10 +121,7 @@ public class BoardServiceImpl implements BoardService{
     @Transactional
     @Override
     public CommentCRUDResponseDto registComment(Long postId, CommentRegistRequestDto dto, @AuthenticationPrincipal MemberDetails principal){
-
-        if (principal == null) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        validatePrincipal(principal);
 
         PostsEntity postEntity = postsRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
@@ -157,50 +152,56 @@ public class BoardServiceImpl implements BoardService{
         return responseDto;
     }
 
+    @Transactional
     @Override
     public PostCRUDResponseDto updatePost(Long postId, PostUpdateRequestDto postRequestDto, @AuthenticationPrincipal MemberDetails principal) {
+        validatePrincipal(principal);
+
         PostsEntity postEntity = postsRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-        postEntity.update(postRequestDto.getTitle(), postRequestDto.getContent());    //실제 수정 로직
 
+
+        postEntity.update(postRequestDto.getTitle(), postRequestDto.getContent());    //실제 수정 로직
         PostsEntity updatedPost = postsRepository.save(postEntity);
 
-        PostCRUDResponseDto responseDto = PostCRUDResponseDto.builder()
+
+        return PostCRUDResponseDto.builder()
                 .posts_id(updatedPost.getPostsId())
                 .build();
-
-        return responseDto;
-
-        //위 식과 아래식은 큰 차이는 없지만 아래식이 좀 더 명시적이고 동기화 상태 보장함
-        //내 생각에 간편한 식은 delete에 어울릴 듯
     }
 
+    @Transactional
     @Override
     public PostCRUDResponseDto deletePost(Long postId, @AuthenticationPrincipal MemberDetails principal) {
+        validatePrincipal(principal);
+
         postsRepository.deleteById(postId);
         return PostCRUDResponseDto.builder().posts_id(postId).build();
     }
 
+    @Transactional
     @Override
-    public CommentCRUDResponseDto updateComment(Long commentId, CommentUpdateRequestDto commentRequestDto) {
+    public CommentCRUDResponseDto updateComment(Long commentId, CommentUpdateRequestDto commentRequestDto, @AuthenticationPrincipal MemberDetails principal) {
+        validatePrincipal(principal);
+
         CommentsEntity comment = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
         comment.update(commentRequestDto.getContent()); //실제 수정 로직
 
         CommentsEntity updatedComment = commentsRepository.save(comment);
 
-        CommentCRUDResponseDto responseDto = CommentCRUDResponseDto.builder()
+        return CommentCRUDResponseDto.builder()
                 .comment_id(updatedComment.getCommentsId())
                 .build();
-
-        return responseDto;
     }
 
+    @Transactional
     @Override
-    public CommentCRUDResponseDto deleteComment(Long commentId) {
+    public CommentCRUDResponseDto deleteComment(Long commentId, @AuthenticationPrincipal MemberDetails principal) {
+        validatePrincipal(principal);
+
         commentsRepository.deleteById(commentId);
         return CommentCRUDResponseDto.builder().comment_id(commentId).build();
     }
-
-
 }
