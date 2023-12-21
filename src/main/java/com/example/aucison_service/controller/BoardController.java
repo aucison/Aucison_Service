@@ -70,6 +70,7 @@ public class BoardController {
     }
 
     @PutMapping("/detail/{products_id}/board/{posts_id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<PostCRUDResponseDto> updatePost(@PathVariable("products_id") Long productId,
                                                        @PathVariable("posts_id") Long postId,
                                                        @RequestBody PostUpdateRequestDto requestDto,
@@ -78,6 +79,7 @@ public class BoardController {
     }
 
     @DeleteMapping("/detail/{products_id}/board/{posts_id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<PostCRUDResponseDto> deletePost(@PathVariable("products_id") Long productId,
                                                        @PathVariable("posts_id") Long postId,
                                                        @AuthenticationPrincipal MemberDetails principal) {
@@ -86,18 +88,22 @@ public class BoardController {
 
 
     @PutMapping("/detail/{products_id}/board/{posts_id}/comment/{comments_id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<CommentCRUDResponseDto> updateComment(@PathVariable("products_id") Long productId,
                                                              @PathVariable("posts_id") Long postId,
                                                              @PathVariable("comments_id") Long commentId,
-                                                             @RequestBody CommentUpdateRequestDto requestDto) {
-        return ApiResponse.createSuccess(boardService.updateComment(commentId, requestDto));
+                                                             @RequestBody CommentUpdateRequestDto requestDto,
+                                                             @AuthenticationPrincipal MemberDetails principal) {
+        return ApiResponse.createSuccess(boardService.updateComment(commentId, requestDto, principal));
     }
 
     @DeleteMapping("/detail/{products_id}/board/{posts_id}/comment/{comments_id}")
+    @PreAuthorize("isAuthenticated()")
     public ApiResponse<CommentCRUDResponseDto> deleteComment(@PathVariable("products_id") Long productId,
                                                              @PathVariable("posts_id") Long postId,
-                                                             @PathVariable("comments_id") Long commentId) {
-        return ApiResponse.createSuccess(boardService.deleteComment(commentId));
+                                                             @PathVariable("comments_id") Long commentId,
+                                                             @AuthenticationPrincipal MemberDetails principal) {
+        return ApiResponse.createSuccess(boardService.deleteComment(commentId, principal));
     }
 
 }
