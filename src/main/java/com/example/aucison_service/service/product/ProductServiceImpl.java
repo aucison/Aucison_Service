@@ -100,6 +100,7 @@ public class ProductServiceImpl implements ProductService{
                             .orElse(null);
 
                     return AucsProductResponseDto.builder()
+                            .productsId(product.getProductsId())
                             .name(product.getName())
                             .information(product.getInformation())
                             .summary(product.getSummary())
@@ -132,6 +133,7 @@ public class ProductServiceImpl implements ProductService{
                     .orElse(null);
 
             return AucsProductResponseDto.builder()
+                    .productsId(product.getProductsId())
                     .name(product.getName())
                     .information(product.getInformation())
                     .summary(product.getSummary())
@@ -162,6 +164,7 @@ public class ProductServiceImpl implements ProductService{
                     .orElse(null);
 
             return SaleProductResponseDto.builder()
+                    .productsId(product.getProductsId())
                     .name(product.getName())
                     .information(product.getInformation())
                     .summary(product.getSummary())
@@ -189,6 +192,7 @@ public class ProductServiceImpl implements ProductService{
                     .orElse(null);
 
             return SaleProductResponseDto.builder()
+                    .productsId(product.getProductsId())
                     .name(product.getName())
                     .information(product.getInformation())
                     .summary(product.getSummary())
@@ -288,6 +292,7 @@ public class ProductServiceImpl implements ProductService{
 
         //객체 생성 과정에서 선택적으로 특정 필드를 생성하기 위해 다음과 같이 코드 구성 -> .build가 나중에 나옴(return시에)
         ProductSearchResponseDto.ProductSearchResponseDtoBuilder dto = ProductSearchResponseDto.builder()
+                .productsId(product.getProductsId())
                 .name(product.getName())
                 .summary(product.getSummary())
                 .brand(product.getBrand());

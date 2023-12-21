@@ -15,7 +15,7 @@ public class ProductSearchResponseDto {
 
     //검색시 검색 결과 들을 반환하는 Dto
 
-
+    private Long productsId;
     private String name;
 //    private LocalDateTime createdTime;
     private String summary;

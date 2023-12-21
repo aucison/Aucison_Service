@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class SaleProductResponseDto {
 
     //비 경매상품(일반)들 검색 결과 반환시 사용하는 Dto
-
+    private Long productsId;
     private String name;
    // private LocalDateTime createdTime;  // Date 타입에서 LocalDateTime으로 변경
     private String information;
