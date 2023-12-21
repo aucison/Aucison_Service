@@ -105,5 +105,4 @@ public class BoardController {
                                                              @AuthenticationPrincipal MemberDetails principal) {
         return ApiResponse.createSuccess(boardService.deleteComment(commentId, principal));
     }
-
 }
