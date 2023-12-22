@@ -1,8 +1,7 @@
 package com.example.aucison_service.jpa.member;
 
-import com.example.aucison_service.dto.auth.MembersInfoDto;
+import com.example.aucison_service.dto.mypage.RequestMembersInfoDto;
 import com.example.aucison_service.enums.Role;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,11 +51,6 @@ public class MembersEntity {
         this.email = (String) userInfo.get("email");
         this.name = (String) userInfo.get("name");
         //this.nickname = this.name + "_google";
-    }
-
-    public void updateInfo(MembersInfoDto membersInfoDto) {
-        this.name = membersInfoDto.getName();
-        this.nickname = membersInfoDto.getNickName();
     }
 
     public void updateNickname(String nickname) {

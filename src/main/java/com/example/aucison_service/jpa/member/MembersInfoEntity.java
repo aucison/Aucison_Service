@@ -1,6 +1,5 @@
 package com.example.aucison_service.jpa.member;
 
-import com.example.aucison_service.dto.auth.MembersInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +10,6 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 @Entity
 @Table(name = "members_info")
@@ -44,17 +42,23 @@ public class MembersInfoEntity { // 사용자 추가 정보
     @OneToMany(mappedBy = "membersInfoEntity", fetch = FetchType.LAZY) // 양방향 매핑
     private List<HistoriesEntity> historiesEntityList;
 
-    public MembersInfoEntity updateInfo(MembersEntity membersEntity, MembersInfoDto membersInfoDto) {
-        this.phone = membersInfoDto.getPhone();
-        this.subEmail = membersInfoDto.getSubEmail();
+    @Builder
+    public MembersInfoEntity(String phone, Float credit, String subEmail, MembersEntity membersEntity) {
+        this.phone = phone;
+        this.credit = credit;
+        this.subEmail = subEmail;
         this.membersEntity = membersEntity;
-
-        return this;
     }
 
     public void updatePhone(String phone) {
         if (phone != null && !phone.isEmpty()) {
             this.phone = phone;
+        }
+    }
+
+    public void updateSubEmail(String subEmail) {
+        if (subEmail != null && !subEmail.isEmpty()) {
+            this.subEmail = subEmail;
         }
     }
 

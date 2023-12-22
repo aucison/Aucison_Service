@@ -3,6 +3,7 @@ package com.example.aucison_service.controller;
 
 import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.mypage.RequestAddressDto;
+import com.example.aucison_service.dto.mypage.RequestMembersInfoDto;
 import com.example.aucison_service.dto.mypage.RequestUpdateAddressDto;
 import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.member.MypageService;
@@ -99,5 +100,11 @@ public class MypageController {
     }
 
     // 회원 정보 수정
-    // TODO: s3 적용
+    @PatchMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<?> patchMemberDetails(@AuthenticationPrincipal MemberDetails principal,
+                                             @ModelAttribute RequestMembersInfoDto requestMembersInfoDto) {
+        mypageService.patchMemberDetails(principal, requestMembersInfoDto);
+        return ApiResponse.createSuccessWithNoData("회원정보 수정 성공");
+    }
 }
