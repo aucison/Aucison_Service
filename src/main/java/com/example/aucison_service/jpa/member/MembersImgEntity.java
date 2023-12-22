@@ -1,14 +1,12 @@
 package com.example.aucison_service.jpa.member;
 
 
-import com.example.aucison_service.dto.auth.MembersInfoDto;
+import com.example.aucison_service.dto.mypage.RequestMembersInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,8 +28,14 @@ public class MembersImgEntity { // 사용자 프로필 사진
     @JoinColumn(name = "members_info_id") // 연관관계 주인
     private MembersInfoEntity membersInfoEntity; // 사용자 추가 정보
 
-    public void updateInfo(MembersInfoEntity membersInfoEntity, MembersInfoDto membersInfoDto) {
-        this.url = membersInfoDto.getImgUrl();
+    @Builder
+    public MembersImgEntity(String url, MembersInfoEntity membersInfoEntity) {
+        this.url = url;
+        this.membersInfoEntity = membersInfoEntity;
+    }
+
+    public void updateInfo(MembersInfoEntity membersInfoEntity, String imgUrl) {
+        this.url = imgUrl;
         this.membersInfoEntity = membersInfoEntity;
     }
 }

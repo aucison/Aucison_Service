@@ -1,6 +1,5 @@
 package com.example.aucison_service.jpa.member;
 
-import com.example.aucison_service.dto.auth.MembersInfoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,17 +50,15 @@ public class MembersInfoEntity { // 사용자 추가 정보
         this.membersEntity = membersEntity;
     }
 
-    public MembersInfoEntity updateInfo(MembersEntity membersEntity, MembersInfoDto membersInfoDto) {
-        this.phone = membersInfoDto.getPhone();
-        this.subEmail = membersInfoDto.getSubEmail();
-        this.membersEntity = membersEntity;
-
-        return this;
-    }
-
     public void updatePhone(String phone) {
         if (phone != null && !phone.isEmpty()) {
             this.phone = phone;
+        }
+    }
+
+    public void updateSubEmail(String subEmail) {
+        if (subEmail != null && !subEmail.isEmpty()) {
+            this.subEmail = subEmail;
         }
     }
 

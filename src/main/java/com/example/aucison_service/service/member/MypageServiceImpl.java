@@ -11,6 +11,7 @@ import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.jpa.product.ProductsEntity;
 import com.example.aucison_service.jpa.product.ProductsRepository;
 import com.example.aucison_service.jpa.shipping.*;
+import com.example.aucison_service.service.s3.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class MypageServiceImpl implements MypageService {
     private final ProductsRepository productsRepository;
     private final AddressesRepository addressesRepository;
     private final MembersImgRepository membersImgRepository;
+    private final S3Service s3Service;
 
     @Autowired
     public MypageServiceImpl(HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
@@ -42,7 +44,7 @@ public class MypageServiceImpl implements MypageService {
                              OrdersRepository ordersRepository, AuctionEndDatesRepository auctionEndDatesRepository,
                              DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
                              ProductsRepository productsRepository, AddressesRepository addressesRepository,
-                             MembersImgRepository membersImgRepository) {
+                             MembersImgRepository membersImgRepository, S3Service s3Service) {
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
         this.membersInfoRepository = membersInfoRepository;
@@ -54,6 +56,7 @@ public class MypageServiceImpl implements MypageService {
         this.productsRepository = productsRepository;
         this.addressesRepository = addressesRepository;
         this.membersImgRepository = membersImgRepository;
+        this.s3Service = s3Service;
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
@@ -388,6 +391,42 @@ public class MypageServiceImpl implements MypageService {
                 .email(membersInfo.getSubEmail())
                 .phone(membersInfo.getPhone())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void patchMemberDetails(MemberDetails principal, RequestMembersInfoDto requestMembersInfoDto) {
+        String email = principal.getMember().getEmail();
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+
+        MembersInfoEntity memberInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
+                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+
+        // Update nickname, phone, and subEmail
+        member.updateNickname(requestMembersInfoDto.getNickName());
+        memberInfo.updatePhone(requestMembersInfoDto.getPhone());
+        memberInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
+
+        // 이미지 처리
+        if (requestMembersInfoDto.getImgUrl() != null && !requestMembersInfoDto.getImgUrl().isEmpty()) {
+            String folderName = "membersProfile"; // 폴더 이름 정의
+            String imgUrl = s3Service.uploadFileAndGetUrl(requestMembersInfoDto.getImgUrl(), folderName);
+
+            MembersImgEntity membersImg = memberInfo.getMembersImgEntity();
+            if (membersImg == null) {
+                membersImg = MembersImgEntity.builder()
+                        .url(imgUrl)
+                        .membersInfoEntity(memberInfo)
+                        .build();
+            } else {
+                // 기존 이미지 삭제
+                s3Service.deleteFileFromS3Bucket(membersImg.getUrl(), folderName);
+            }
+            membersImg.updateInfo(memberInfo, imgUrl);
+            membersImgRepository.save(membersImg);
+        }
+
     }
 
 
