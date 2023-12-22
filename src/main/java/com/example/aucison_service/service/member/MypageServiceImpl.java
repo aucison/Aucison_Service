@@ -57,7 +57,6 @@ public class MypageServiceImpl implements MypageService {
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
-    //판매 상품 조회
     @Override
     @Transactional(readOnly = true)
     public List<ResponseOrderHistoryDto> getOrderInfo(MemberDetails principal) {

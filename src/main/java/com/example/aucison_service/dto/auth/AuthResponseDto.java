@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class AuthResponseDto {
 //    private MembersEntity member;
     private String jwtToken;
+    private boolean isNewUser; // 새 사용자 여부
 }
