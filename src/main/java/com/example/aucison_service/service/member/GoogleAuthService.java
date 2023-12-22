@@ -6,6 +6,8 @@ import com.example.aucison_service.enums.Role;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.jpa.member.MembersImgEntity;
+import com.example.aucison_service.jpa.member.MembersInfoEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.security.JwtTokenProvider;
 import org.slf4j.Logger;

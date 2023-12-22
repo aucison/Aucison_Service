@@ -103,7 +103,7 @@ public class MypageController {
     @PatchMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> patchMemberDetails(@AuthenticationPrincipal MemberDetails principal,
-                                             @RequestBody RequestMembersInfoDto requestMembersInfoDto) {
+                                             @ModelAttribute RequestMembersInfoDto requestMembersInfoDto) {
         mypageService.patchMemberDetails(principal, requestMembersInfoDto);
         return ApiResponse.createSuccessWithNoData("회원정보 수정 성공");
     }
