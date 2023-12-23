@@ -2,7 +2,7 @@
 //package com.example.aucison_service.controller;
 //
 //
-//import com.example.aucison_service.service.member.ZzimService;
+//import com.example.aucison_service.service.member.WishService;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@
 //@RequestMapping("/")
 //public class ZzimController {
 //
-//    private final ZzimService zzimService;
+//    private final WishService zzimService;
 //
 //    @GetMapping("/zzim")
 //    public ResponseEntity getWishList(@RequestHeader("accessToken") String accessToken) {

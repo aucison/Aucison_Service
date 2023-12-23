@@ -1,11 +1,11 @@
-package com.example.aucison_service.dto.zzim;
+package com.example.aucison_service.dto.wish;
 
 
 import com.example.aucison_service.enums.Category;
 import lombok.Builder;
 
 @Builder
-public class ResponseZzimHistoryDto {
+public class ResponseWishHistoryDto {
 
     private Long wishesId; // 찜 ID
     private String name; // 상품명
