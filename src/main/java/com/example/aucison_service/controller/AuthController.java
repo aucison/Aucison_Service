@@ -1,27 +1,20 @@
 package com.example.aucison_service.controller;
 
+import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.auth.AuthResponseDto;
-import com.example.aucison_service.dto.auth.GoogleTokenResponseDto;
-import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.dto.auth.MemberAdditionalInfoRequestDto;
 import com.example.aucison_service.security.JwtTokenProvider;
 import com.example.aucison_service.service.member.GoogleAuthService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.example.aucison_service.service.member.MemberDetails;
+import com.example.aucison_service.service.member.MemberInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.result.view.RedirectView;
-import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.net.URI;
-
 
 
 @RestController
@@ -31,13 +24,12 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final GoogleAuthService googleAuthService;
-
-    private final JwtTokenProvider tokenProvider;
+    private final MemberInfoService memberInfoService;
 
     @Autowired
-    public AuthController(GoogleAuthService googleAuthService, JwtTokenProvider tokenProvider) {
+    public AuthController(GoogleAuthService googleAuthService, MemberInfoService memberInfoService) {
         this.googleAuthService = googleAuthService;
-        this.tokenProvider = tokenProvider;
+        this.memberInfoService = memberInfoService;
     }
 
     /*
@@ -70,6 +62,14 @@ public class AuthController {
             logger.error("Error during Google callback processing: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing Google login");
         }
+    }
+
+    @PostMapping("/member-info")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<?> saveMemberInfo(@AuthenticationPrincipal MemberDetails principal,
+                                            @RequestBody MemberAdditionalInfoRequestDto requestDto) {
+        memberInfoService.saveMemberAdditionalInfo(principal, requestDto);
+        return ApiResponse.createSuccessWithNoData("사용자 추가정보 생성 성공");
     }
 
 

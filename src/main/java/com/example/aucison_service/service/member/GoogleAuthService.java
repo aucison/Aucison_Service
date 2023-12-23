@@ -6,6 +6,8 @@ import com.example.aucison_service.enums.Role;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.jpa.member.MembersImgEntity;
+import com.example.aucison_service.jpa.member.MembersInfoEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.security.JwtTokenProvider;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -86,6 +89,7 @@ public class GoogleAuthService {
 
     //3. 사용자 인증 및 JWT 토큰 생성
     // 사용자 인증 및 JWT 토큰 생성 메소드는 다음과 같이 수정합니다.
+    @Transactional
     public AuthResponseDto authenticateUserAndGetJwtToken(String accessToken) {
         // Access Token을 사용하여 Google로부터 사용자 정보를 가져옵니다.
         HttpHeaders headers = new HttpHeaders();
@@ -112,12 +116,14 @@ public class GoogleAuthService {
         // 사용자가 데이터베이스에 존재하는지 확인합니다.
         Optional<MembersEntity> existingUser = membersRepository.findByEmail(email);
 
+        boolean isNewUser = false;
         MembersEntity user;
         if (existingUser.isPresent()) {
             // 이미 존재하는 사용자인 경우, 정보 업데이트
             user = existingUser.get();
             user.updateFromGoogle(userInfo); // 사용자 정보 업데이트 메소드
         } else {
+            isNewUser = true; // 새 사용자임을 표시
             // 새 사용자인 경우, 회원가입 처리
             user = MembersEntity.builder()
                     .email(email)
@@ -136,9 +142,10 @@ public class GoogleAuthService {
 
 
         // 생성된 JWT 토큰을 AuthResponseDto에 담아 반환합니다.
-        AuthResponseDto response = new AuthResponseDto();
-        response.setJwtToken(jwtToken);
-        return response;
+        return AuthResponseDto.builder()
+                .jwtToken(jwtToken)
+                .isNewUser(isNewUser)
+                .build();
     }
 
 

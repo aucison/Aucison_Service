@@ -11,8 +11,10 @@ import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.jpa.product.ProductsEntity;
 import com.example.aucison_service.jpa.product.ProductsRepository;
 import com.example.aucison_service.jpa.shipping.*;
+import com.example.aucison_service.service.s3.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -34,6 +36,7 @@ public class MypageServiceImpl implements MypageService {
     private final ProductsRepository productsRepository;
     private final AddressesRepository addressesRepository;
     private final MembersImgRepository membersImgRepository;
+    private final S3Service s3Service;
 
     @Autowired
     public MypageServiceImpl(HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
@@ -41,7 +44,7 @@ public class MypageServiceImpl implements MypageService {
                              OrdersRepository ordersRepository, AuctionEndDatesRepository auctionEndDatesRepository,
                              DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
                              ProductsRepository productsRepository, AddressesRepository addressesRepository,
-                             MembersImgRepository membersImgRepository) {
+                             MembersImgRepository membersImgRepository, S3Service s3Service) {
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
         this.membersInfoRepository = membersInfoRepository;
@@ -53,12 +56,14 @@ public class MypageServiceImpl implements MypageService {
         this.productsRepository = productsRepository;
         this.addressesRepository = addressesRepository;
         this.membersImgRepository = membersImgRepository;
+        this.s3Service = s3Service;
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
-    //판매 상품 조회
     @Override
-    public List<ResponseOrderHistoryDto> getOrderInfo(String email) {
+    @Transactional(readOnly = true)
+    public List<ResponseOrderHistoryDto> getOrderInfo(MemberDetails principal) {
+        String email = principal.getMember().getEmail();
         MembersEntity members = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
@@ -96,18 +101,21 @@ public class MypageServiceImpl implements MypageService {
 
     //구매 상품 상세 조회
     @Override
-    public ResponseOrderDetailsDto getOrderDetail(RequestOrderDetailsDto requestOrderDetailsDto) {
+    @Transactional(readOnly = true)
+    public ResponseOrderDetailsDto getOrderDetail(MemberDetails principal, Long ordersId, Long historiesId) {
 
+        String email = principal.getMember().getEmail();
         //HistoriesEntity에서 주문 기본 정보를 가져옵니다. (상품 이름, 상품 간단설명, 분류, 주문금액)
-        HistoriesEntity histories = historiesRepository.findByOrdersId(requestOrderDetailsDto.getOrdersId());
-        if (histories == null) {
-            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
-        }
+        HistoriesEntity histories = Optional.ofNullable(historiesRepository.findByOrdersId(ordersId))
+                .orElseThrow(() -> new AppException((ErrorCode.HISTORY_NOT_FOUND)));
+//        if (histories == null) {
+//            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
+//        }
 
         if (histories.getCategory() == Category.AUC) {  //경매일 때
-            return getAuctionOrderDetail(requestOrderDetailsDto.getOrdersId(), requestOrderDetailsDto.getEmail());
+            return getAuctionOrderDetail(ordersId, email);
         } else {    //비경매일 때
-            return getNonAuctionOrderDetail(requestOrderDetailsDto.getOrdersId(), requestOrderDetailsDto.getEmail());
+            return getNonAuctionOrderDetail(ordersId, email);
         }
     }
 
@@ -229,9 +237,11 @@ public class MypageServiceImpl implements MypageService {
 
     // 판매 내역 조회
     @Override
-    public List<ResponseSellHistoryDto> getSellInfo(String email) {
+    @Transactional(readOnly = true)
+    public List<ResponseSellHistoryDto> getSellInfo(MemberDetails principal) {
 //        MembersEntity members = membersRepository.findByEmail(email)
 //                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+        String email = principal.getMember().getEmail();
 
         //'판매' 에 해당하는 histories 조회
         List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntity_MembersEntity_EmailAndAndOrderType(email, OrderType.SELL);
@@ -281,7 +291,9 @@ public class MypageServiceImpl implements MypageService {
 
     //배송지 조회
     @Override
-    public List<ResponseAddressDto> getAddressInfo(String email) {
+    @Transactional(readOnly = true)
+    public List<ResponseAddressDto> getAddressInfo(MemberDetails principal) {
+        String email = principal.getMember().getEmail();
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
@@ -302,11 +314,14 @@ public class MypageServiceImpl implements MypageService {
 
     //배송지 등록
     @Override
-    public void addAddress(String email, RequestAddressDto requestAddressDto) {
+    @Transactional
+    public void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto) {
+        String email = principal.getMember().getEmail();
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        MembersInfoEntity membersInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
+                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
 
         // 동일한 배송지명이 있는지 검사
         if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
@@ -327,7 +342,9 @@ public class MypageServiceImpl implements MypageService {
     }
 
     @Override
-    public void deleteAddress(String email, String addrName) {
+    @Transactional
+    public void deleteAddress(MemberDetails principal, String addrName) {
+        String email = principal.getMember().getEmail();
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
@@ -340,7 +357,9 @@ public class MypageServiceImpl implements MypageService {
 
     //배송지 수정
     @Override
-    public void updateAddressByEmailAndAddrName(String email, String addrName, RequestUpdateAddressDto requestUpdateAddressDto) {
+    @Transactional
+    public void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName, RequestUpdateAddressDto requestUpdateAddressDto) {
+        String email = principal.getMember().getEmail();
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -356,7 +375,9 @@ public class MypageServiceImpl implements MypageService {
 
     //회원 정보 조회
     @Override
-    public ResponseMemberProfileDto getMemberProfile(String email) {
+    @Transactional(readOnly = true)
+    public ResponseMemberProfileDto getMemberProfile(MemberDetails principal) {
+        String email = principal.getMember().getEmail();
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -370,6 +391,42 @@ public class MypageServiceImpl implements MypageService {
                 .email(membersInfo.getSubEmail())
                 .phone(membersInfo.getPhone())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void patchMemberDetails(MemberDetails principal, RequestMembersInfoDto requestMembersInfoDto) {
+        String email = principal.getMember().getEmail();
+        MembersEntity member = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+
+        MembersInfoEntity memberInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
+                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+
+        // Update nickname, phone, and subEmail
+        member.updateNickname(requestMembersInfoDto.getNickName());
+        memberInfo.updatePhone(requestMembersInfoDto.getPhone());
+        memberInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
+
+        // 이미지 처리
+        if (requestMembersInfoDto.getImgUrl() != null && !requestMembersInfoDto.getImgUrl().isEmpty()) {
+            String folderName = "membersProfile"; // 폴더 이름 정의
+            String imgUrl = s3Service.uploadFileAndGetUrl(requestMembersInfoDto.getImgUrl(), folderName);
+
+            MembersImgEntity membersImg = memberInfo.getMembersImgEntity();
+            if (membersImg == null) {
+                membersImg = MembersImgEntity.builder()
+                        .url(imgUrl)
+                        .membersInfoEntity(memberInfo)
+                        .build();
+            } else {
+                // 기존 이미지 삭제
+                s3Service.deleteFileFromS3Bucket(membersImg.getUrl(), folderName);
+            }
+            membersImg.updateInfo(memberInfo, imgUrl);
+            membersImgRepository.save(membersImg);
+        }
+
     }
 
 
