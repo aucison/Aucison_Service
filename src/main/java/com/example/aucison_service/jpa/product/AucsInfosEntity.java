@@ -45,4 +45,11 @@ public class AucsInfosEntity extends BaseTimeEntity {
         this.bidsCode=bidsCode;
         this.productsEntity=productsEntity;
     }
+
+    // 경매 종료 시간을 주어진 분만큼 연장하는 메소드
+    public void extendAuctionEndTimeByMinutes(int minutes) {
+        if (end != null) {
+            this.end = this.end.plusMinutes(minutes);
+        }
+    }
 }

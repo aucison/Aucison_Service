@@ -23,10 +23,10 @@ public class AuctionEndDatesEntity {
     private Long productsId; // 상품 ID, Unique 제약조건 추가
 
     @Column(name = "end_date", nullable = false)
-    private Date endDate; // 경매 종료일
+    private LocalDateTime endDate; // 경매 종료일
 
     @Builder
-    public AuctionEndDatesEntity(Long productsId, Date endDate) {
+    public AuctionEndDatesEntity(Long productsId, LocalDateTime endDate) {
         this.productsId = productsId;
         this.endDate = endDate;
     }
