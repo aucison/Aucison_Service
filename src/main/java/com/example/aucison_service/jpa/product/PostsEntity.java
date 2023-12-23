@@ -13,7 +13,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "posts")
+@Table(name =
+        "posts")
 public class PostsEntity extends BaseTimeEntity {
 
     @Id
