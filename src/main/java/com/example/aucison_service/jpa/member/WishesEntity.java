@@ -17,7 +17,7 @@ public class WishesEntity { // 찜
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wishes_id")
-    private Long id; // 찜 id
+    private Long wishesId; // 찜 id
 
     @ManyToOne
     @JoinColumn(name = "email") // 연관관계 주인
