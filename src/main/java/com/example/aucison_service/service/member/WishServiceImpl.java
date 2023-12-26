@@ -78,8 +78,6 @@ public class WishServiceImpl implements WishService {
 //        WishesEntity wish = WishesEntity.builder();
 
 
-
-
     }
 
     //찜 삭제
