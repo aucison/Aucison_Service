@@ -21,9 +21,8 @@ public class Payments extends BaseTimeEntity { //결제
 
     @Column(name = "cost", nullable = false)
     private float cost;    //결제 금액
-    @Column(name = "created_time", nullable = false)
-    private LocalDateTime createdTime;            //결제 승인 시점
-
+//    @Column(name = "created_time", nullable = false)
+//    private LocalDateTime createdTime;            //결제 승인 시점
 
     //외래키
     @OneToOne
@@ -32,9 +31,8 @@ public class Payments extends BaseTimeEntity { //결제
 
 
     @Builder
-    public Payments(float cost, LocalDateTime createdTime, Orders orders) {
+    public Payments(float cost, Orders orders) {
         this.cost = cost;
-        this.createdTime = createdTime;
         this.orders = orders;
     }
 }
