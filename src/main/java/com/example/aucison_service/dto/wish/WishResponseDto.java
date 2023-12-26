@@ -3,10 +3,12 @@ package com.example.aucison_service.dto.wish;
 
 
 import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Builder
+@Data
 public class WishResponseDto {
 
     private Long wishesId; // 찜 ID

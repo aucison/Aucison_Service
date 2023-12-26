@@ -48,9 +48,10 @@ public enum ErrorCode {
     AUCTION_ENDED(HttpStatus.FORBIDDEN, "경매가 이미 종료되었습니다."),
     INSUFFICIENT_CREDIT(HttpStatus.BAD_REQUEST, "잔액이 부족합니다."),
     SHIPPING_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "배송지를 새로 등록해주세요."),
-    LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "로그를 찾을 수 없습니다.");
+    LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "로그를 찾을 수 없습니다."),
 
-
+    WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "찜 상품이 아닙니다."),
+    DUPLICATE_WISH(HttpStatus.BAD_REQUEST, "이미 찜한 상품입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

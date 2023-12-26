@@ -10,8 +10,10 @@ import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesEntity;
 import com.example.aucison_service.jpa.member.WishesRepository;
+import com.example.aucison_service.jpa.product.AucsInfosEntity;
 import com.example.aucison_service.jpa.product.ProductsEntity;
 import com.example.aucison_service.jpa.product.ProductsRepository;
+import com.example.aucison_service.jpa.product.SaleInfosEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,16 +46,43 @@ public class WishServiceImpl implements WishService {
     public void addWish(WishRequestDto wishRequestDto, MemberDetails principal) {
         validatePrincipal(principal);
 
-//        WishesEntity wish = WishesEntity.builder();
+        //사용자 정보 가져옴
+        MembersEntity member = membersRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // 상품 정보 조회
+        Long productId = wishRequestDto.getProductsId();
+        ProductsEntity product = productsRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
+         //중복 찜 확인
+        if(wishesRepository.existsByMembersEntityAndProductId(member, productId)) {
+            throw new AppException(ErrorCode.DUPLICATE_WISH);
+        }
 
+        // 찜 객체 생성 및 저장
+        WishesEntity wish = WishesEntity.builder()
+                .membersEntity(member)
+                .productId(product.getProductsId())
+                .build();
+        wishesRepository.save(wish);
     }
 
     //찜 삭제
     @Override
     public void deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+        //사용자 정보 가져옴
+        MembersEntity member = membersRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
+    // 찜 정보 조회
+        Long productId = wishRequestDto.getProductsId();
+        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productId)
+                .orElseThrow(() -> new AppException(ErrorCode.WISH_NOT_FOUND));
+
+
+        // 찜 삭제
+        wishesRepository.delete(wish);
     }
 
     //찜 목록 조회
@@ -66,8 +95,32 @@ public class WishServiceImpl implements WishService {
         List<WishesEntity> wishes = wishesRepository.findByMembersEntity(member);
 
         return wishes.stream()
-                .map(wish -> {
-                    ProductsEntity product = productsRepository.findByProductsId()
-                }
+                .map(wish -> {  //wish이용하여 하나하나 탐색
+                    ProductsEntity product = productsRepository.findById(wish.getProductId())
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+                    WishResponseDto.WishResponseDtoBuilder builder = WishResponseDto.builder()
+                            .wishesId(wish.getWishesId())
+                            .name(product.getName())
+                            .summary(product.getSummary())
+                            .category(product.getCategory())
+                            .kind(product.getKind())
+                            .brand(product.getBrand());
+
+                    if ("AUCS".equals(product.getCategory())) {
+                        // 경매 상품인 경우
+                        AucsInfosEntity aucInfo = product.getAucsInfosEntity();
+
+                        builder.price(aucInfo.getStartPrice())
+                                .end(aucInfo.getEnd());
+                    } else if ("SALE".equals(product.getCategory())) {
+                        // 비경매 상품인 경우
+                        SaleInfosEntity saleInfo = product.getSaleInfosEntity();
+
+                        builder.nowPrice(saleInfo.getPrice());
+                    }
+                    return builder.build();
+                })
+                .collect(Collectors.toList());
     }
 }
