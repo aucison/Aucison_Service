@@ -7,7 +7,6 @@ import com.example.aucison_service.dto.wish.WishResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.member.WishService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,33 +16,29 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/wishes")
 public class WishController {
 
     private final WishService wishService;
 
-    @Autowired
-    public WishController(WishService wishService) {
-        this.wishService = wishService;
-    }
     // 찜 추가
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<?> addWish(@RequestBody WishRequestDto wishRequestDto,
                                      @AuthenticationPrincipal MemberDetails principal) {
         wishService.addWish(wishRequestDto, principal);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>("Wish added successfully", HttpStatus.CREATED);
     }
 
     // 찜 삭제
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public ResponseEntity<?> deleteWish(@RequestBody WishRequestDto wishRequestDto,
                                         @AuthenticationPrincipal MemberDetails principal) {
         wishService.deleteWish(wishRequestDto, principal);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("Wish deleted successfully", HttpStatus.OK);
     }
 
     // 사용자의 찜 목록 조회
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<List<WishResponseDto>> getMemberWishList(@AuthenticationPrincipal MemberDetails principal) {
         List<WishResponseDto> wishes = wishService.getMemberWishList(principal);
         return new ResponseEntity<>(wishes, HttpStatus.OK);
