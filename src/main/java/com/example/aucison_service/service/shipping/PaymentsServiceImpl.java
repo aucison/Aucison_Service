@@ -110,7 +110,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         //product 이미지 중 대표(첫 번째 url 반환)
-        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOOrderByProductImgIdAsc(productsId);
+        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
         String image = null;
         if (!images.isEmpty()) {
             image =  images.get(0).getUrl(); // 첫 번째 이미지 URL 반환
@@ -181,7 +181,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         logPageExit(logId);
 
         //product 이미지 중 대표(첫 번째 url 반환)
-        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOOrderByProductImgIdAsc(productsId);
+        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
         String image = null;
         if (!images.isEmpty()) {
             image =  images.get(0).getUrl(); // 첫 번째 이미지 URL 반환

@@ -10,10 +10,15 @@ import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesEntity;
 import com.example.aucison_service.jpa.member.WishesRepository;
+
 import com.example.aucison_service.jpa.product.AucsInfosEntity;
 import com.example.aucison_service.jpa.product.ProductsEntity;
 import com.example.aucison_service.jpa.product.ProductsRepository;
 import com.example.aucison_service.jpa.product.SaleInfosEntity;
+
+import com.example.aucison_service.jpa.product.ProductsEntity;
+import com.example.aucison_service.jpa.product.ProductsRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +51,7 @@ public class WishServiceImpl implements WishService {
     public void addWish(WishRequestDto wishRequestDto, MemberDetails principal) {
         validatePrincipal(principal);
 
+
         //사용자 정보 가져옴
         MembersEntity member = membersRepository.findByEmail(principal.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
@@ -66,6 +72,12 @@ public class WishServiceImpl implements WishService {
                 .productId(product.getProductsId())
                 .build();
         wishesRepository.save(wish);
+
+//        WishesEntity wish = WishesEntity.builder();
+
+
+
+
     }
 
     //찜 삭제
@@ -83,6 +95,7 @@ public class WishServiceImpl implements WishService {
 
         // 찜 삭제
         wishesRepository.delete(wish);
+
     }
 
     //찜 목록 조회
@@ -95,6 +108,7 @@ public class WishServiceImpl implements WishService {
         List<WishesEntity> wishes = wishesRepository.findByMembersEntity(member);
 
         return wishes.stream()
+
                 .map(wish -> {  //wish이용하여 하나하나 탐색
                     ProductsEntity product = productsRepository.findById(wish.getProductId())
                             .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -122,5 +136,10 @@ public class WishServiceImpl implements WishService {
                     return builder.build();
                 })
                 .collect(Collectors.toList());
+
+                .map(wish -> {
+                    ProductsEntity product = productsRepository.findByProductsId()
+                }
+
     }
 }
