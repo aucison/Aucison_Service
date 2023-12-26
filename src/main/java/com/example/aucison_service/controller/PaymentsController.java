@@ -41,8 +41,8 @@ public class PaymentsController {
 
     @PostMapping("payment")    //결제완료
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Long> savePayment(@AuthenticationPrincipal MemberDetails principal
-                                        ,@RequestBody PaymentsRequestDto paymentsRequestDto) {
+    public ApiResponse<Long> savePayment(@AuthenticationPrincipal MemberDetails principal,
+                                         @RequestBody PaymentsRequestDto paymentsRequestDto) {
         return ApiResponse.createSuccess(paymentsService.savePayment(principal, paymentsRequestDto));
     }
 }
