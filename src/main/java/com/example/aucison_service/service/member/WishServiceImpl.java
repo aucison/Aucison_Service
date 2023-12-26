@@ -21,6 +21,7 @@ import com.example.aucison_service.jpa.product.ProductsRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +49,7 @@ public class WishServiceImpl implements WishService {
 
     //찜 추가
     @Override
+    @Transactional
     public void addWish(WishRequestDto wishRequestDto, MemberDetails principal) {
         validatePrincipal(principal);
 
@@ -82,6 +84,7 @@ public class WishServiceImpl implements WishService {
 
     //찜 삭제
     @Override
+    @Transactional
     public void deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
         //사용자 정보 가져옴
         MembersEntity member = membersRepository.findByEmail(principal.getUsername())
