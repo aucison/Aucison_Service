@@ -421,7 +421,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         return log.getPageAccessLogsId();
     }
 
-    @Transactional
     // 경매 연장에 따른 Orders 정보 저장 메서드
     private Long saveExtendedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto, AucsInfosEntity aucsInfo) {
         Orders order = Orders.builder()
@@ -434,7 +433,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
-    @Transactional
     // 경매 종료에 따른 Orders 정보 저장 메서드
     private Long saveFinalizedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
         Orders order = Orders.builder()
@@ -447,7 +445,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
-    @Transactional
     // Payment와 Delivery 저장을 위한 공통 메서드
     private void savePaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, Orders order) {
         Payments payment = Payments.builder()
