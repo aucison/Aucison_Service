@@ -137,9 +137,5 @@ public class WishServiceImpl implements WishService {
                 })
                 .collect(Collectors.toList());
 
-                .map(wish -> {
-                    ProductsEntity product = productsRepository.findByProductsId()
-                }
-
     }
 }
