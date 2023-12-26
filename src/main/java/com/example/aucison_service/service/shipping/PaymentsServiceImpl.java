@@ -15,6 +15,7 @@ import com.example.aucison_service.service.member.MemberDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -229,6 +230,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
 
     @Override
+    @Transactional
     public Long savePayment(MemberDetails principal, PaymentsRequestDto paymentsRequestDto) {    //결제완료
         String email = principal.getMember().getEmail();
         if ("SALE".equals(paymentsRequestDto.getCategory())) {   //비경매
@@ -240,6 +242,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
     }
 
+    @Transactional
     public Long saveSalePayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(비경매)
         // Orders 정보 저장
         Orders order = Orders.builder()
@@ -290,6 +293,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
+    @Transactional
     public Long saveAucsPayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(경매)
         //결제 페이지 접근 로그 생성 전에 체크
         //TODO: 3분 연장 로직, status 판단 로직
@@ -404,6 +408,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         return orderId;
     }
 
+    @Transactional
     // 페이지에 접근했을 때의 로그 생성
     public Long logPageAccess(Long productId, String email, PageType pageType) {
         PageAccessLogs log = PageAccessLogs.builder()
@@ -416,6 +421,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         return log.getPageAccessLogsId();
     }
 
+    @Transactional
     // 경매 연장에 따른 Orders 정보 저장 메서드
     private Long saveExtendedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto, AucsInfosEntity aucsInfo) {
         Orders order = Orders.builder()
@@ -428,6 +434,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
+    @Transactional
     // 경매 종료에 따른 Orders 정보 저장 메서드
     private Long saveFinalizedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
         Orders order = Orders.builder()
@@ -440,6 +447,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
+    @Transactional
     // Payment와 Delivery 저장을 위한 공통 메서드
     private void savePaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, Orders order) {
         Payments payment = Payments.builder()
@@ -462,6 +470,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
 
+    @Transactional
     // 페이지에서 나갔을 때의 로그 갱신
     public void logPageExit(Long logId) {
         // logId는 페이지 접근 시 저장된 로그의 ID
