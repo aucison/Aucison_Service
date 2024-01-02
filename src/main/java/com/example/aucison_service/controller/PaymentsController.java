@@ -21,13 +21,20 @@ public class PaymentsController {
     public PaymentsController(PaymentsService paymentsService) {
         this.paymentsService = paymentsService;
     }
-    @GetMapping("payment/{productsId}")    //가상결제
+    @GetMapping("payment/auction/{productsId}")    //경매상품 가상결제
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<VirtualPaymentResponseDto> getVirtualPaymentInfo(@PathVariable Long productsId,
+    public ApiResponse<VirtualPaymentResponseDto> getAucsVirtualPaymentInfo(@PathVariable Long productsId,
                                                                         @AuthenticationPrincipal MemberDetails principal,
                                                                         @RequestParam String addrName,
                                                                         @RequestParam int percent) {
-        return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, addrName, percent));
+        return ApiResponse.createSuccess(paymentsService.getAucsVirtualPaymentInfo(productsId, principal, addrName, percent));
+    }
+    @GetMapping("payment/sale/{productsId}")    //일반상품 가상결제
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<VirtualPaymentResponseDto> getSaleVirtualPaymentInfo(@PathVariable Long productsId,
+                                                                        @AuthenticationPrincipal MemberDetails principal,
+                                                                        @RequestParam String addrName) {
+        return ApiResponse.createSuccess(paymentsService.getSaleVirtualPaymentInfo(productsId, principal, addrName));
     }
 
     @GetMapping("payment/{productsId}/shipping-address")   //배송지 새롭게 조회
