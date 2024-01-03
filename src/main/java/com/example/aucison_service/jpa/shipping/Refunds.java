@@ -25,7 +25,8 @@ public class Refunds extends BaseTimeEntity {  //환불
     private Orders orders;  //주문 정보
 
     @Builder
-    public Refunds(float cost) {
+    public Refunds(float cost, Orders orders) {
         this.cost = cost;
+        this.orders = orders;
     }
 }

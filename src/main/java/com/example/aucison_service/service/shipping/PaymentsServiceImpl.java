@@ -11,7 +11,10 @@ import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.jpa.product.*;
 import com.example.aucison_service.jpa.shipping.*;
+import com.example.aucison_service.service.member.GoogleAuthService;
 import com.example.aucison_service.service.member.MemberDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentsServiceImpl implements PaymentsService {
+    private static final Logger logger = LoggerFactory.getLogger(GoogleAuthService.class);
     private final BidsRepository bidsRepository;
     private final PageAccessLogsRepository pageAccessLogsRepository;
     private final OrdersRepository ordersRepository;
@@ -366,15 +370,15 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         long timeDifference = Duration.between(auctionAccessTime, auctionEndTime).toMillis();; // 시간 차이를 밀리초 단위로 계산
 
-        Long orderId = null;
+        Orders order = null;
         if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {
             aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출
             aucsInfosRepository.save(aucsInfo);
-            orderId = saveAuctionOrder(email, paymentsRequestDto);
+            order = saveAuctionOrder(email, paymentsRequestDto);
         } else if (timeDifference < 3 * 60 * 1000) {
-            orderId = saveFinalizedAuctionOrder(email, paymentsRequestDto);
+            order = saveFinalizedAuctionOrder(email, paymentsRequestDto);
         } else {
-            orderId = saveAuctionOrder(email, paymentsRequestDto);
+            order = saveAuctionOrder(email, paymentsRequestDto);
         }
 
         // Bids 정보 저장
@@ -406,14 +410,17 @@ public class PaymentsServiceImpl implements PaymentsService {
         //경매 미낙찰에 따른 환불
         //상품 id로 해당 상품 주문 정보를 모두 찾음
         List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
+        logger.info(String.valueOf(existingOrders.size()));
 
-        Orders winningOrder = null;
+        Orders winningOrder = order;
         if (!existingOrders.isEmpty()) {
-            winningOrder = existingOrders.get(0);
+            //logger.info(winningOrder.getPayments().getPaymentsId().toString());
 
             for (Orders ord : existingOrders) {
+                logger.info(ord.getOrdersId().toString());
                 //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
                 if (!ord.equals(winningOrder) && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
+                    logger.info(ord.getPayments().getPaymentsId().toString());
 
                     ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
 
@@ -430,6 +437,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                     // 환불 정보 저장
                     Refunds refund = Refunds.builder()
                             .cost(refundedAmount)
+                            .orders(ord)
                             .build();
                     refundsRepository.save(refund);
 
@@ -463,7 +471,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         logPageExit(logId);
 
-        return orderId;
+        return order.getOrdersId();
     }
 
     @Transactional
@@ -481,7 +489,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     // 경매 Orders 정보 저장 메서드
     @Transactional
-    public Long saveAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
+    public Orders saveAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
         Orders order = Orders.builder()
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
@@ -489,12 +497,12 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
         order = ordersRepository.save(order);
         savePaymentAndDelivery(paymentsRequestDto, order);
-        return order.getOrdersId();
+        return order;
     }
 
     // 경매 종료에 따른 Orders 정보 저장 메서드
     @Transactional
-    public Long saveFinalizedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
+    public Orders saveFinalizedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
         Orders order = Orders.builder()
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
@@ -502,7 +510,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
         order = ordersRepository.save(order);
         savePaymentAndDelivery(paymentsRequestDto, order);
-        return order.getOrdersId();
+        return order;
     }
 
     // Payment와 Delivery 저장을 위한 공통 메서드
@@ -518,6 +526,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .addr(paymentsRequestDto.getAddr())
                 .addrDetail(paymentsRequestDto.getAddrDetail())
                 .addrName(paymentsRequestDto.getAddrName())
+                .zipNum(paymentsRequestDto.getZipNum())
                 .isCompleted(false)
                 .isStarted(false)
                 .name(paymentsRequestDto.getName())
