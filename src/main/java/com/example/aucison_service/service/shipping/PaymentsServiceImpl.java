@@ -370,9 +370,11 @@ public class PaymentsServiceImpl implements PaymentsService {
         if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {
             aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출
             aucsInfosRepository.save(aucsInfo);
-            orderId = saveExtendedAuctionOrder(email, paymentsRequestDto, aucsInfo);
+            orderId = saveAuctionOrder(email, paymentsRequestDto);
         } else if (timeDifference < 3 * 60 * 1000) {
             orderId = saveFinalizedAuctionOrder(email, paymentsRequestDto);
+        } else {
+            orderId = saveAuctionOrder(email, paymentsRequestDto);
         }
 
         // Bids 정보 저장
@@ -405,45 +407,48 @@ public class PaymentsServiceImpl implements PaymentsService {
         //상품 id로 해당 상품 주문 정보를 모두 찾음
         List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
 
-        Orders winningOrder = existingOrders.get(0);
+        Orders winningOrder = null;
+        if (!existingOrders.isEmpty()) {
+            winningOrder = existingOrders.get(0);
 
-        for (Orders ord : existingOrders) {
-            //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
-            if (!ord.equals(winningOrder) && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
+            for (Orders ord : existingOrders) {
+                //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
+                if (!ord.equals(winningOrder) && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
 
-                ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
+                    ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
 
-                float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
+                    float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
-                //credit 정보 가져오기
-                //TODO: 판매자 credit update
-                currentCredit = membersInfoEntity.getCredit();
-                updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
+                    //credit 정보 가져오기
+                    //TODO: 판매자 credit update
+                    currentCredit = membersInfoEntity.getCredit();
+                    updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
 
-                // credit 업데이트 요청
-                membersInfoEntity.updateCredit(updatedCredit);
+                    // credit 업데이트 요청
+                    membersInfoEntity.updateCredit(updatedCredit);
 
-                // 환불 정보 저장
-                Refunds refund = Refunds.builder()
-                        .cost(refundedAmount)
-                        .build();
-                refundsRepository.save(refund);
+                    // 환불 정보 저장
+                    Refunds refund = Refunds.builder()
+                            .cost(refundedAmount)
+                            .build();
+                    refundsRepository.save(refund);
 
-                // 실시간 응찰 내역에 패찰 정보 저장
-                Bids failedBid = Bids.builder()
-                        .productsId(paymentsRequestDto.getProductsId())
-                        .email(ord.getEmail())
-                        .nowPrice(ord.getPayments().getCost())
+                    // 실시간 응찰 내역에 패찰 정보 저장
+                    Bids failedBid = Bids.builder()
+                            .productsId(paymentsRequestDto.getProductsId())
+                            .email(ord.getEmail())
+                            .nowPrice(ord.getPayments().getCost())
 //                        .bidsAt(new Date())
-                        .status(OrderStatus.FAILED_BID)
-                        .bidsCode(UUID.randomUUID().toString())
-                        .build();
-                bidsRepository.save(failedBid);
+                            .status(OrderStatus.FAILED_BID)
+                            .bidsCode(UUID.randomUUID().toString())
+                            .build();
+                    bidsRepository.save(failedBid);
 
+                }
             }
         }
 
-        //가상 결제 페이지 탈출 로그 생성 전에 체크
+        //결제 페이지 탈출 로그 생성 전에 체크
         LocalDateTime exitTime = LocalDateTime.now();
         if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
             throw new AppException(ErrorCode.AUCTION_ENDED);
@@ -474,9 +479,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         return log.getPageAccessLogsId();
     }
 
-    // 경매 연장에 따른 Orders 정보 저장 메서드
+    // 경매 Orders 정보 저장 메서드
     @Transactional
-    public Long saveExtendedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto, AucsInfosEntity aucsInfo) {
+    public Long saveAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
         Orders order = Orders.builder()
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
