@@ -41,19 +41,24 @@ public class ProductServiceImpl implements ProductService{
     WishesRepository wishesRepository;
     S3Service s3Service;
 
+    ProductsIndexService productsIndexService;
+    ProductsSearchRepository productsSearchRepository;
+
 
 
 
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
-                              WishesRepository wishesRepository, S3Service s3Service){
+                              WishesRepository wishesRepository, S3Service s3Service, ProductsIndexService productsIndexService, ProductsSearchRepository productsSearchRepository){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
         this.membersRepository=membersRepository;
         this.wishesRepository=wishesRepository;
         this.s3Service=s3Service;
+        this.productsIndexService = productsIndexService;
+        this.productsSearchRepository = productsSearchRepository;
     }
 
 
@@ -273,61 +278,42 @@ public class ProductServiceImpl implements ProductService{
 
     }
 
+
     @Override
-    public ProductSearchResponseDto searchProductByName(String name) {
-        //상품 검색 결과 반환
-        //현재 기술적 한개로 검색시 정확히 일치하는 단 한개만을 보여줄 수 있음
+    public List<ProductSearchResponseDto> searchProductByName(String name) {
+        List<ProductsEntity> products = productsSearchRepository.findByName(name);
 
-
-        ProductsEntity product = productsRepository.findByName(name);
-
-        //검색결과 -> 일치하는 것 없음
-        if (product == null) {
+        if (products.isEmpty()) {
             throw new AppException(ErrorCode.SEARCH_NOT_FOUND);
         }
+    //ProductSearchResponseDto 클래스에 Lombok의 @Builder 어노테이션이 적용되어 있을 떄  아래처럼 한다.
+        return products.stream().map(product -> {
+            ProductSearchResponseDto.ProductSearchResponseDtoBuilder builder = ProductSearchResponseDto.builder()
+                    .productsId(product.getProductsId())
+                    .name(product.getName())
+                    .summary(product.getSummary())
+                    .brand(product.getBrand());
 
+            if ("AUCS".equals(product.getCategory())) {
+                builder.end(product.getAucsInfosEntity().getEnd())
+                        .high(product.getAucsInfosEntity().getStartPrice());
+            } else if ("SALE".equals(product.getCategory())) {
+                builder.price(product.getSaleInfosEntity().getPrice());
+            }
 
-        //객체 생성 과정에서 선택적으로 특정 필드를 생성하기 위해 다음과 같이 코드 구성 -> .build가 나중에 나옴(return시에)
-        ProductSearchResponseDto.ProductSearchResponseDtoBuilder dto = ProductSearchResponseDto.builder()
-                .productsId(product.getProductsId())
-                .name(product.getName())
-                .summary(product.getSummary())
-                .brand(product.getBrand());
-
-
-
-        if("AUCS".equals(product.getCategory())){
-
-//            //최고가를 얻기 위해 nowPrice의 모든 값 비교
-//            List<Long> nowPrices = shippingServiceClient.getNowPricesByProductId(product.getProducts_id());
-//            Long highestPrice = nowPrices.stream().max(Long::compareTo).orElse(null);
-
-            dto
-                    .end(product.getAucsInfosEntity().getEnd())
-                    .high(product.getAucsInfosEntity().getStartPrice());    //임시로 최고가를 이딴식으로 가져옴
-
-        }
-        else if("SALE".equals(product.getCategory())){
-            dto
-                    .price(product.getSaleInfosEntity().getPrice());
-        }
-
-
-        return dto.build();
-
+            return builder.build();
+        }).collect(Collectors.toList());
     }
 
     @Override
     public ProductDetailResponseDto getProductDetail(Long productsId) {
-
-
         ProductsEntity product = productsRepository.findByProductsId(productsId);
 
         if (product == null) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        ProductDetailResponseDto.ProductDetailResponseDtoBuilder builder = ProductDetailResponseDto.builder()
+        ProductDetailResponseDto.ProductDetailResponseDtoBuilder dto = ProductDetailResponseDto.builder()
                 .name(product.getName())
                 .kind(product.getKind())
                 .category(product.getCategory())
@@ -337,17 +323,17 @@ public class ProductServiceImpl implements ProductService{
 
         // 경매 상품 추가정보
         if ("AUCS".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
-            builder.startPrice(product.getAucsInfosEntity().getStartPrice())
+            dto.startPrice(product.getAucsInfosEntity().getStartPrice())
                     .end(product.getAucsInfosEntity().getEnd())
                     .high(product.getAucsInfosEntity().getStartPrice());
         }
 
         // 비경매 상품 추가정보
         if ("SALE".equals(product.getCategory()) && product.getSaleInfosEntity() != null) {
-            builder.price(product.getSaleInfosEntity().getPrice());
+            dto.price(product.getSaleInfosEntity().getPrice());
         }
 
-        return builder.build();
+        return dto.build();
 
 
         //게시판 정보들은 따로 보내준다

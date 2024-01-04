@@ -21,7 +21,7 @@ public interface ProductService {
 
     void registerProduct(ProductRegisterRequestDto dto, @AuthenticationPrincipal MemberDetails principal);
 
-    ProductSearchResponseDto searchProductByName(String name);
+    List<ProductSearchResponseDto> searchProductByName(String name);
 
     //상품 상세 정보 조회하기
     ProductDetailResponseDto getProductDetail(Long productsId);

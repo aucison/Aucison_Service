@@ -88,20 +88,20 @@ public class ProductController {
     }
 
 
-    //상품 검색
     @GetMapping("/search")
-    public ResponseEntity<ProductSearchResponseDto> searchProductByName(@RequestParam String name) {//쿼리 파라미터 방식(Query Parameter) -> 테스트 ?name=th
+    public ResponseEntity<List<ProductSearchResponseDto>> searchProductByName(@RequestParam String name) {
         try {
             // 서비스 계층을 통한 상품 검색 로직 수행
-            ProductSearchResponseDto response = productService.searchProductByName(name);
+            List<ProductSearchResponseDto> responses = productService.searchProductByName(name);
 
-            if (response == null) {
+            if (responses.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return ResponseEntity.ok(responses);
         } catch (Exception e) {
             // 예외 처리
+            logger.error("Error during product search: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
