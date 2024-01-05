@@ -34,6 +34,8 @@ build/
 
 
 ### custom add ###
+src/main/java/com/example/aucison_service/admin/
+src/main/java/com/example/aucison_service/admin/*
 src/main/resources/application-aws.yml
 src/main/resources/application-google.yml
 src/main/resources/application-https.yml

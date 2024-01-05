@@ -1,9 +1,11 @@
 spring:
+  elasticsearch:
+    rest:
+      uris: "http://localhost:9200" # Elasticsearch 서버의 URL
   jpa:
     database: mysql
     show-sql: 'true'
   profiles:
-
     include: aws, google, https
 #    include: test
 
