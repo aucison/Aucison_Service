@@ -11,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/payment")
 public class PaymentsController {
@@ -21,21 +23,16 @@ public class PaymentsController {
     public PaymentsController(PaymentsService paymentsService) {
         this.paymentsService = paymentsService;
     }
-    @GetMapping("/auction/{productsId}")    //경매상품 가상결제
+
+    @GetMapping("/{productsId}")    //가상결제
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<VirtualPaymentResponseDto> getAucsVirtualPaymentInfo(@PathVariable Long productsId,
+    public ApiResponse<VirtualPaymentResponseDto> getVirtualPaymentInfo(@PathVariable Long productsId,
                                                                         @AuthenticationPrincipal MemberDetails principal,
                                                                         @RequestParam String addrName,
-                                                                        @RequestParam int percent) {
-        return ApiResponse.createSuccess(paymentsService.getAucsVirtualPaymentInfo(productsId, principal, addrName, percent));
+                                                                        @RequestParam Optional<Integer> percent) {
+        return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, addrName, percent));
     }
-    @GetMapping("/sale/{productsId}")    //일반상품 가상결제
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<VirtualPaymentResponseDto> getSaleVirtualPaymentInfo(@PathVariable Long productsId,
-                                                                        @AuthenticationPrincipal MemberDetails principal,
-                                                                        @RequestParam String addrName) {
-        return ApiResponse.createSuccess(paymentsService.getSaleVirtualPaymentInfo(productsId, principal, addrName));
-    }
+
 
     @GetMapping("/{productsId}/shipping-address")   //배송지 새롭게 조회
     public ApiResponse<?> getShippingAddress(@PathVariable Long productsId,

@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -66,42 +67,23 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, MemberDetails principal,
-                                                           String addrName, int percent) {  //가상 결제(경매)
+    public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName,
+                                                           Optional<Integer> percent) {
+        ProductsEntity product = productsRepository.findByProductsId(productsId);
         String email = principal.getMember().getEmail();
 
-        //product 정보 가져오기
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
-
-        if ("AUCS".equals(product.getCategory())) {
-            //경매 상품 가상 결제
-            return getAucsVirtualPaymentInfo(productsId, email, addrName, percent);
-        }  else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        switch (product.getCategory()) {
+            case "AUCS":
+                return getAucsVirtualPaymentInfo(productsId, email, addrName, percent.orElseThrow(()
+                        -> new AppException(ErrorCode.INVALID_PERCENT)));
+            case "SALE":
+                return getSaleVirtualPaymentInfo(productsId, email, addrName);
+            default:
+                throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
-
     }
 
-    @Override
-    @Transactional
-    public VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, MemberDetails principal,
-                                                               String addrName) {  //가상 결제(비경매)
-        String email = principal.getMember().getEmail();
-
-        //product 정보 가져오기
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
-
-        if ("SALE".equals(product.getCategory())) {
-            //경매 상품 가상 결제
-            return getSaleVirtualPaymentInfo(productsId, email, addrName);
-        }  else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-
-    }
-
-    @Transactional
-    public VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
+    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
                                                                String addrName) {  //가상 결제(비경매)
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
@@ -109,7 +91,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         //product 정보 가져오기
         ProductsEntity product = productsRepository.findByProductsId(productsId);
 
-        //AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
@@ -121,41 +102,18 @@ public class PaymentsServiceImpl implements PaymentsService {
         //credit 정보 가져오기
         float currentCredit = membersInfoEntity.getCredit();
 
-        //등록 가격(판매) 가져오기
+        //등록 가격(비경매) 가져오기
         SaleInfosEntity saleInfosEntity = saleInfosRepository.findByProductsEntity(product);
+        float newCredit = currentCredit - saleInfosEntity.getPrice();        //현재 credit에서 등록 가격을 차감
 
-        //현재 credit에서 등록 가격을 차감
-        float newCredit = currentCredit - saleInfosEntity.getPrice();
+        validateCredit(newCredit);
 
-        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
-
-        //product 이미지 중 대표(첫 번째 url 반환)
-        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
-        String image = null;
-        if (!images.isEmpty()) {
-            image =  images.get(0).getUrl(); // 첫 번째 이미지 URL 반환
-        } else {
-            image = null; // 이미지가 없으면 null 반환
-        }
+        String image = fetchProductImage(productsId);
 
         logPageExit(logId);
 
-        return VirtualPaymentResponseDto.builder()
-                .category(product.getCategory())
-                .name(product.getName())
-                .productImg(image)
-                .price(saleInfosEntity.getPrice())
-                .addrName(addresses.getAddrName())
-                .name(addresses.getName())
-                .tel(addresses.getTel())
-                .zipCode(addresses.getZipCode())
-                .addr(addresses.getAddr())
-                .addrDetail(addresses.getAddrDetail())
-                .credit(currentCredit)
-                .newCredit(newCredit)
-                .build();
+        return buildVirtualPaymentResponseDto(product, image, saleInfosEntity.getPrice(), addresses,
+                currentCredit, newCredit);
 
     }
 
@@ -200,21 +158,12 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //현재 credit에서 경매 가격을 차감
         float newCredit = currentCredit - nowPrice;
-
-        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
+        validateCredit(newCredit);
 
         float newPrice = nowPrice + (nowPrice * (percent / 100));   //응찰가
 
         //product 이미지 중 대표(첫 번째 url 반환)
-        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
-        String image = null;
-        if (!images.isEmpty()) {
-            image =  images.get(0).getUrl(); // 첫 번째 이미지 URL 반환
-        } else {
-            image = null; // 이미지가 없으면 null 반환
-        }
+        String image = fetchProductImage(productsId);
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
         LocalDateTime exitTime = LocalDateTime.now();
@@ -224,11 +173,33 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         logPageExit(logId);
 
+        return buildVirtualPaymentResponseDto(product, image, newPrice, addresses,
+                currentCredit, newCredit);
+    }
+
+    private void validateCredit(float credit) { //사용자의 credit이 결제하려는 금액보다 적은지 검사하는 메서드
+        if (credit < 0) {
+            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+        }
+    }
+
+    private String fetchProductImage(Long productsId) { //product 이미지 중 대표(첫 번째 url 반환)
+        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
+        return images.isEmpty() ? null : images.get(0).getUrl();
+    }
+
+    //가상결제 공통반환 메서드
+    private VirtualPaymentResponseDto buildVirtualPaymentResponseDto(ProductsEntity product,
+                                                                     String image,
+                                                                     float price,
+                                                                     AddrInfoResponseDto addresses,
+                                                                     float currentCredit,
+                                                                     float newCredit) {
         return VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())
                 .name(product.getName())
                 .productImg(image)
-                .nowPrice(newPrice)
+                .price(price)
                 .addrName(addresses.getAddrName())
                 .name(addresses.getName())
                 .tel(addresses.getTel())
@@ -238,7 +209,6 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .credit(currentCredit)
                 .newCredit(newCredit)
                 .build();
-
     }
 
     @Override
