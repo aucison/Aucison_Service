@@ -1,7 +1,7 @@
 package com.example.aucison_service.service.product;
 
 import com.example.aucison_service.jpa.product.ProductsRepository;
-import com.example.aucison_service.jpa.product.ProductsSearchRepository;
+import com.example.aucison_service.elastic.ProductsSearchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

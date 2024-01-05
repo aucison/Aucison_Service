@@ -2,7 +2,7 @@ package com.example.aucison_service.service.product;
 
 
 
-import com.example.aucison_service.controller.AuthController;
+
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
@@ -10,6 +10,7 @@ import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
+import com.example.aucison_service.elastic.ProductsSearchRepository;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
@@ -17,9 +18,19 @@ import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.s3.S3Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +54,7 @@ public class ProductServiceImpl implements ProductService{
 
     ProductsIndexService productsIndexService;
     ProductsSearchRepository productsSearchRepository;
+    ElasticsearchOperations elasticsearchOperations;
 
 
 
@@ -50,7 +62,8 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
-                              WishesRepository wishesRepository, S3Service s3Service, ProductsIndexService productsIndexService, ProductsSearchRepository productsSearchRepository){
+                              WishesRepository wishesRepository, S3Service s3Service, ProductsIndexService productsIndexService, ProductsSearchRepository productsSearchRepository,
+                              ElasticsearchOperations elasticsearchOperations){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
@@ -59,6 +72,7 @@ public class ProductServiceImpl implements ProductService{
         this.s3Service=s3Service;
         this.productsIndexService = productsIndexService;
         this.productsSearchRepository = productsSearchRepository;
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
 
@@ -281,7 +295,9 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public List<ProductSearchResponseDto> searchProductByName(String name) {
-        List<ProductsEntity> products = productsSearchRepository.findByName(name);
+        Pageable pageable = PageRequest.of(0, 3); // 예시: 첫 페이지에 3개 반환
+        List<ProductsEntity> products = findBySimilarName(name, pageable);
+
 
         if (products.isEmpty()) {
             throw new AppException(ErrorCode.SEARCH_NOT_FOUND);
@@ -304,6 +320,17 @@ public class ProductServiceImpl implements ProductService{
             return builder.build();
         }).collect(Collectors.toList());
     }
+
+    private List<ProductsEntity> findBySimilarName(String name, Pageable pageable) {
+        String queryString = String.format("name:(%s)", name);
+        StringQuery searchQuery = new StringQuery(queryString, pageable);
+
+        SearchHits<ProductsEntity> searchHits = elasticsearchOperations.search(searchQuery, ProductsEntity.class);
+        return searchHits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public ProductDetailResponseDto getProductDetail(Long productsId) {

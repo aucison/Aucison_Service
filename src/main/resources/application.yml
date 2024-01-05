@@ -1,7 +1,7 @@
 spring:
   elasticsearch:
-    rest:
-      uris: "http://localhost:9200" # Elasticsearch 서버의 URL
+    uris: "http://localhost:9200"
+
   jpa:
     database: mysql
     show-sql: 'true'
