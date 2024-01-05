@@ -16,6 +16,5 @@ public class PaymentsRequestDto {
     private String addrDetail;  //상세주소
     private String name;    //받는사람 이름
     private String tel; //받는사람 전화번호
-    private float nowPrice; //(경매) 응찰가: 가상 결제 페이지에서 연산이 끝난 가격
-    private float price;    //(비경매) 등록가격
+    private float price;    //등록가격
 }
