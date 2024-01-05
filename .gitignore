@@ -40,8 +40,8 @@ src/main/resources/application-https.yml
 src/main/resources/application-test.yml
 src/main/resources/keystore.p12
 
-src/main/java/com/example/aucison_service/testing
-src/main/java/com/example/aucison_service/testing/TestController.java
+src/main/java/com/example/aucison_service/admin/
+src/main/java/com/example/aucison_service/admin/*
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,java,maven
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,java,maven
 

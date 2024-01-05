@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentsServiceImpl implements PaymentsService {
-    private static final Logger logger = LoggerFactory.getLogger(GoogleAuthService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PaymentsServiceImpl.class);
     private final BidsRepository bidsRepository;
     private final PageAccessLogsRepository pageAccessLogsRepository;
     private final OrdersRepository ordersRepository;
@@ -320,15 +320,19 @@ public class PaymentsServiceImpl implements PaymentsService {
         List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
         logger.info(String.valueOf(existingOrders.size()));
 
-//        Orders winningOrder = order;
+        Orders lastlyOrder = order;    //방금 경매상품을 응찰한 사용자의 주문
         if (!existingOrders.isEmpty()) {
             //logger.info(winningOrder.getPayments().getPaymentsId().toString());
 
             for (Orders ord : existingOrders) {
+                logger.info(ord.getProductsId().toString());
                 logger.info(ord.getOrdersId().toString());
+                logger.info(ord.getEmail());
+                logger.info(ord.getStatus().toString());
+
                 //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
-                if (ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
-                    logger.info(ord.getPayments().getPaymentsId().toString());
+                if (lastlyOrder != ord && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
+                    //logger.info(ord.getPayments().getPaymentsId().toString());
 
                     ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
 
@@ -417,11 +421,15 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
         ordersRepository.save(order);
 
+        logger.info(order.getProductsId().toString());
+
         Payments payment = Payments.builder()
                 .cost(paymentsRequestDto.getPrice())
                 .orders(order)
                 .build();
         paymentsRepository.save(payment);
+
+        logger.info(payment.getPaymentsId().toString());
 
         Deliveries delivery = Deliveries.builder()
                 .addr(paymentsRequestDto.getAddr())
@@ -435,6 +443,8 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .orders(order)
                 .build();
         deliveriesRepository.save(delivery);
+
+        logger.info(delivery.getDeliveriesId().toString());
 
         return order;
     }
@@ -468,10 +478,15 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private boolean isBeforeAuctionEndDate(Long productsId, LocalDateTime dateTimeToCheck) {
         //종료 날짜를 받아와 현재 시간과 비교하여 true 또는 false를 반환
+
         ProductsEntity product = productsRepository.findByProductsId(productsId);
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
 
         LocalDateTime auctionEndDate = aucsInfo.getEnd();
+
+        // 로깅 추가하여 시간 비교 확인
+        logger.info("Current Time: {}", dateTimeToCheck);
+        logger.info("Auction End Time: {}", auctionEndDate);
 
         return dateTimeToCheck.isBefore(auctionEndDate);
     }
