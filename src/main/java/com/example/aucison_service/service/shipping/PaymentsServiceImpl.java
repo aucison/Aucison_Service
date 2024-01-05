@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -66,42 +67,23 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, MemberDetails principal,
-                                                           String addrName, int percent) {  //가상 결제(경매)
+    public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName,
+                                                           Optional<Integer> percent) {
+        ProductsEntity product = productsRepository.findByProductsId(productsId);
         String email = principal.getMember().getEmail();
 
-        //product 정보 가져오기
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
-
-        if ("AUCS".equals(product.getCategory())) {
-            //경매 상품 가상 결제
-            return getAucsVirtualPaymentInfo(productsId, email, addrName, percent);
-        }  else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        switch (product.getCategory()) {
+            case "AUCS":
+                return getAucsVirtualPaymentInfo(productsId, email, addrName, percent.orElseThrow(()
+                        -> new AppException(ErrorCode.INVALID_PERCENT)));
+            case "SALE":
+                return getSaleVirtualPaymentInfo(productsId, email, addrName);
+            default:
+                throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
-
     }
 
-    @Override
-    @Transactional
-    public VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, MemberDetails principal,
-                                                               String addrName) {  //가상 결제(비경매)
-        String email = principal.getMember().getEmail();
-
-        //product 정보 가져오기
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
-
-        if ("SALE".equals(product.getCategory())) {
-            //경매 상품 가상 결제
-            return getSaleVirtualPaymentInfo(productsId, email, addrName);
-        }  else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-
-    }
-
-    @Transactional
-    public VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
+    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
                                                                String addrName) {  //가상 결제(비경매)
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
@@ -109,7 +91,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         //product 정보 가져오기
         ProductsEntity product = productsRepository.findByProductsId(productsId);
 
-        //AddrInfoResponseDto addrInfoResponseDto = fetchShippingInfo(email, addrName);
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
@@ -121,46 +102,22 @@ public class PaymentsServiceImpl implements PaymentsService {
         //credit 정보 가져오기
         float currentCredit = membersInfoEntity.getCredit();
 
-        //등록 가격(판매) 가져오기
+        //등록 가격(비경매) 가져오기
         SaleInfosEntity saleInfosEntity = saleInfosRepository.findByProductsEntity(product);
+        float newCredit = currentCredit - saleInfosEntity.getPrice();        //현재 credit에서 등록 가격을 차감
 
-        //현재 credit에서 등록 가격을 차감
-        float newCredit = currentCredit - saleInfosEntity.getPrice();
+        validateCredit(newCredit);
 
-        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
-
-        //product 이미지 중 대표(첫 번째 url 반환)
-        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
-        String image = null;
-        if (!images.isEmpty()) {
-            image =  images.get(0).getUrl(); // 첫 번째 이미지 URL 반환
-        } else {
-            image = null; // 이미지가 없으면 null 반환
-        }
+        String image = fetchProductImage(productsId);
 
         logPageExit(logId);
 
-        return VirtualPaymentResponseDto.builder()
-                .category(product.getCategory())
-                .name(product.getName())
-                .productImg(image)
-                .price(saleInfosEntity.getPrice())
-                .addrName(addresses.getAddrName())
-                .name(addresses.getName())
-                .tel(addresses.getTel())
-                .zipCode(addresses.getZipCode())
-                .addr(addresses.getAddr())
-                .addrDetail(addresses.getAddrDetail())
-                .credit(currentCredit)
-                .newCredit(newCredit)
-                .build();
+        return buildVirtualPaymentResponseDto(product, image, saleInfosEntity.getPrice(), addresses,
+                currentCredit, newCredit);
 
     }
 
-    @Transactional
-    public VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email,
+    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email,
                                                                String addrName, int percent) {  //가상 결제(경매)
         //가상 결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
@@ -200,21 +157,12 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //현재 credit에서 경매 가격을 차감
         float newCredit = currentCredit - nowPrice;
-
-        if (newCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
+        validateCredit(newCredit);
 
         float newPrice = nowPrice + (nowPrice * (percent / 100));   //응찰가
 
         //product 이미지 중 대표(첫 번째 url 반환)
-        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
-        String image = null;
-        if (!images.isEmpty()) {
-            image =  images.get(0).getUrl(); // 첫 번째 이미지 URL 반환
-        } else {
-            image = null; // 이미지가 없으면 null 반환
-        }
+        String image = fetchProductImage(productsId);
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
         LocalDateTime exitTime = LocalDateTime.now();
@@ -224,11 +172,33 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         logPageExit(logId);
 
+        return buildVirtualPaymentResponseDto(product, image, newPrice, addresses,
+                currentCredit, newCredit);
+    }
+
+    private void validateCredit(float credit) { //사용자의 credit이 결제하려는 금액보다 적은지 검사하는 메서드
+        if (credit < 0) {
+            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+        }
+    }
+
+    private String fetchProductImage(Long productsId) { //product 이미지 중 대표(첫 번째 url 반환)
+        List<ProductImgEntity> images = productImgRepository.findByProductProductsIdOrderByProductImgIdAsc(productsId);
+        return images.isEmpty() ? null : images.get(0).getUrl();
+    }
+
+    //가상결제 공통반환 메서드
+    private VirtualPaymentResponseDto buildVirtualPaymentResponseDto(ProductsEntity product,
+                                                                     String image,
+                                                                     float price,
+                                                                     AddrInfoResponseDto addresses,
+                                                                     float currentCredit,
+                                                                     float newCredit) {
         return VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())
                 .name(product.getName())
                 .productImg(image)
-                .nowPrice(newPrice)
+                .price(price)
                 .addrName(addresses.getAddrName())
                 .name(addresses.getName())
                 .tel(addresses.getTel())
@@ -238,7 +208,6 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .credit(currentCredit)
                 .newCredit(newCredit)
                 .build();
-
     }
 
     @Override
@@ -269,83 +238,41 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Transactional
     public Long savePayment(MemberDetails principal, PaymentsRequestDto paymentsRequestDto) {    //결제완료
         String email = principal.getMember().getEmail();
-        if ("SALE".equals(paymentsRequestDto.getCategory())) {   //비경매
-            return saveSalePayment(email, paymentsRequestDto);
-        } else if ("AUCS".equals(paymentsRequestDto.getCategory())) {    //경매
-            return saveAucsPayment(email, paymentsRequestDto);
-        } else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+
+        switch (paymentsRequestDto.getCategory()) {
+            case "AUCS":
+                return saveAucsPayment(email, paymentsRequestDto);
+            case "SALE":
+                return saveSalePayment(email, paymentsRequestDto);
+            default:
+                throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
     }
 
-    @Transactional
-    public Long saveSalePayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(비경매)
+    private Long saveSalePayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(비경매)
         //결제 페이지 접근 로그 생성
         Long logId = logPageAccess(paymentsRequestDto.getProductsId(), email,
                 PageType.PAYMENT_COMPLETED);
 
-        PageAccessLogs accessLog = pageAccessLogsRepository.findById(logId)
-                .orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
+        pageAccessLogsRepository.findById(logId).orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
 
-        // Orders 정보 저장
-        Orders order = Orders.builder()
-                .productsId(paymentsRequestDto.getProductsId())
-                .email(email)
-                .status(OrderStatus.ORDER_COMPLETED)
-                .build();
-
-        order = ordersRepository.save(order);
-
-        // Payments 정보 저장
-        Payments payment = Payments.builder()
-                .cost(paymentsRequestDto.getPrice())
-                .orders(order)
-                .build();
-
-        payment = paymentsRepository.save(payment);
-
-        // Deliveries 정보 저장
-        Deliveries delivery = Deliveries.builder()
-                .zipNum(paymentsRequestDto.getZipNum())
-                .addr(paymentsRequestDto.getAddr())
-                .addrDetail(paymentsRequestDto.getAddrDetail())
-                .addrName(paymentsRequestDto.getAddrName())
-                .isCompleted(false)
-                .isStarted(false)
-                .name(paymentsRequestDto.getName())
-                .tel(paymentsRequestDto.getTel())
-                .orders(order)
-                .build();
-
-        delivery = deliveriesRepository.save(delivery);
+        // Orders, Payments, Deliveries 정보 저장
+        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.ORDER_COMPLETED);
 
         // credit 정보 가져오기
         //TODO: 판매자 credit update
-        MembersEntity membersEntity = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-
-        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
-
-        float currentCredit = membersInfoEntity.getCredit();
-        float updatedCredit = currentCredit - paymentsRequestDto.getPrice();
-        if (updatedCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
-
-        membersInfoEntity.updateCredit(updatedCredit);
+        updateMemberCredit(email, paymentsRequestDto.getPrice());
 
         //상품 삭제
-        ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
-        productsRepository.delete(product);
+        deleteProduct(paymentsRequestDto.getProductsId());
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
         logPageExit(logId);
 
-        return order.getOrdersId();
+        return orders.getOrdersId();
     }
 
-    @Transactional
-    public Long saveAucsPayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(경매)
+    private Long saveAucsPayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(경매)
         //결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
         if (!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), accessTime)) {
@@ -372,54 +299,35 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         Orders order = null;
         if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {
-            aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출
+            aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출(응찰)
             aucsInfosRepository.save(aucsInfo);
-            order = saveAuctionOrder(email, paymentsRequestDto);
-        } else if (timeDifference < 3 * 60 * 1000) {
-            order = saveFinalizedAuctionOrder(email, paymentsRequestDto);
-        } else {
-            order = saveAuctionOrder(email, paymentsRequestDto);
+            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.WAITING_FOR_BID);
+        } else if (timeDifference < 3 * 60 * 1000) {    //낙찰
+            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.WINNING_BID);
+        } else {    //응찰
+            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.WAITING_FOR_BID);
         }
 
         // Bids 정보 저장
-        Bids bid = Bids.builder()
-                .productsId(paymentsRequestDto.getProductsId())
-                .email(email)
-                .nowPrice(paymentsRequestDto.getNowPrice())
-                .status(OrderStatus.WAITING_FOR_BID)
-                // Bids code는 고유하게 생성하는 로직 필요
-                .bidsCode(UUID.randomUUID().toString())
-                .build();
+        saveBidInfo(paymentsRequestDto, email, order);
 
-        bid = bidsRepository.save(bid);
-
-        // credit 정보 가져오기
-        MembersEntity membersEntity = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
-
-        float currentCredit = membersInfoEntity.getCredit();
-        float updatedCredit = currentCredit - paymentsRequestDto.getPrice();
-
-        if (updatedCredit < 0) {    //사용자의 credit이 결제하려는 금액보다 적을 경우
-            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-        }
-
-        membersInfoEntity.updateCredit(updatedCredit);
+        // 구매자 credit update
+        //TODO: 판매자 credit update
+        updateMemberCredit(email, paymentsRequestDto.getPrice());
 
         //경매 미낙찰에 따른 환불
         //상품 id로 해당 상품 주문 정보를 모두 찾음
         List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
         logger.info(String.valueOf(existingOrders.size()));
 
-        Orders winningOrder = order;
+//        Orders winningOrder = order;
         if (!existingOrders.isEmpty()) {
             //logger.info(winningOrder.getPayments().getPaymentsId().toString());
 
             for (Orders ord : existingOrders) {
                 logger.info(ord.getOrdersId().toString());
                 //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
-                if (!ord.equals(winningOrder) && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
+                if (ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
                     logger.info(ord.getPayments().getPaymentsId().toString());
 
                     ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
@@ -428,11 +336,15 @@ public class PaymentsServiceImpl implements PaymentsService {
 
                     //credit 정보 가져오기
                     //TODO: 판매자 credit update
-                    currentCredit = membersInfoEntity.getCredit();
-                    updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
+                    MembersEntity member = membersRepository.findByEmail(order.getEmail())
+                            .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+                    MembersInfoEntity memberInfo = membersInfoRepository.findByMembersEntity(member);
+
+                    float currentCredit = memberInfo.getCredit();
+                    float updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
 
                     // credit 업데이트 요청
-                    membersInfoEntity.updateCredit(updatedCredit);
+                    memberInfo.updateCredit(updatedCredit);
 
                     // 환불 정보 저장
                     Refunds refund = Refunds.builder()
@@ -446,7 +358,6 @@ public class PaymentsServiceImpl implements PaymentsService {
                             .productsId(paymentsRequestDto.getProductsId())
                             .email(ord.getEmail())
                             .nowPrice(ord.getPayments().getCost())
-//                        .bidsAt(new Date())
                             .status(OrderStatus.FAILED_BID)
                             .bidsCode(UUID.randomUUID().toString())
                             .build();
@@ -464,9 +375,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //낙찰일 경우 상품 삭제
         if (timeDifference < 3 * 60 * 1000) {
-            //상품 삭제
-            product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
-            productsRepository.delete(product);
+            deleteProduct(product.getProductsId());
         }
 
         logPageExit(logId);
@@ -474,9 +383,22 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
-    @Transactional
+    private void saveBidInfo(PaymentsRequestDto paymentsRequestDto, String email, Orders order) {
+        // 새로운 응찰 정보 생성
+        Bids newBid = Bids.builder()
+                .productsId(paymentsRequestDto.getProductsId())
+                .email(email)
+                .nowPrice(paymentsRequestDto.getPrice()) // 현재 응찰 가격
+                .status(order.getStatus()) // 초기 상태는 '응찰'로 설정
+                .bidsCode(UUID.randomUUID().toString()) // 고유한 Bids Code 생성
+                .build();
+
+        // Bids 정보 저장
+        bidsRepository.save(newBid);
+    }
+
     // 페이지에 접근했을 때의 로그 생성
-    public Long logPageAccess(Long productId, String email, PageType pageType) {
+    private Long logPageAccess(Long productId, String email, PageType pageType) {
         PageAccessLogs log = PageAccessLogs.builder()
                 .productsId(productId)
                 .email(email)
@@ -487,37 +409,16 @@ public class PaymentsServiceImpl implements PaymentsService {
         return log.getPageAccessLogsId();
     }
 
-    // 경매 Orders 정보 저장 메서드
-    @Transactional
-    public Orders saveAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
+    private Orders createOrderAndPaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, String email, OrderStatus status) {
         Orders order = Orders.builder()
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
-                .status(OrderStatus.WAITING_FOR_BID)
+                .status(status)
                 .build();
-        order = ordersRepository.save(order);
-        savePaymentAndDelivery(paymentsRequestDto, order);
-        return order;
-    }
+        ordersRepository.save(order);
 
-    // 경매 종료에 따른 Orders 정보 저장 메서드
-    @Transactional
-    public Orders saveFinalizedAuctionOrder(String email, PaymentsRequestDto paymentsRequestDto) {
-        Orders order = Orders.builder()
-                .productsId(paymentsRequestDto.getProductsId())
-                .email(email)
-                .status(OrderStatus.WINNING_BID)
-                .build();
-        order = ordersRepository.save(order);
-        savePaymentAndDelivery(paymentsRequestDto, order);
-        return order;
-    }
-
-    // Payment와 Delivery 저장을 위한 공통 메서드
-    @Transactional
-    public void savePaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, Orders order) {
         Payments payment = Payments.builder()
-                .cost(paymentsRequestDto.getNowPrice())
+                .cost(paymentsRequestDto.getPrice())
                 .orders(order)
                 .build();
         paymentsRepository.save(payment);
@@ -534,12 +435,29 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .orders(order)
                 .build();
         deliveriesRepository.save(delivery);
+
+        return order;
+    }
+
+    private void updateMemberCredit(String email, float amount) {
+        MembersEntity membersEntity = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
+        float newCredit = membersInfoEntity.getCredit() - amount;
+        if (newCredit < 0) {
+            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+        }
+        membersInfoEntity.updateCredit(newCredit);
+    }
+
+    private void deleteProduct(Long productId) {
+        ProductsEntity product = productsRepository.findByProductsId(productId);
+        productsRepository.delete(product);
     }
 
 
-    @Transactional
     // 페이지에서 나갔을 때의 로그 갱신
-    public void logPageExit(Long logId) {
+    private void logPageExit(Long logId) {
         // logId는 페이지 접근 시 저장된 로그의 ID
         PageAccessLogs existingLog = pageAccessLogsRepository.findById(logId)
                 .orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND));
@@ -548,8 +466,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         pageAccessLogsRepository.save(existingLog);
     }
 
-    @Transactional(readOnly = true)
-    public boolean isBeforeAuctionEndDate(Long productsId, LocalDateTime dateTimeToCheck) {
+    private boolean isBeforeAuctionEndDate(Long productsId, LocalDateTime dateTimeToCheck) {
         //종료 날짜를 받아와 현재 시간과 비교하여 true 또는 false를 반환
         ProductsEntity product = productsRepository.findByProductsId(productsId);
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
