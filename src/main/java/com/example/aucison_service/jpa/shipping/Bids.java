@@ -27,6 +27,7 @@ public class Bids extends BaseTimeEntity { //실시간 응찰 내역
     private float nowPrice;    //응찰가격
 
     @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
 
     @Column(name = "bids_code", nullable = false)

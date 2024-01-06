@@ -7,16 +7,18 @@ import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.util.Optional;
+
 public interface PaymentsService {
     /**
-     * 가상 결제 조회
+     * 경매상품 가상 결제 조회
      *
      * @param productsId 상품 ID
      * @param addrName 배송지명
      * @param percent 구매자가 올린 퍼센트
      * @return PaymentPageResponse
      */
-    VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName, int percent);
+    VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName, Optional<Integer> percent);
 
     /**
      * 배송지 새롭게 조회

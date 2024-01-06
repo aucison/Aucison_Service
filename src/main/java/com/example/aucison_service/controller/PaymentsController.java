@@ -11,8 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/")
+@RequestMapping("/payment")
 public class PaymentsController {
 
     private final PaymentsService paymentsService;
@@ -21,16 +23,18 @@ public class PaymentsController {
     public PaymentsController(PaymentsService paymentsService) {
         this.paymentsService = paymentsService;
     }
-    @GetMapping("payment/{productsId}")    //가상결제
+
+    @GetMapping("/{productsId}")    //가상결제
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<VirtualPaymentResponseDto> getVirtualPaymentInfo(@PathVariable Long productsId,
                                                                         @AuthenticationPrincipal MemberDetails principal,
                                                                         @RequestParam String addrName,
-                                                                        @RequestParam int percent) {
+                                                                        @RequestParam Optional<Integer> percent) {
         return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, addrName, percent));
     }
 
-    @GetMapping("payment/{productsId}/shipping-address")   //배송지 새롭게 조회
+
+    @GetMapping("/{productsId}/shipping-address")   //배송지 새롭게 조회
     public ApiResponse<?> getShippingAddress(@PathVariable Long productsId,
                                              @RequestParam String email,
                                              @RequestParam String addrName) {
@@ -39,7 +43,7 @@ public class PaymentsController {
     }
 
 
-    @PostMapping("payment")    //결제완료
+    @PostMapping   //결제완료
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Long> savePayment(@AuthenticationPrincipal MemberDetails principal,
                                          @RequestBody PaymentsRequestDto paymentsRequestDto) {
