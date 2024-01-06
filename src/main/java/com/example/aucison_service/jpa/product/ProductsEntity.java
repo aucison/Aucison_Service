@@ -35,7 +35,7 @@ public class ProductsEntity extends BaseTimeEntity {
 
 //    @Column(name = "createdTime", nullable = false)
 //    private LocalDateTime createdTime;        //등록 시간 ->이게 주석인게 맞다네??, 상속만 받으면 됨
-    @Column(name = "information", nullable = false)
+    @Column(name = "information", nullable = false, columnDefinition = "VARCHAR(10000)")
     private String information;     //상품 정보
 
     @Column(name = "summary", nullable = false)

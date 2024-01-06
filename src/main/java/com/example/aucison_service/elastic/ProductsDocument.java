@@ -8,6 +8,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 
+import java.util.List;
+
+
 @Document(indexName = "productsdocument")
 @Getter
 @Setter
@@ -25,6 +28,9 @@ public class ProductsDocument {
     private String email;
 
 
+    private List<String> images;
+
+
     // ProductsEntity의 정보를 반영
     private Long productsId; // ProductsEntity의 ID
     private Long aucEnd; // LocalDateTime을 Long으로 변경
@@ -33,7 +39,7 @@ public class ProductsDocument {
 
 
     public ProductsDocument(String id, String name, String kind, String category,
-                            String information, String summary, String brand, String email, Long productsId,
+                            String information, String summary, String brand, String email, Long productsId, List<String> images,
                             Long aucEnd, Float aucStartPrice, Float salePrice) {
         this.id = id;
         this.name = name;
@@ -44,6 +50,7 @@ public class ProductsDocument {
         this.brand = brand;
         this.email = email;
         this.productsId = productsId;
+        this.images = images;
         this.aucEnd = aucEnd;
         this.aucStartPrice = aucStartPrice;
         this.salePrice = salePrice;
