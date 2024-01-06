@@ -310,7 +310,8 @@ public class ProductServiceImpl implements ProductService{
                     .productsId(product.getProductsId())
                     .name(product.getName())
                     .summary(product.getSummary())
-                    .brand(product.getBrand());
+                    .brand(product.getBrand())
+                    .images(product.getImages()); // 이미지 URL 목록 추가
 
             if ("AUCS".equals(product.getCategory())) {
                 LocalDateTime aucEnd = LocalDateTime.ofInstant(Instant.ofEpochMilli(product.getAucEnd()), ZoneId.systemDefault());

@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(indexName = "productsdocument")
 @Getter
@@ -23,6 +24,9 @@ public class ProductsDocument {
     private String summary;
     private String brand;
     private String email;
+    private String img;
+
+    private List<String> images;
 
 
     // ProductsEntity의 정보를 반영
@@ -33,7 +37,7 @@ public class ProductsDocument {
 
 
     public ProductsDocument(String id, String name, String kind, String category,
-                            String information, String summary, String brand, String email, Long productsId,
+                            String information, String summary, String brand, String email, Long productsId, List<String> images,
                             Long aucEnd, Float aucStartPrice, Float salePrice) {
         this.id = id;
         this.name = name;
@@ -44,6 +48,7 @@ public class ProductsDocument {
         this.brand = brand;
         this.email = email;
         this.productsId = productsId;
+        this.images = images;
         this.aucEnd = aucEnd;
         this.aucStartPrice = aucStartPrice;
         this.salePrice = salePrice;

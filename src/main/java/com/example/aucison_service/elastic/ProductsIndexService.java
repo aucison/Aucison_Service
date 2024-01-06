@@ -1,5 +1,6 @@
 package com.example.aucison_service.elastic;
 
+import com.example.aucison_service.jpa.product.ProductImgEntity;
 import com.example.aucison_service.jpa.product.ProductsEntity;
 import com.example.aucison_service.jpa.product.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductsIndexService {
@@ -32,6 +35,8 @@ public class ProductsIndexService {
         Float aucStartPrice = null;
         Long aucEndTimestamp = null;
         Float salePrice = null;
+        List<String> imageUrls = null;
+
 
         if ("AUCS".equals(productEntity.getCategory()) && productEntity.getAucsInfosEntity() != null) {
             aucStartPrice = productEntity.getAucsInfosEntity().getStartPrice();
@@ -41,6 +46,10 @@ public class ProductsIndexService {
         } else if ("SALE".equals(productEntity.getCategory()) && productEntity.getSaleInfosEntity() != null) {
             salePrice = productEntity.getSaleInfosEntity().getPrice();
         }
+
+        imageUrls = productEntity.getImages().stream()
+                .map(ProductImgEntity::getUrl)
+                .collect(Collectors.toList());
 
         return new ProductsDocument(
                 productEntity.getProductsId().toString(),
@@ -52,6 +61,7 @@ public class ProductsIndexService {
                 productEntity.getBrand(),
                 productEntity.getEmail(),
                 productEntity.getProductsId(),
+                imageUrls,
                 aucEndTimestamp,
                 aucStartPrice,
                 salePrice

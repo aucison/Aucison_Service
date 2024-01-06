@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,6 +25,7 @@ public class ProductSearchResponseDto {
     //마이크로 서비스간 통신
     //private boolean isWished;  // 찜 여부
 
+    private List<String> images;
     // 경매상품 정보
     //private float startPrice;
     private LocalDateTime end;   //end의 경우 사용자나 시스템 로직에 의해 명시적으로 설정해야 하므로 Date형
