@@ -2,15 +2,15 @@ package com.example.aucison_service.service.product;
 
 
 
-import com.example.aucison_service.controller.AuthController;
+
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
+import com.example.aucison_service.elastic.ProductsDocument;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
@@ -18,16 +18,31 @@ import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.s3.S3Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
+
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,7 +50,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl implements ProductService{
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     ProductsRepository productsRepository;
     SaleInfosRepository sale_infosRepository;
     AucsInfosRepository aucs_infosRepository;
@@ -43,19 +58,23 @@ public class ProductServiceImpl implements ProductService{
     WishesRepository wishesRepository;
     S3Service s3Service;
 
+    ElasticsearchOperations elasticsearchOperations;
+
 
 
 
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
-                              WishesRepository wishesRepository, S3Service s3Service){
+                              WishesRepository wishesRepository, S3Service s3Service,
+                              ElasticsearchOperations elasticsearchOperations){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
         this.membersRepository=membersRepository;
         this.wishesRepository=wishesRepository;
         this.s3Service=s3Service;
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
 
@@ -275,61 +294,76 @@ public class ProductServiceImpl implements ProductService{
 
     }
 
+
     @Override
-    public ProductSearchResponseDto searchProductByName(String name) {
-        //상품 검색 결과 반환
-        //현재 기술적 한개로 검색시 정확히 일치하는 단 한개만을 보여줄 수 있음
+    public List<ProductSearchResponseDto> searchProductByName(String name) {
+        Pageable pageable = PageRequest.of(0, 3); // 예시: 첫 페이지에 3개 반환
+        List<ProductsDocument> products = findBySimilarName(name, pageable);
 
 
-        ProductsEntity product = productsRepository.findByName(name);
-
-        //검색결과 -> 일치하는 것 없음
-        if (product == null) {
+        if (products.isEmpty()) {
             throw new AppException(ErrorCode.SEARCH_NOT_FOUND);
         }
+    //ProductSearchResponseDto 클래스에 Lombok의 @Builder 어노테이션이 적용되어 있을 떄  아래처럼 한다.
+        return products.stream().map(product -> {
+            ProductSearchResponseDto.ProductSearchResponseDtoBuilder builder = ProductSearchResponseDto.builder()
+                    .productsId(product.getProductsId())
+                    .name(product.getName())
+                    .summary(product.getSummary())
+                    .brand(product.getBrand());
 
+            if ("AUCS".equals(product.getCategory())) {
+                LocalDateTime aucEnd = LocalDateTime.ofInstant(Instant.ofEpochMilli(product.getAucEnd()), ZoneId.systemDefault());
+                builder.end(aucEnd) // 변환된 LocalDateTime 할당
+                        .high(product.getAucStartPrice());
+            } else if ("SALE".equals(product.getCategory())) {
+                builder.price(product.getSalePrice());
+            }
 
-        //객체 생성 과정에서 선택적으로 특정 필드를 생성하기 위해 다음과 같이 코드 구성 -> .build가 나중에 나옴(return시에)
-        ProductSearchResponseDto.ProductSearchResponseDtoBuilder dto = ProductSearchResponseDto.builder()
-                .productsId(product.getProductsId())
-                .name(product.getName())
-                .summary(product.getSummary())
-                .brand(product.getBrand());
-
-
-
-        if("AUCS".equals(product.getCategory())){
-
-//            //최고가를 얻기 위해 nowPrice의 모든 값 비교
-//            List<Long> nowPrices = shippingServiceClient.getNowPricesByProductId(product.getProducts_id());
-//            Long highestPrice = nowPrices.stream().max(Long::compareTo).orElse(null);
-
-            dto
-                    .end(product.getAucsInfosEntity().getEnd())
-                    .high(product.getAucsInfosEntity().getStartPrice());    //임시로 최고가를 이딴식으로 가져옴
-
-        }
-        else if("SALE".equals(product.getCategory())){
-            dto
-                    .price(product.getSaleInfosEntity().getPrice());
-        }
-
-
-        return dto.build();
-
+            return builder.build();
+        }).collect(Collectors.toList());
     }
+
+    private List<ProductsDocument> findBySimilarName(String name, Pageable pageable) {
+        // 쿼리 구문 로깅
+        String queryString = String.format("name:*%s*", name);
+        logger.info("Executing search with query string: {}", queryString);
+
+        // Elasticsearch 쿼리 생성
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.queryStringQuery(queryString))
+                .withPageable(pageable)
+                .build();
+
+        try {
+            // Elasticsearch 검색 실행
+            SearchHits<ProductsDocument> searchHits = elasticsearchOperations.search(searchQuery, ProductsDocument.class);
+
+            // 결과 로깅
+            logger.info("Search hits: {}", searchHits.getTotalHits());
+
+            // 검색 결과 처리 및 반환
+            return searchHits.getSearchHits().stream()
+                    .map(SearchHit::getContent)
+                    .peek(document -> logger.info("Found document with ID: {}", document.getId()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // 예외 로깅
+            logger.error("Error occurred during search: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
 
     @Override
     public ProductDetailResponseDto getProductDetail(Long productsId) {
-
-
         ProductsEntity product = productsRepository.findByProductsId(productsId);
 
         if (product == null) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        ProductDetailResponseDto.ProductDetailResponseDtoBuilder builder = ProductDetailResponseDto.builder()
+        ProductDetailResponseDto.ProductDetailResponseDtoBuilder dto = ProductDetailResponseDto.builder()
                 .name(product.getName())
                 .kind(product.getKind())
                 .category(product.getCategory())
@@ -339,17 +373,17 @@ public class ProductServiceImpl implements ProductService{
 
         // 경매 상품 추가정보
         if ("AUCS".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
-            builder.startPrice(product.getAucsInfosEntity().getStartPrice())
+            dto.startPrice(product.getAucsInfosEntity().getStartPrice())
                     .end(product.getAucsInfosEntity().getEnd())
                     .high(product.getAucsInfosEntity().getStartPrice());
         }
 
         // 비경매 상품 추가정보
         if ("SALE".equals(product.getCategory()) && product.getSaleInfosEntity() != null) {
-            builder.price(product.getSaleInfosEntity().getPrice());
+            dto.price(product.getSaleInfosEntity().getPrice());
         }
 
-        return builder.build();
+        return dto.build();
 
 
         //게시판 정보들은 따로 보내준다

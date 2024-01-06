@@ -1,17 +1,15 @@
 package com.example.aucison_service.jpa.product;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> {
 
-
-    //List<ProductsEntity> findByCategory(String auc);    //이게 맞나?? 잘 모르겠음
-
     List<ProductsEntity> findByCategoryAndKind(String category, String kind);
-
-    ProductsEntity findByName(String name);
 
     ProductsEntity findByProductsId(Long productsId);
 }

@@ -408,6 +408,7 @@ public class MypageServiceImpl implements MypageService {
         memberInfo.updatePhone(requestMembersInfoDto.getPhone());
         memberInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
 
+
         // 이미지 처리
         if (requestMembersInfoDto.getImgUrl() != null && !requestMembersInfoDto.getImgUrl().isEmpty()) {
             String folderName = "membersProfile"; // 폴더 이름 정의
@@ -427,7 +428,7 @@ public class MypageServiceImpl implements MypageService {
             membersImgRepository.save(membersImg);
         }
 
-    }
 
+    }
 
 }
