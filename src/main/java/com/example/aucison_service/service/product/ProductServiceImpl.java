@@ -8,9 +8,9 @@ import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
+import com.example.aucison_service.elastic.ProductsDocument;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.elastic.ProductsSearchRepository;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.jpa.member.WishesRepository;
 import com.example.aucison_service.jpa.product.*;
@@ -20,7 +20,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 
-
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,8 +58,6 @@ public class ProductServiceImpl implements ProductService{
     WishesRepository wishesRepository;
     S3Service s3Service;
 
-    ProductsIndexService productsIndexService;
-    ProductsSearchRepository productsSearchRepository;
     ElasticsearchOperations elasticsearchOperations;
 
 
@@ -62,7 +66,7 @@ public class ProductServiceImpl implements ProductService{
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
-                              WishesRepository wishesRepository, S3Service s3Service, ProductsIndexService productsIndexService, ProductsSearchRepository productsSearchRepository,
+                              WishesRepository wishesRepository, S3Service s3Service,
                               ElasticsearchOperations elasticsearchOperations){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
@@ -70,8 +74,6 @@ public class ProductServiceImpl implements ProductService{
         this.membersRepository=membersRepository;
         this.wishesRepository=wishesRepository;
         this.s3Service=s3Service;
-        this.productsIndexService = productsIndexService;
-        this.productsSearchRepository = productsSearchRepository;
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
@@ -296,7 +298,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public List<ProductSearchResponseDto> searchProductByName(String name) {
         Pageable pageable = PageRequest.of(0, 3); // 예시: 첫 페이지에 3개 반환
-        List<ProductsEntity> products = findBySimilarName(name, pageable);
+        List<ProductsDocument> products = findBySimilarName(name, pageable);
 
 
         if (products.isEmpty()) {
@@ -311,24 +313,45 @@ public class ProductServiceImpl implements ProductService{
                     .brand(product.getBrand());
 
             if ("AUCS".equals(product.getCategory())) {
-                builder.end(product.getAucsInfosEntity().getEnd())
-                        .high(product.getAucsInfosEntity().getStartPrice());
+                LocalDateTime aucEnd = LocalDateTime.ofInstant(Instant.ofEpochMilli(product.getAucEnd()), ZoneId.systemDefault());
+                builder.end(aucEnd) // 변환된 LocalDateTime 할당
+                        .high(product.getAucStartPrice());
             } else if ("SALE".equals(product.getCategory())) {
-                builder.price(product.getSaleInfosEntity().getPrice());
+                builder.price(product.getSalePrice());
             }
 
             return builder.build();
         }).collect(Collectors.toList());
     }
 
-    private List<ProductsEntity> findBySimilarName(String name, Pageable pageable) {
-        String queryString = String.format("name:(%s)", name);
-        StringQuery searchQuery = new StringQuery(queryString, pageable);
+    private List<ProductsDocument> findBySimilarName(String name, Pageable pageable) {
+        // 쿼리 구문 로깅
+        String queryString = String.format("name:*%s*", name);
+        logger.info("Executing search with query string: {}", queryString);
 
-        SearchHits<ProductsEntity> searchHits = elasticsearchOperations.search(searchQuery, ProductsEntity.class);
-        return searchHits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .collect(Collectors.toList());
+        // Elasticsearch 쿼리 생성
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.queryStringQuery(queryString))
+                .withPageable(pageable)
+                .build();
+
+        try {
+            // Elasticsearch 검색 실행
+            SearchHits<ProductsDocument> searchHits = elasticsearchOperations.search(searchQuery, ProductsDocument.class);
+
+            // 결과 로깅
+            logger.info("Search hits: {}", searchHits.getTotalHits());
+
+            // 검색 결과 처리 및 반환
+            return searchHits.getSearchHits().stream()
+                    .map(SearchHit::getContent)
+                    .peek(document -> logger.info("Found document with ID: {}", document.getId()))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // 예외 로깅
+            logger.error("Error occurred during search: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
 

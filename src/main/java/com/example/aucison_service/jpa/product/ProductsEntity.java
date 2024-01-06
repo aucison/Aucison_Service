@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Table(name = "products")
-@Document(indexName = "products")   //색인화
 public class ProductsEntity extends BaseTimeEntity {
 
 

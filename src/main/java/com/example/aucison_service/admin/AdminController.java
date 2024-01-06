@@ -2,11 +2,11 @@ package com.example.aucison_service.admin;
 
 
 import com.example.aucison_service.dto.auth.AuthResponseDto;
+import com.example.aucison_service.elastic.ProductsIndexService;
 import com.example.aucison_service.enums.Role;
 import com.example.aucison_service.jpa.member.MembersEntity;
 import com.example.aucison_service.jpa.member.MembersRepository;
 import com.example.aucison_service.security.JwtTokenProvider;
-import com.example.aucison_service.service.product.ProductsIndexService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class AdminController {
     private final MembersRepository membersRepository;
 
     @Autowired
-    public AdminController(ProductsIndexService productsIndexService, JwtTokenProvider jwtTokenProvider, MembersRepository membersRepository) {
+    public AdminController( JwtTokenProvider jwtTokenProvider, MembersRepository membersRepository, ProductsIndexService productsIndexService) {
         this.productsIndexService = productsIndexService;
         this.jwtTokenProvider = jwtTokenProvider;
         this.membersRepository = membersRepository;

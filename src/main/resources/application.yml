@@ -1,13 +1,14 @@
 spring:
   elasticsearch:
     uris: "http://localhost:9200"
-
+#    username: elastic  # Elasticsearch 사용자 이름
+#    password: abcd1234  # Elasticsearch 비밀번호
   jpa:
     database: mysql
     show-sql: 'true'
   profiles:
-    include: aws, google, https
-#    include: test
+#    include: aws, google, https
+    include: test
 
 
 #  redis:
