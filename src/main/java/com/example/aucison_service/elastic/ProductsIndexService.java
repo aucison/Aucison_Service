@@ -1,5 +1,4 @@
 package com.example.aucison_service.elastic;
-
 import com.example.aucison_service.jpa.product.ProductImgEntity;
 import com.example.aucison_service.jpa.product.ProductsEntity;
 import com.example.aucison_service.jpa.product.ProductsRepository;
