@@ -3,12 +3,8 @@ package com.example.aucison_service.dto.mypage;
 
 import com.example.aucison_service.enums.Category;
 import com.example.aucison_service.enums.OrderStatus;
-import com.example.aucison_service.jpa.member.HistoriesEntity;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import javax.swing.plaf.nimbus.State;
 
 @Data
 @Builder
