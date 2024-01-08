@@ -3,8 +3,8 @@
 //import com.example.aucison_service.dto.orders.OrdersResponseDto;
 //import com.example.aucison_service.exception.AppException;
 //import com.example.aucison_service.exception.ErrorCode;
-//import com.example.aucison_service.jpa.shipping.Orders;
-//import com.example.aucison_service.jpa.shipping.OrdersRepository;
+//import com.example.aucison_service.jpa.shipping.entity.Orders;
+//import com.example.aucison_service.jpa.shipping.repository.OrdersRepository;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Transactional;
