@@ -11,7 +11,7 @@ import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.*;
 import com.example.aucison_service.jpa.product.*;
 import com.example.aucison_service.jpa.shipping.*;
-import com.example.aucison_service.service.member.GoogleAuthService;
+import com.example.aucison_service.service.address.AddressService;
 import com.example.aucison_service.service.member.MemberDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +210,6 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
     }
 
-    @Override
     @Transactional(readOnly = true)
     public AddrInfoResponseDto getShippingInfo(Long productsId, String email, String addrName) {  //배송지명으로 배송지 조회
         MembersEntity membersEntity = membersRepository.findByEmail(email)

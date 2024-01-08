@@ -20,15 +20,15 @@ public interface PaymentsService {
      */
     VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName, Optional<Integer> percent);
 
-    /**
-     * 배송지 새롭게 조회
-     *
-     * @param productsId 상품 ID
-     * @param email 사용자 이메일
-     * @param addrName 배송지명
-     * @return AddrInfoResponseDto
-     */
-    AddrInfoResponseDto getShippingInfo(Long productsId, String email, String addrName);
+//    /**
+//     * 배송지 새롭게 조회
+//     *
+//     * @param productsId 상품 ID
+//     * @param email 사용자 이메일
+//     * @param addrName 배송지명
+//     * @return AddrInfoResponseDto
+//     */
+//    AddrInfoResponseDto getShippingInfo(Long productsId, String email, String addrName);
 
     /**
      * 주어진 정보를 기반으로 결제 정보를 저장합니다.
