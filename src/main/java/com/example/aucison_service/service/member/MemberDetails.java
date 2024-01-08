@@ -1,8 +1,7 @@
 package com.example.aucison_service.service.member;
 
-import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.jpa.member.entity.MembersEntity;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 

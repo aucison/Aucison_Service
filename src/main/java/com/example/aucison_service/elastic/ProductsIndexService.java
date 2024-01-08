@@ -1,7 +1,7 @@
 package com.example.aucison_service.elastic;
-import com.example.aucison_service.jpa.product.ProductImgEntity;
-import com.example.aucison_service.jpa.product.ProductsEntity;
-import com.example.aucison_service.jpa.product.ProductsRepository;
+import com.example.aucison_service.jpa.product.entity.ProductImgEntity;
+import com.example.aucison_service.jpa.product.entity.ProductsEntity;
+import com.example.aucison_service.jpa.product.repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

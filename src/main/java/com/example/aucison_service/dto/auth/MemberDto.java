@@ -1,6 +1,6 @@
 package com.example.aucison_service.dto.auth;
 
-import com.example.aucison_service.jpa.member.MembersEntity;
+import com.example.aucison_service.jpa.member.entity.MembersEntity;
 import lombok.Builder;
 import lombok.Data;
 

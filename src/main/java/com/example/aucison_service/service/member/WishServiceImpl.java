@@ -6,18 +6,15 @@ import com.example.aucison_service.dto.wish.WishRequestDto;
 import com.example.aucison_service.dto.wish.WishResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.MembersEntity;
-import com.example.aucison_service.jpa.member.MembersRepository;
-import com.example.aucison_service.jpa.member.WishesEntity;
-import com.example.aucison_service.jpa.member.WishesRepository;
+import com.example.aucison_service.jpa.member.entity.MembersEntity;
+import com.example.aucison_service.jpa.member.repository.MembersRepository;
+import com.example.aucison_service.jpa.member.entity.WishesEntity;
+import com.example.aucison_service.jpa.member.repository.WishesRepository;
 
-import com.example.aucison_service.jpa.product.AucsInfosEntity;
-import com.example.aucison_service.jpa.product.ProductsEntity;
-import com.example.aucison_service.jpa.product.ProductsRepository;
-import com.example.aucison_service.jpa.product.SaleInfosEntity;
-
-import com.example.aucison_service.jpa.product.ProductsEntity;
-import com.example.aucison_service.jpa.product.ProductsRepository;
+import com.example.aucison_service.jpa.product.entity.AucsInfosEntity;
+import com.example.aucison_service.jpa.product.entity.ProductsEntity;
+import com.example.aucison_service.jpa.product.repository.ProductsRepository;
+import com.example.aucison_service.jpa.product.entity.SaleInfosEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

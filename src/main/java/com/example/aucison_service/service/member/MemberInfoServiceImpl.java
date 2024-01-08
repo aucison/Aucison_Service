@@ -3,15 +3,13 @@ package com.example.aucison_service.service.member;
 import com.example.aucison_service.dto.auth.MemberAdditionalInfoRequestDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.MembersEntity;
-import com.example.aucison_service.jpa.member.MembersInfoEntity;
-import com.example.aucison_service.jpa.member.MembersInfoRepository;
-import com.example.aucison_service.jpa.member.MembersRepository;
+import com.example.aucison_service.jpa.member.entity.MembersEntity;
+import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
+import com.example.aucison_service.jpa.member.repository.MembersInfoRepository;
+import com.example.aucison_service.jpa.member.repository.MembersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class MemberInfoServiceImpl implements MemberInfoService{
