@@ -14,13 +14,13 @@ public interface MypageService {
     // 판매 내역 조회
     List<ResponseSellHistoryDto> getSellInfo(MemberDetails principal);
     // 배송지 조회
-    List<ResponseAddressDto> getAddressInfo(MemberDetails principal);
-    // 배송지 등록
-    void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto);
+//    List<ResponseAddressDto> getAddressInfo(MemberDetails principal);
+//    // 배송지 등록
+//    void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto);
     // 배송지 삭제
-    void deleteAddress(MemberDetails principal, String addrName);
+//    void deleteAddress(MemberDetails principal, String addrName);
     // 배송지 수정
-    void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName, RequestUpdateAddressDto requestUpdateAddressDto);
+//    void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName, RequestUpdateAddressDto requestUpdateAddressDto);
     // 회원 정보 조회
     ResponseMemberProfileDto getMemberProfile(MemberDetails principal);
     // 회원 정보 수정
