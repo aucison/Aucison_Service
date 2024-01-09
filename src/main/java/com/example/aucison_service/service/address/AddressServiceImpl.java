@@ -6,7 +6,12 @@ import com.example.aucison_service.dto.mypage.ResponseAddressDto;
 import com.example.aucison_service.dto.payments.AddrInfoResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.*;
+import com.example.aucison_service.jpa.member.entity.AddressesEntity;
+import com.example.aucison_service.jpa.member.entity.MembersEntity;
+import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
+import com.example.aucison_service.jpa.member.repository.AddressesRepository;
+import com.example.aucison_service.jpa.member.repository.MembersInfoRepository;
+import com.example.aucison_service.jpa.member.repository.MembersRepository;
 import com.example.aucison_service.service.member.MemberDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,7 +117,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional(readOnly = true)
-    public AddrInfoResponseDto getShippingInfo(Long productsId, MemberDetails principal, String addrName) {  //배송지명으로 배송지 조회
+    public AddrInfoResponseDto getAddressInfoByAddrName(MemberDetails principal, String addrName) {  //배송지명으로 배송지 조회
         String email = principal.getMember().getEmail();
 
         MembersEntity membersEntity = membersRepository.findByEmail(email)

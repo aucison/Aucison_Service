@@ -24,10 +24,6 @@ import com.example.aucison_service.jpa.product.repository.ProductsRepository;
 import com.example.aucison_service.jpa.product.repository.SaleInfosRepository;
 import com.example.aucison_service.jpa.shipping.entity.*;
 import com.example.aucison_service.jpa.shipping.repository.*;
-import com.example.aucison_service.jpa.member.*;
-import com.example.aucison_service.jpa.product.*;
-import com.example.aucison_service.jpa.shipping.*;
-import com.example.aucison_service.service.address.AddressService;
 import com.example.aucison_service.service.member.MemberDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +109,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(member);
 
         //배송지 정보 가져오기
-        AddrInfoResponseDto addresses = getShippingInfo(productsId, email, addrName);
+        AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
 
         //credit 정보 가져오기
         float currentCredit = membersInfoEntity.getCredit();
@@ -166,7 +162,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         //배송지 정보 가져오기
-        AddrInfoResponseDto addresses = getShippingInfo(productsId, email, addrName);
+        AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
 
         //credit 정보 가져오기
         float currentCredit = membersInfoEntity.getCredit();
@@ -226,8 +222,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public AddrInfoResponseDto getShippingInfo(Long productsId, String email, String addrName) {  //배송지명으로 배송지 조회
+    private AddrInfoResponseDto getShippingInfo(String email, String addrName) {  //배송지명으로 배송지 조회
         MembersEntity membersEntity = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 

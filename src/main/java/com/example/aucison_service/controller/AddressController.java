@@ -20,6 +20,7 @@ public class AddressController {
         this.addressService = addressService;
     }
 
+    @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> addAddress(@AuthenticationPrincipal MemberDetails principal,
                                      @RequestBody RequestAddressDto requestAddressDto) {
@@ -29,6 +30,7 @@ public class AddressController {
     }
 
     // 배송지 삭제
+    @DeleteMapping
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> deleteAddress(@AuthenticationPrincipal MemberDetails principal,
                                         @RequestParam String addrName) {
@@ -38,6 +40,7 @@ public class AddressController {
     }
 
     //배송지 수정
+    @PatchMapping
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> updateAddress(@AuthenticationPrincipal MemberDetails principal,
                                         @RequestParam String addrName,
@@ -48,18 +51,18 @@ public class AddressController {
     }
 
 
+    @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> getAddressInfo(@AuthenticationPrincipal MemberDetails principal) {
 //        String email = principal.getAttribute("email");
         return ApiResponse.createSuccess(addressService.getAddressInfo(principal));
     }
 
+    @GetMapping("/by-name")
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{productsId}")   //배송지 새롭게 조회
-    public ApiResponse<?> getShippingAddress(@PathVariable Long productsId,
-                                             @AuthenticationPrincipal MemberDetails principal,
+    public ApiResponse<?> getAddressInfoByAddrName(@AuthenticationPrincipal MemberDetails principal,
                                              @RequestParam String addrName) {
         // 서비스 로직을 호출하여 배송지 정보 조회
-        return ApiResponse.createSuccess(addressService.getShippingInfo(productsId, principal, addrName));
+        return ApiResponse.createSuccess(addressService.getAddressInfoByAddrName(principal, addrName));
     }
 }

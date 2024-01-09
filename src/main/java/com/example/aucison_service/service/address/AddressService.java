@@ -16,5 +16,5 @@ public interface AddressService {
     void deleteAddress(MemberDetails principal, String addrName);
     void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName, RequestUpdateAddressDto requestUpdateAddressDto);
     List<ResponseAddressDto> getAddressInfo(MemberDetails principal);
-    AddrInfoResponseDto getShippingInfo(Long productsId, MemberDetails principal, String addrName);
+    AddrInfoResponseDto getAddressInfoByAddrName(MemberDetails principal, String addrName);
 }
