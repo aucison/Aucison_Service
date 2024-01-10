@@ -298,88 +298,88 @@ public class MypageServiceImpl implements MypageService {
 
 
     //배송지 조회
-    @Override
-    @Transactional(readOnly = true)
-    public List<ResponseAddressDto> getAddressInfo(MemberDetails principal) {
-        String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<ResponseAddressDto> getAddressInfo(MemberDetails principal) {
+//        String email = principal.getMember().getEmail();
+//        MembersEntity member = membersRepository.findByEmail(email)
+//                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+//
+//        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+//        List<AddressesEntity> addresses = addressesRepository.findAllByMembersInfoEntity(membersInfo);
+//
+//        return addresses.stream()
+//                .map(address -> ResponseAddressDto.builder()
+//                        .addrName(address.getAddrName())
+//                        .name(address.getName())
+//                        .zipNum(address.getZipNum())
+//                        .addr(address.getAddr())
+//                        .addrDetail(address.getAddrDetail())
+//                        .tel(address.getTel())
+//                        .build())
+//                .collect(Collectors.toList());
+//    }
 
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
-        List<AddressesEntity> addresses = addressesRepository.findAllByMembersInfoEntity(membersInfo);
+//    //배송지 등록
+//    @Override
+//    @Transactional
+//    public void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto) {
+//        String email = principal.getMember().getEmail();
+//        MembersEntity member = membersRepository.findByEmail(email)
+//                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+//
+//        MembersInfoEntity membersInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
+//                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+//
+//        // 동일한 배송지명이 있는지 검사
+//        if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
+//            throw new AppException(ErrorCode.ADDRESS_NAME_ALREADY_EXISTS); // 배송지명이 이미 존재하면 예외 발생
+//        }
+//
+//        AddressesEntity address = AddressesEntity.builder()
+//                .addrName(requestAddressDto.getAddrName())
+//                .zipNum(requestAddressDto.getZipNum())
+//                .addr(requestAddressDto.getAddr())
+//                .addrDetail(requestAddressDto.getAddrDetail())
+//                .name(requestAddressDto.getName())
+//                .tel(requestAddressDto.getTel())
+//                .membersInfoEntity(membersInfo)
+//                .build();
+//
+//        addressesRepository.save(address);
+//    }
 
-        return addresses.stream()
-                .map(address -> ResponseAddressDto.builder()
-                        .addrName(address.getAddrName())
-                        .name(address.getName())
-                        .zipNum(address.getZipNum())
-                        .addr(address.getAddr())
-                        .addrDetail(address.getAddrDetail())
-                        .tel(address.getTel())
-                        .build())
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    @Transactional
+//    public void deleteAddress(MemberDetails principal, String addrName) {
+//        String email = principal.getMember().getEmail();
+//        MembersEntity member = membersRepository.findByEmail(email)
+//                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+//
+//        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+//
+//        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+//
+//        addressesRepository.delete(address);
+//    }
 
-    //배송지 등록
-    @Override
-    @Transactional
-    public void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto) {
-        String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
-
-        MembersInfoEntity membersInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
-                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
-
-        // 동일한 배송지명이 있는지 검사
-        if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
-            throw new AppException(ErrorCode.ADDRESS_NAME_ALREADY_EXISTS); // 배송지명이 이미 존재하면 예외 발생
-        }
-
-        AddressesEntity address = AddressesEntity.builder()
-                .addrName(requestAddressDto.getAddrName())
-                .zipNum(requestAddressDto.getZipNum())
-                .addr(requestAddressDto.getAddr())
-                .addrDetail(requestAddressDto.getAddrDetail())
-                .name(requestAddressDto.getName())
-                .tel(requestAddressDto.getTel())
-                .membersInfoEntity(membersInfo)
-                .build();
-
-        addressesRepository.save(address);
-    }
-
-    @Override
-    @Transactional
-    public void deleteAddress(MemberDetails principal, String addrName) {
-        String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
-
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
-
-        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
-
-        addressesRepository.delete(address);
-    }
-
-    //배송지 수정
-    @Override
-    @Transactional
-    public void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName, RequestUpdateAddressDto requestUpdateAddressDto) {
-        String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
-
-        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
-
-        // 엔티티의 update 메소드를 호출하여 주소 정보 업데이트
-        address.update(requestUpdateAddressDto);
-
-        addressesRepository.save(address);
-    }
+//    //배송지 수정
+//    @Override
+//    @Transactional
+//    public void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName, RequestUpdateAddressDto requestUpdateAddressDto) {
+//        String email = principal.getMember().getEmail();
+//        MembersEntity member = membersRepository.findByEmail(email)
+//                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+//
+//        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+//
+//        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+//
+//        // 엔티티의 update 메소드를 호출하여 주소 정보 업데이트
+//        address.update(requestUpdateAddressDto);
+//
+//        addressesRepository.save(address);
+//    }
 
     //회원 정보 조회
     @Override

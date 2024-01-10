@@ -34,13 +34,13 @@ public class PaymentsController {
     }
 
 
-    @GetMapping("/{productsId}/shipping-address")   //배송지 새롭게 조회
-    public ApiResponse<?> getShippingAddress(@PathVariable Long productsId,
-                                             @RequestParam String email,
-                                             @RequestParam String addrName) {
-        // 서비스 로직을 호출하여 배송지 정보 조회
-        return ApiResponse.createSuccess(paymentsService.getShippingInfo(productsId, email, addrName));
-    }
+//    @GetMapping("/{productsId}/shipping-address")   //배송지 새롭게 조회
+//    public ApiResponse<?> getShippingAddress(@PathVariable Long productsId,
+//                                             @RequestParam String email,
+//                                             @RequestParam String addrName) {
+//        // 서비스 로직을 호출하여 배송지 정보 조회
+//        return ApiResponse.createSuccess(paymentsService.getShippingInfo(productsId, email, addrName));
+//    }
 
 
     @PostMapping   //결제완료
