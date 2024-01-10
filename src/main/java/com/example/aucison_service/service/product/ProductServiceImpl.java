@@ -8,6 +8,7 @@ import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
+import com.example.aucison_service.dto.wish.ProductWishCountDto;
 import com.example.aucison_service.elastic.ProductsDocument;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
@@ -102,7 +103,6 @@ public class ProductServiceImpl implements ProductService{
     public List<AucsProductResponseDto> getAllAucsHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "HAND");
         if (products.isEmpty()) {
-            logger.info("PRODUCT_NOT_EXIST: 1");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
 
@@ -121,6 +121,8 @@ public class ProductServiceImpl implements ProductService{
                             .findFirst()
                             .orElse(null);
 
+                    Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
+
                     return AucsProductResponseDto.builder()
                             .productsId(product.getProductsId())
                             .name(product.getName())
@@ -131,6 +133,7 @@ public class ProductServiceImpl implements ProductService{
                             .end(aucsInfo.getEnd())
                             .bidsCode(aucsInfo.getBidsCode())
                             .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                            .wishCount(wishCount) // 찜 횟수 추가
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -138,10 +141,10 @@ public class ProductServiceImpl implements ProductService{
 
 
     //모든 경매(AUCS) + 일반(NORM) 상품 반환
+    @Transactional(readOnly = true)
     public List<AucsProductResponseDto> getAllAucsNormProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "NORM");
         if (products.isEmpty()) {
-            logger.info("RODUCT_NOT_EXIST: 2");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
 
@@ -154,6 +157,8 @@ public class ProductServiceImpl implements ProductService{
                     .findFirst()
                     .orElse(null);
 
+            Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
+
             return AucsProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
@@ -164,16 +169,17 @@ public class ProductServiceImpl implements ProductService{
                     .end(aucsInfo.getEnd())
                     .bidsCode(aucsInfo.getBidsCode())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                    .wishCount(wishCount) // 찜 횟수 추가
                     .build();
         }).collect(Collectors.toList());
     }
 
 
     //모든 비경매(SALE) + 핸드메이드(HAND) 상품 반환
+    @Transactional(readOnly = true)
     public List<SaleProductResponseDto> getAllSaleHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("SALE", "HAND");
         if (products.isEmpty()) {
-            logger.info("RODUCT_NOT_EXIST: 3");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
         return products.stream().map(product -> {
@@ -185,6 +191,8 @@ public class ProductServiceImpl implements ProductService{
                     .findFirst()
                     .orElse(null);
 
+            Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
+
             return SaleProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
@@ -193,15 +201,16 @@ public class ProductServiceImpl implements ProductService{
                     .brand(product.getBrand())
                     .price(saleInfo.getPrice())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                    .wishCount(wishCount) // 찜 횟수 추가
                     .build();
         }).collect(Collectors.toList());
     }
 
     //모든 비경매(SALE) + 일반(NORM) 상품 반환
+    @Transactional(readOnly = true)
     public List<SaleProductResponseDto> getAllSaleNormProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("SALE", "NORM");
         if (products.isEmpty()) {
-            logger.info("RODUCT_NOT_EXIST: 4");
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
         return products.stream().map(product -> {
@@ -213,6 +222,8 @@ public class ProductServiceImpl implements ProductService{
                     .findFirst()
                     .orElse(null);
 
+            Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
+
             return SaleProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
@@ -221,6 +232,7 @@ public class ProductServiceImpl implements ProductService{
                     .brand(product.getBrand())
                     .price(saleInfo.getPrice())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
+                    .wishCount(wishCount) // 찜 횟수 추가
                     .build();
         }).collect(Collectors.toList());
     }
@@ -300,6 +312,7 @@ public class ProductServiceImpl implements ProductService{
 
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProductSearchResponseDto> searchProductByName(String name) {
         Pageable pageable = PageRequest.of(0, 3); // 예시: 첫 페이지에 3개 반환
         List<ProductsDocument> products = findBySimilarName(name, pageable);
@@ -310,12 +323,15 @@ public class ProductServiceImpl implements ProductService{
         }
     //ProductSearchResponseDto 클래스에 Lombok의 @Builder 어노테이션이 적용되어 있을 떄  아래처럼 한다.
         return products.stream().map(product -> {
+            Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
+
             ProductSearchResponseDto.ProductSearchResponseDtoBuilder builder = ProductSearchResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
                     .summary(product.getSummary())
                     .brand(product.getBrand())
-                    .images(product.getImages()); // 이미지 URL 목록 추가
+                    .images(product.getImages()) // 이미지 URL 목록 추가
+                    .wishCount(wishCount); // 찜 횟수 추가
 
             if ("AUCS".equals(product.getCategory())) {
                 LocalDateTime aucEnd = LocalDateTime.ofInstant(Instant.ofEpochMilli(product.getAucEnd()), ZoneId.systemDefault());
@@ -329,6 +345,7 @@ public class ProductServiceImpl implements ProductService{
         }).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     private List<ProductsDocument> findBySimilarName(String name, Pageable pageable) {
         // 쿼리 구문 로깅
         String queryString = String.format("name:*%s*", name);
@@ -361,6 +378,7 @@ public class ProductServiceImpl implements ProductService{
 
 
     @Override
+    @Transactional(readOnly = true)
     public ProductDetailResponseDto getProductDetail(Long productsId) {
         ProductsEntity product = productsRepository.findByProductsId(productsId);
 
@@ -368,13 +386,16 @@ public class ProductServiceImpl implements ProductService{
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
+        Long wishCount = wishesRepository.countByProductId(productsId); //찜 집계
+
         ProductDetailResponseDto.ProductDetailResponseDtoBuilder dto = ProductDetailResponseDto.builder()
                 .name(product.getName())
                 .kind(product.getKind())
                 .category(product.getCategory())
                 .information(product.getInformation())
                 .summary(product.getSummary())
-                .brand(product.getBrand());
+                .brand(product.getBrand())
+                .wishCount(wishCount); // 찜 횟수 추가;
 
         // 경매 상품 추가정보
         if ("AUCS".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {

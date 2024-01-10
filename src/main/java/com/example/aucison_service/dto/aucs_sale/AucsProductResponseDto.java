@@ -27,4 +27,6 @@ public class AucsProductResponseDto {
     private float startPrice;
     private LocalDateTime end;
     private String bidsCode;
+
+    private Long wishCount; // 추가된 찜 횟수 필드
 }

@@ -26,5 +26,5 @@ public class SaleProductResponseDto {
 
     private float price;
 
-
+    private Long wishCount; // 추가된 찜 횟수 필드
 }
