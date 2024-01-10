@@ -102,12 +102,14 @@ public class ProductServiceImpl implements ProductService{
     @Transactional(readOnly = true)
     public List<AucsProductResponseDto> getAllAucsHandProducts() {
         List<ProductsEntity> products = productsRepository.findByCategoryAndKind("AUCS", "HAND");
+
         if (products.isEmpty()) {
             throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
         }
 
         return products.stream()
                 .peek(product -> {
+                    // AucsInfosEntity가 null인 경우 엔티티를 새로고침
                     if (product.getAucsInfosEntity() == null) {
                         entityManager.refresh(product);
                     }
@@ -321,7 +323,9 @@ public class ProductServiceImpl implements ProductService{
         if (products.isEmpty()) {
             throw new AppException(ErrorCode.SEARCH_NOT_FOUND);
         }
-    //ProductSearchResponseDto 클래스에 Lombok의 @Builder 어노테이션이 적용되어 있을 떄  아래처럼 한다.
+
+
+        //ProductSearchResponseDto 클래스에 Lombok의 @Builder 어노테이션이 적용되어 있을 떄  아래처럼 한다.
         return products.stream().map(product -> {
             Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
 
@@ -346,7 +350,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Transactional(readOnly = true)
-    private List<ProductsDocument> findBySimilarName(String name, Pageable pageable) {
+    public List<ProductsDocument> findBySimilarName(String name, Pageable pageable) {
         // 쿼리 구문 로깅
         String queryString = String.format("name:*%s*", name);
         logger.info("Executing search with query string: {}", queryString);
@@ -411,9 +415,7 @@ public class ProductServiceImpl implements ProductService{
 
         return dto.build();
 
-
         //게시판 정보들은 따로 보내준다
 
     }
-
 }

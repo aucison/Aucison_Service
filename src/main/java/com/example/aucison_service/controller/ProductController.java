@@ -51,76 +51,54 @@ public class ProductController {
 
     //모든 경매(AUCS) + 핸드메이드(HAND) 상품 반환
     @GetMapping("/aucs/hand/list")
-    public ResponseEntity<List<AucsProductResponseDto>> getAllAucsHandProducts() {
+    public ApiResponse<List<AucsProductResponseDto>> getAllAucsHandProducts() {
         List<AucsProductResponseDto> products = productService.getAllAucsHandProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return ApiResponse.createSuccess(products);
     }
-
 
     //모든 경매(AUCS) + 일반(NORM) 상품 반환
     @GetMapping("/aucs/norm/list")
-    public ResponseEntity<List<AucsProductResponseDto>> getAllAucsNormProducts() {
+    public ApiResponse<List<AucsProductResponseDto>> getAllAucsNormProducts() {
         List<AucsProductResponseDto> products = productService.getAllAucsNormProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return ApiResponse.createSuccess(products);
     }
 
     //모든 비경매(SALE) + 핸드메이드(HAND) 상품 반환
     @GetMapping("/sale/hand/list")
-    public ResponseEntity<List<SaleProductResponseDto>> getAllSaleHandProducts() {
+    public ApiResponse<List<SaleProductResponseDto>> getAllSaleHandProducts() {
         List<SaleProductResponseDto> products = productService.getAllSaleHandProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return ApiResponse.createSuccess(products);
     }
 
     //모든 비경매(SALE) + 일반(NORM) 상품 반환
     @GetMapping("/sale/norm/list")
-    public ResponseEntity<List<SaleProductResponseDto>> getAllSaleNormProducts() {
+    public ApiResponse<List<SaleProductResponseDto>> getAllSaleNormProducts() {
         List<SaleProductResponseDto> products = productService.getAllSaleNormProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return ApiResponse.createSuccess(products);
     }
 
     //상품등록
     @PostMapping("/product/register")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> registerProduct(@ModelAttribute ProductRegisterRequestDto dto,
-                                             @AuthenticationPrincipal MemberDetails principal) {
+    public ApiResponse<?> registerProduct(@ModelAttribute ProductRegisterRequestDto dto,
+                                          @AuthenticationPrincipal MemberDetails principal) {
         productService.registerProduct(dto, principal);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ApiResponse.createSuccessWithNoData("Product registered successfully");
     }
 
 
+    //상품 검색
     @GetMapping("/search")
-    public ResponseEntity<List<ProductSearchResponseDto>> searchProductByName(@RequestParam String name) {
-        try {
-            // 서비스 계층을 통한 상품 검색 로직 수행
-            List<ProductSearchResponseDto> responses = productService.searchProductByName(name);
-
-            if (responses.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            return ResponseEntity.ok(responses);
-        } catch (Exception e) {
-            // 예외 처리
-            logger.error("Error during product search: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ApiResponse<List<ProductSearchResponseDto>> searchProductByName(@RequestParam String name) {
+        List<ProductSearchResponseDto> responses = productService.searchProductByName(name);
+        return ApiResponse.createSuccess(responses);
     }
 
 
     // 상품 상세 정보 조회
     @GetMapping("/detail/{productId}")
-    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId) {    //경로변수 방식(Path Variable) -> 테스트 /123
-        try {
-            ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
-
-            if (productDetail == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            return new ResponseEntity<>(productDetail, HttpStatus.OK);
-        } catch (Exception e) {
-            // 예외 처리, 예를 들어 로깅이나 에러 메시지 반환
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ApiResponse<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId) {
+        ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
+        return ApiResponse.createSuccess(productDetail);
     }
 }
