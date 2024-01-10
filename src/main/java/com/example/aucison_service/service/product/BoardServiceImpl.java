@@ -47,6 +47,7 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal MemberDetails principal){
         validatePrincipal(principal);
 
@@ -108,9 +109,6 @@ public class BoardServiceImpl implements BoardService{
                 .email(email)
                 .productsEntity(product)
                 .build();
-
-        // 'createdTime'이 자동으로 설정될 것이므로 필요 x
-
 
         PostsEntity savedPost = postsRepository.save(post);
 
