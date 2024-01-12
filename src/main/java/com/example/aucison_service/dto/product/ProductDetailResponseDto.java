@@ -15,17 +15,15 @@ public class ProductDetailResponseDto {
 
     //상품을 선택해서 조회했을 때 나오는 상세 정보를 반환하는 dto
 
-
-
     private String name;
     private String kind;
     private String category;
-//    private LocalDateTime createdTime;
     private String information;
-    private String summary;
-    private String brand;
+    private String tags;
+    private String status;
 
-
+    //판매자 이메일
+    private String email;
 
     // 경매상품 정보
     private Float startPrice;

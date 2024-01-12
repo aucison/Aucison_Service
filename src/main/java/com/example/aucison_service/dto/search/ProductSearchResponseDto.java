@@ -18,12 +18,9 @@ public class ProductSearchResponseDto {
 
     private Long productsId;
     private String name;
-//    private LocalDateTime createdTime;
-    private String summary;
-    private String brand;
+    private String tags;
+    private String status;
 
-    //마이크로 서비스간 통신
-    //private boolean isWished;  // 찜 여부
 
     private List<String> images;
     // 경매상품 정보

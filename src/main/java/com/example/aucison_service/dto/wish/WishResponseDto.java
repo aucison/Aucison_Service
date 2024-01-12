@@ -17,11 +17,10 @@ public class WishResponseDto {
 
     private Long wishesId; // 찜 ID
     private String name; // 상품명
-    private String summary; // 상품 한 줄 설명
-    //private String imgUrl; // 상품 대표 이미지
     private String category; // 경매 여부(경매/비경매)
     private String kind;
-    private String brand;
+    private String tags;
+    private String status;
 
 
     //경매상품

@@ -37,15 +37,23 @@ public class ProductsEntity extends BaseTimeEntity {
     @Column(name = "information", nullable = false, columnDefinition = "VARCHAR(10000)")
     private String information;     //상품 정보
 
-    @Column(name = "summary", nullable = false)
-    private String summary;         //상품 한줄 설명
+//    @Column(name = "summary", nullable = false)
+//    private String summary;         //상품 한줄 설명
 
     @Column(name = "brand", nullable = false)
-    private String brand;     //브랜드명
+    private String brand;           //브랜드명
 
 
-    @Column(name = "email", nullable = false)
-    private String email;     //판매자(msa 통신)
+//    @Column(name = "email", nullable = false)
+//    private String email;     //판매자(msa 통신)
+
+
+    @Column(name = "tags", nullable = true)
+    private String tags;           //상품 태그들
+
+    @Column(name = "status", nullable = false)
+    private String status;         //상품 상태
+
 
 
     @OneToOne(mappedBy = "productsEntity",  cascade = CascadeType.ALL)
@@ -62,14 +70,14 @@ public class ProductsEntity extends BaseTimeEntity {
 
     @Builder
     public ProductsEntity(String name, String kind, String category,
-                          String information, String summary, String brand, String email) {
+                          String information,  String brand, String tags, String status) {
         this.name = name;
         this.kind = kind;
         this.category = category;
         this.information = information;
-        this.summary = summary;
+        this.tags = tags;
         this.brand = brand;
-        this.email = email;
+        this.status = status;
     }
 
     public void addImage(ProductImgEntity image) {

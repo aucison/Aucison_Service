@@ -20,12 +20,11 @@ public class ProductRegisterRequestDto {
     private String name;
     private String kind;
     private String category;
-    //private LocalDateTime createdTime;
     private String information;
-    private String summary;
-    private String brand;
+    private String tags;
+    //private String status;    -> 따로 지정할 필요 없음, 자동 기본값 판매중
 
-    //마이크로 서비스간 통신, 판매자 이메일
+    //판매자 이메일
     private String email;
 
     //이미지 등록
