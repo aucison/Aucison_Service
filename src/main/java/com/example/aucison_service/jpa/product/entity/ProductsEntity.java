@@ -43,10 +43,8 @@ public class ProductsEntity extends BaseTimeEntity {
     @Column(name = "brand", nullable = false)
     private String brand;           //브랜드명
 
-
-//    @Column(name = "email", nullable = false)
-//    private String email;     //판매자(msa 통신)
-
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @Column(name = "tags", nullable = true)
     private String tags;           //상품 태그들
@@ -70,7 +68,7 @@ public class ProductsEntity extends BaseTimeEntity {
 
     @Builder
     public ProductsEntity(String name, String kind, String category,
-                          String information,  String brand, String tags, String status) {
+                          String information,  String brand, String tags, String status, String email) {
         this.name = name;
         this.kind = kind;
         this.category = category;
@@ -78,6 +76,7 @@ public class ProductsEntity extends BaseTimeEntity {
         this.tags = tags;
         this.brand = brand;
         this.status = status;
+        this.email = email;
     }
 
     public void addImage(ProductImgEntity image) {

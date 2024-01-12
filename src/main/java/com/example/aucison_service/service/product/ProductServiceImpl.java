@@ -128,9 +128,7 @@ public class ProductServiceImpl implements ProductService{
                     return AucsProductResponseDto.builder()
                             .productsId(product.getProductsId())
                             .name(product.getName())
-                            .information(product.getInformation())
-                            .summary(product.getSummary())
-                            .brand(product.getBrand())
+                            .status(product.getStatus())
                             .startPrice(aucsInfo.getStartPrice())
                             .end(aucsInfo.getEnd())
                             .bidsCode(aucsInfo.getBidsCode())
@@ -164,9 +162,7 @@ public class ProductServiceImpl implements ProductService{
             return AucsProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .information(product.getInformation())
-                    .summary(product.getSummary())
-                    .brand(product.getBrand())
+                    .status(product.getStatus())
                     .startPrice(aucsInfo.getStartPrice())
                     .end(aucsInfo.getEnd())
                     .bidsCode(aucsInfo.getBidsCode())
@@ -198,9 +194,7 @@ public class ProductServiceImpl implements ProductService{
             return SaleProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .information(product.getInformation())
-                    .summary(product.getSummary())
-                    .brand(product.getBrand())
+                    .status(product.getStatus())
                     .price(saleInfo.getPrice())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                     .wishCount(wishCount) // 찜 횟수 추가
@@ -229,9 +223,7 @@ public class ProductServiceImpl implements ProductService{
             return SaleProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .information(product.getInformation())
-                    .summary(product.getSummary())
-                    .brand(product.getBrand())
+                    .status(product.getStatus())
                     .price(saleInfo.getPrice())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                     .wishCount(wishCount) // 찜 횟수 추가
@@ -255,7 +247,7 @@ public class ProductServiceImpl implements ProductService{
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-//        String email = principal.getAttribute("email");
+
         //아래 코드로 변경
         String email = principal.getMember().getEmail();
 
@@ -265,8 +257,8 @@ public class ProductServiceImpl implements ProductService{
                 .kind(dto.getKind())
                 .category(dto.getCategory())
                 .information(dto.getInformation())
-                .summary(dto.getSummary())
-                .brand(dto.getBrand())
+                .tags(dto.getTags())
+                .status("판매중")
                 .email(email) //  OAuth2 인증을 통해 가져온 이메일 설정
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
@@ -332,8 +324,7 @@ public class ProductServiceImpl implements ProductService{
             ProductSearchResponseDto.ProductSearchResponseDtoBuilder builder = ProductSearchResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .summary(product.getSummary())
-                    .brand(product.getBrand())
+                    .status(product.getStatus())
                     .images(product.getImages()) // 이미지 URL 목록 추가
                     .wishCount(wishCount); // 찜 횟수 추가
 
@@ -397,8 +388,8 @@ public class ProductServiceImpl implements ProductService{
                 .kind(product.getKind())
                 .category(product.getCategory())
                 .information(product.getInformation())
-                .summary(product.getSummary())
-                .brand(product.getBrand())
+                .status(product.getStatus())
+                .tags(product.getTags())
                 .wishCount(wishCount); // 찜 횟수 추가;
 
         // 경매 상품 추가정보
@@ -416,6 +407,5 @@ public class ProductServiceImpl implements ProductService{
         return dto.build();
 
         //게시판 정보들은 따로 보내준다
-
     }
 }

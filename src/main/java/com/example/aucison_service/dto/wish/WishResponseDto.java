@@ -10,9 +10,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Builder
-
 @Data
-
 public class WishResponseDto {
 
     private Long wishesId; // 찜 ID
@@ -20,7 +18,7 @@ public class WishResponseDto {
     private String category; // 경매 여부(경매/비경매)
     private String kind;
     private String tags;
-    private String status;
+    //private String status;
 
 
     //경매상품

@@ -22,7 +22,7 @@ public class ProductRegisterRequestDto {
     private String category;
     private String information;
     private String tags;
-    //private String status;    -> 따로 지정할 필요 없음, 자동 기본값 판매중
+    private String status;
 
     //판매자 이메일
     private String email;
