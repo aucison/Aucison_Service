@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableJpaAuditing  //이거 활성화 해야 시간 자동...
 @SpringBootApplication
 //빈 충돌문제 해결
-@EnableJpaRepositories("com.example.aucison_service.jpa")
+@EnableJpaRepositories(basePackages = {"com.example.aucison_service.jpa.member.repository","com.example.aucison_service.jpa.product.repository","com.example.aucison_service.jpa.shipping.repository"})
 @EnableElasticsearchRepositories("com.example.aucison_service.elastic")
 @EnableAsync
 public class AucisonServiceApplication {

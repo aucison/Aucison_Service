@@ -1,5 +1,6 @@
 package com.example.aucison_service.elastic;
 
+import com.example.aucison_service.enums.PStatusEnum;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,8 +24,9 @@ public class ProductsDocument {
     private String kind;
     private String category;
     private String information;
-    private String summary;
-    private String brand;
+
+    private String tags;
+    private PStatusEnum pStatus;
     private String email;
 
 
@@ -39,15 +41,15 @@ public class ProductsDocument {
 
 
     public ProductsDocument(String id, String name, String kind, String category,
-                            String information, String summary, String brand, String email, Long productsId, List<String> images,
+                            String information, String tags, String pStatus, String email, Long productsId, List<String> images,
                             Long aucEnd, Float aucStartPrice, Float salePrice) {
         this.id = id;
         this.name = name;
         this.kind = kind;
         this.category = category;
         this.information = information;
-        this.summary = summary;
-        this.brand = brand;
+        this.tags = tags;
+        this.pStatus = PStatusEnum.valueOf(pStatus); // 문자열을 enum으로 변환
         this.email = email;
         this.productsId = productsId;
         this.images = images;

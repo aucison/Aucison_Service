@@ -1,6 +1,7 @@
 package com.example.aucison_service.service.product;
 
 
+
 import com.example.aucison_service.controller.AuthController;
 import com.example.aucison_service.dto.board.*;
 import com.example.aucison_service.exception.AppException;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +50,7 @@ public class BoardServiceImpl implements BoardService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostListResponseDto> getBoardByProductId(Long productId,@AuthenticationPrincipal MemberDetails principal){
         validatePrincipal(principal);
 
@@ -108,9 +112,6 @@ public class BoardServiceImpl implements BoardService{
                 .email(email)
                 .productsEntity(product)
                 .build();
-
-        // 'createdTime'이 자동으로 설정될 것이므로 필요 x
-
 
         PostsEntity savedPost = postsRepository.save(post);
 
@@ -210,3 +211,6 @@ public class BoardServiceImpl implements BoardService{
         return CommentCRUDResponseDto.builder().comment_id(commentId).build();
     }
 }
+
+
+

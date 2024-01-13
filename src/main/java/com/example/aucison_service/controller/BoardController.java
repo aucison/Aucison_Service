@@ -9,10 +9,10 @@ import com.example.aucison_service.service.product.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/")
@@ -24,18 +24,6 @@ public class BoardController {
     public BoardController(BoardService boardService){
         this.boardService=boardService;
     }
-
-    /*
-    @GetMapping("/detail/board/{products_id}")
-    public ResponseEntity<Map<String, Object>> getBoardByProductId(@PathVariable Long products_id) {
-        List<PostListResponseDto> posts = boardService.getBoardByProductId(products_id);
-
-        Map<String, Object> response = new HashMap<>();
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-     */
 
     //해당 상품의 게시물 및 댓글 조회
     @GetMapping("/detail/{products_id}/board")
@@ -106,3 +94,5 @@ public class BoardController {
         return ApiResponse.createSuccess(boardService.deleteComment(commentId, principal));
     }
 }
+
+
