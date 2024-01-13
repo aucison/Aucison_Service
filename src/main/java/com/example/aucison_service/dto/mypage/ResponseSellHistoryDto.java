@@ -2,7 +2,7 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,6 +18,6 @@ public class ResponseSellHistoryDto {
     private String soldDate;    //판매 날짜
 
     private Long ordersId;  //주문번호
-    private OrderStatus status;  //주문상태
+    private OStatusEnum status;  //주문상태
     private float price; //판매 가격
 }

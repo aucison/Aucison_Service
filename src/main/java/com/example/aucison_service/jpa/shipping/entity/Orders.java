@@ -1,7 +1,7 @@
 package com.example.aucison_service.jpa.shipping.entity;
 
 import com.example.aucison_service.BaseTimeEntity;
-import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OStatusEnum;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class Orders extends BaseTimeEntity {   //주문 정보
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;   //주문상태(낙찰, 응찰, 패찰, 주문완료)
+    private OStatusEnum oStatus;   //주문상태(낙찰, 응찰, 패찰, 주문완료)
 
     @OneToOne(mappedBy = "orders")
     private Payments payments;
@@ -37,14 +37,14 @@ public class Orders extends BaseTimeEntity {   //주문 정보
     @Builder
     public Orders(Long productsId, String email,
                   //LocalDateTime createdTime,
-                  OrderStatus status) {
+                  OStatusEnum oStatus) {
         this.productsId = productsId;
         this.email = email;
 //        this.createdTime = createdTime;
-        this.status = status;
+        this.oStatus = oStatus;
     }
 
-    public void updateStatus(OrderStatus status) {  //status 변경
-        this.status = status;
+    public void updateStatus(OStatusEnum oStatus) {  //status 변경
+        this.oStatus = oStatus;
     }
 }

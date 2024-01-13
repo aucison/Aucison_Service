@@ -2,7 +2,7 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class ResponseOrderDetailsDto {
 
     private Long ordersId; // 주문번호
     private String orderDate; // 주문일자 또는 마감일자
-    private OrderStatus status; // 주문상태
+    private OStatusEnum status; // 주문상태
     private float price; // 구매 가격
 
     // AddressInfo와 BidDetails는 각각의 DTO로 분리할 수도 있습니다.
@@ -43,7 +43,7 @@ public class ResponseOrderDetailsDto {
     @AllArgsConstructor
     @Builder
     public static class BidDetails {
-        private OrderStatus bidStatus;
+        private OStatusEnum bidStatus;
         private LocalDateTime bidTime;
     }
 }
