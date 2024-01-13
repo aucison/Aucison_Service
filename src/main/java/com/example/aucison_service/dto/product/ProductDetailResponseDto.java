@@ -35,13 +35,7 @@ public class ProductDetailResponseDto {
     // 비경매상품 정보
     private Float price;
 
+    private Long wishCount; // 추가된 찜 횟수 필드
 
-    //게시물
-    //아직 미작성
-
-    //댓글
-    //아직 미작성
-
-    //미작성 이유 ->  postserviceimpl에서 별도로 따로 서비스를 구현할 수 있기 때문
 
 }
