@@ -1,5 +1,6 @@
 package com.example.aucison_service.elastic;
 
+import com.example.aucison_service.enums.PStatusEnum;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +26,7 @@ public class ProductsDocument {
     private String information;
 
     private String tags;
-    private String status;
+    private PStatusEnum pStatus;
     private String email;
 
 
@@ -40,7 +41,7 @@ public class ProductsDocument {
 
 
     public ProductsDocument(String id, String name, String kind, String category,
-                            String information, String tags, String status, String email, Long productsId, List<String> images,
+                            String information, String tags, PStatusEnum pStatus, String email, Long productsId, List<String> images,
                             Long aucEnd, Float aucStartPrice, Float salePrice) {
         this.id = id;
         this.name = name;
@@ -48,7 +49,7 @@ public class ProductsDocument {
         this.category = category;
         this.information = information;
         this.tags = tags;
-        this.status = status;
+        this.pStatus = pStatus;
         this.email = email;
         this.productsId = productsId;
         this.images = images;

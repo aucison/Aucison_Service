@@ -2,6 +2,8 @@ package com.example.aucison_service.jpa.product.entity;
 
 
 import com.example.aucison_service.BaseTimeEntity;
+import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.PStatusEnum;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,9 +51,9 @@ public class ProductsEntity extends BaseTimeEntity {
     @Column(name = "tags", nullable = true)
     private String tags;           //상품 태그들
 
-    @Column(name = "status", nullable = false)
-    private String status;         //상품 상태
-
+    @Column(name = "p_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PStatusEnum pStatus;         //상품 상태
 
 
     @OneToOne(mappedBy = "productsEntity",  cascade = CascadeType.ALL)
@@ -68,14 +70,14 @@ public class ProductsEntity extends BaseTimeEntity {
 
     @Builder
     public ProductsEntity(String name, String kind, String category,
-                          String information,  String brand, String tags, String status, String email) {
+                          String information,  String brand, String tags, PStatusEnum pStatus, String email) {
         this.name = name;
         this.kind = kind;
         this.category = category;
         this.information = information;
         this.tags = tags;
         this.brand = brand;
-        this.status = status;
+        this.pStatus = pStatus;
         this.email = email;
     }
 
@@ -84,4 +86,7 @@ public class ProductsEntity extends BaseTimeEntity {
         image.setProduct(this);
     }
 
+    public void updatePStatus(PStatusEnum pStatus) {  //status 변경
+        this.pStatus = pStatus;
+    }
 }

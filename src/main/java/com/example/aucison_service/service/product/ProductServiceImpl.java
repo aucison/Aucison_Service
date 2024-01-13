@@ -6,10 +6,11 @@ package com.example.aucison_service.service.product;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
+import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
-import com.example.aucison_service.dto.wish.ProductWishCountDto;
 import com.example.aucison_service.elastic.ProductsDocument;
+import com.example.aucison_service.enums.PStatusEnum;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.repository.MembersRepository;
@@ -128,7 +129,7 @@ public class ProductServiceImpl implements ProductService{
                     return AucsProductResponseDto.builder()
                             .productsId(product.getProductsId())
                             .name(product.getName())
-                            .status(product.getStatus())
+                            .pStatus(product.getPStatus())
                             .startPrice(aucsInfo.getStartPrice())
                             .end(aucsInfo.getEnd())
                             .bidsCode(aucsInfo.getBidsCode())
@@ -162,7 +163,7 @@ public class ProductServiceImpl implements ProductService{
             return AucsProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .status(product.getStatus())
+                    .pStatus(product.getPStatus())
                     .startPrice(aucsInfo.getStartPrice())
                     .end(aucsInfo.getEnd())
                     .bidsCode(aucsInfo.getBidsCode())
@@ -194,7 +195,7 @@ public class ProductServiceImpl implements ProductService{
             return SaleProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .status(product.getStatus())
+                    .pStatus(product.getPStatus())
                     .price(saleInfo.getPrice())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                     .wishCount(wishCount) // 찜 횟수 추가
@@ -223,7 +224,7 @@ public class ProductServiceImpl implements ProductService{
             return SaleProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .status(product.getStatus())
+                    .pStatus(product.getPStatus())
                     .price(saleInfo.getPrice())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                     .wishCount(wishCount) // 찜 횟수 추가
@@ -258,7 +259,7 @@ public class ProductServiceImpl implements ProductService{
                 .category(dto.getCategory())
                 .information(dto.getInformation())
                 .tags(dto.getTags())
-                .status("판매중")
+                .pStatus(PStatusEnum.S000)  //enum은 이렇게함
                 .email(email) //  OAuth2 인증을 통해 가져온 이메일 설정
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
@@ -304,6 +305,45 @@ public class ProductServiceImpl implements ProductService{
 
     }
 
+    @Override
+    public ProductRegisterFinshResponseDto finshReisterProduct(Long productId, @AuthenticationPrincipal MemberDetails principal) {
+        //상품등록 완료 후 확인 페이지 -> 솔직히 프론트 처리가 더 이상적일듯, 이전 페이지 내용 가져오면됨
+
+        if (principal == null) {
+            logger.info("인증되지 않은 사용자입니다!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        ProductsEntity product = productsRepository.findByProductsId(productId);
+
+        String email = principal.getMember().getEmail();
+
+        // 첫 번째 이미지 URL 추출 (이미지가 없는 경우 null이 될 수 있음)
+        String firstImageUrl = product.getImages().stream()
+                .map(ProductImgEntity::getUrl)
+                .findFirst()
+                .orElse(null);
+
+        ProductRegisterFinshResponseDto.ProductRegisterFinshResponseDtoBuilder builder =ProductRegisterFinshResponseDto.builder()
+                .name(product.getName())
+                .kind(product.getKind())
+                .category(product.getCategory())
+                .tags(product.getTags())
+                .email(email)
+                .image(firstImageUrl);
+
+        if("AUCS".equals(product.getCategory())){
+            AucsInfosEntity aucsInfo = product.getAucsInfosEntity();
+            builder.startPrice(aucsInfo.getStartPrice())
+                    .end(aucsInfo.getEnd());
+
+        } else if("SALE".equals(product.getCategory())){
+            SaleInfosEntity saleInfo = product.getSaleInfosEntity();
+            builder.price(saleInfo.getPrice());
+        }
+
+        return builder.build();
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -324,7 +364,7 @@ public class ProductServiceImpl implements ProductService{
             ProductSearchResponseDto.ProductSearchResponseDtoBuilder builder = ProductSearchResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
-                    .status(product.getStatus())
+                    .pStatus(product.getPStatus())
                     .images(product.getImages()) // 이미지 URL 목록 추가
                     .wishCount(wishCount); // 찜 횟수 추가
 
@@ -388,7 +428,7 @@ public class ProductServiceImpl implements ProductService{
                 .kind(product.getKind())
                 .category(product.getCategory())
                 .information(product.getInformation())
-                .status(product.getStatus())
+                .pStatus(product.getPStatus())
                 .tags(product.getTags())
                 .wishCount(wishCount); // 찜 횟수 추가;
 
@@ -408,4 +448,5 @@ public class ProductServiceImpl implements ProductService{
 
         //게시판 정보들은 따로 보내준다
     }
+
 }

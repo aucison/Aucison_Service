@@ -1,5 +1,6 @@
 package com.example.aucison_service.dto.product;
 
+import com.example.aucison_service.enums.PStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +23,7 @@ public class ProductRegisterRequestDto {
     private String category;
     private String information;
     private String tags;
-    private String status;
+    private PStatusEnum pStatus;
 
     //판매자 이메일
     private String email;

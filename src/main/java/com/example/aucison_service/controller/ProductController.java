@@ -6,19 +6,16 @@ import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
+import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
-import com.example.aucison_service.dto.search.ProductSearchRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.product.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -86,6 +83,14 @@ public class ProductController {
         return ApiResponse.createSuccessWithNoData("Product registered successfully");
     }
 
+    //상품 등록 완료 확인 페이지
+    @GetMapping("/product/register/{productId}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<?> finshRegisterProduct(@PathVariable Long productId,
+                                               @AuthenticationPrincipal MemberDetails principal){
+        ProductRegisterFinshResponseDto product = productService.finshReisterProduct(productId, principal);
+        return ApiResponse.createSuccess(product);
+    }
 
     //상품 검색
     @GetMapping("/search")
@@ -101,4 +106,6 @@ public class ProductController {
         ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
         return ApiResponse.createSuccess(productDetail);
     }
+
+
 }

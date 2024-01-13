@@ -1,6 +1,7 @@
 package com.example.aucison_service.dto.search;
 
 
+import com.example.aucison_service.enums.PStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +20,7 @@ public class ProductSearchResponseDto {
     private Long productsId;
     private String name;
     private String tags;
-    private String status;
+    private PStatusEnum pStatus;
 
 
     private List<String> images;
