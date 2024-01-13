@@ -1,7 +1,7 @@
 package com.example.aucison_service.jpa.shipping.entity;
 
 import com.example.aucison_service.BaseTimeEntity;
-import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OStatusEnum;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,14 +28,14 @@ public class Bids extends BaseTimeEntity { //실시간 응찰 내역
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
+    private OStatusEnum status;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
 
     @Column(name = "bids_code", nullable = false)
     private String bidsCode;    //응찰 고유 코드
 
     @Builder
     public Bids(Long productsId, String email,
-                float nowPrice, OrderStatus status, String bidsCode) {
+                float nowPrice, OStatusEnum status, String bidsCode) {
         this.productsId = productsId;
         this.email = email;
         this.nowPrice = nowPrice;
@@ -43,7 +43,7 @@ public class Bids extends BaseTimeEntity { //실시간 응찰 내역
         this.bidsCode = bidsCode;
     }
 
-    public void updateStatus(OrderStatus status) {  //경매 상품 미낙찰 시 status를 변경하는 메서드
+    public void updateStatus(OStatusEnum status) {  //경매 상품 미낙찰 시 status를 변경하는 메서드
         this.status = status;
     }
 

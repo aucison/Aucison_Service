@@ -4,7 +4,7 @@ package com.example.aucison_service.service.shipping;
 import com.example.aucison_service.dto.payments.AddrInfoResponseDto;
 import com.example.aucison_service.dto.payments.PaymentsRequestDto;
 import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
-import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OStatusEnum;
 import com.example.aucison_service.enums.PageType;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
@@ -267,7 +267,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         pageAccessLogsRepository.findById(logId).orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
 
         // Orders, Payments, Deliveries 정보 저장
-        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.ORDER_COMPLETED);
+        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.COOO);
 
         // credit 정보 가져오기
         //TODO: 판매자 credit update
@@ -283,15 +283,16 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     private Long saveAucsPayment(String email, PaymentsRequestDto paymentsRequestDto) {    //결제완료(경매)
+        Long productId = paymentsRequestDto.getProductsId();
+
         //결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
-        if (!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), accessTime)) {
+        if (!isBeforeAuctionEndDate(productId, accessTime)) {
             throw new AppException(ErrorCode.AUCTION_ENDED);
         }
 
         //결제 페이지 접근 로그 생성
-        Long logId = logPageAccess(paymentsRequestDto.getProductsId(), email,
-                PageType.PAYMENT_COMPLETED);
+        Long logId = logPageAccess(productId, email, PageType.PAYMENT_COMPLETED);
 
         PageAccessLogs accessLog = pageAccessLogsRepository.findById(logId)
                 .orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
@@ -299,7 +300,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //3분 연장 판단
         //TODO: AuctionEndDatesEntity 활용
-        ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
+        ProductsEntity product = productsRepository.findByProductsId(productId);
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
 
         LocalDateTime auctionAccessTime = accessLog.getCreatedDate();
@@ -311,11 +312,11 @@ public class PaymentsServiceImpl implements PaymentsService {
         if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {
             aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출(응찰)
             aucsInfosRepository.save(aucsInfo);
-            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.WAITING_FOR_BID);
+            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
         } else if (timeDifference < 3 * 60 * 1000) {    //낙찰
-            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.WINNING_BID);
+            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
         } else {    //응찰
-            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OrderStatus.WAITING_FOR_BID);
+            order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
         }
 
         // Bids 정보 저장
@@ -327,24 +328,38 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //경매 미낙찰에 따른 환불
         //상품 id로 해당 상품 주문 정보를 모두 찾음
-        List<Orders> existingOrders = ordersRepository.findAllByProductsId(paymentsRequestDto.getProductsId());
-        logger.info(String.valueOf(existingOrders.size()));
+        processRefundsForAuction(productId, order, timeDifference);
+
+        //결제 페이지 탈출 로그 생성 전에 체크
+        LocalDateTime exitTime = LocalDateTime.now();
+        if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
+            throw new AppException(ErrorCode.AUCTION_ENDED);
+        }
+
+        //낙찰일 경우 상품 삭제
+        if (timeDifference < 3 * 60 * 1000) {
+            deleteProduct(product.getProductsId());
+        }
+
+        logPageExit(logId);
+
+        return order.getOrdersId();
+    }
+
+    private void processRefundsForAuction(Long productId, Orders order, long timeDifference) {
+        List<Orders> existingOrders = ordersRepository.findAllByProductsId(productId);
 
         Orders lastlyOrder = order;    //방금 경매상품을 응찰한 사용자의 주문
+        OStatusEnum failedBidStatus = timeDifference < 3 * 60 * 1000 ? OStatusEnum.C002 : OStatusEnum.B002;  //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
+
         if (!existingOrders.isEmpty()) {
-            //logger.info(winningOrder.getPayments().getPaymentsId().toString());
 
             for (Orders ord : existingOrders) {
-                logger.info(ord.getProductsId().toString());
-                logger.info(ord.getOrdersId().toString());
-                logger.info(ord.getEmail());
-                logger.info(ord.getStatus().toString());
+                //새로운 응찰이 아니고 "최고가 입찰" 상태였던 이전 주문이라면
+                if (lastlyOrder != ord && ord.getOStatus().equals(OStatusEnum.B001)) {
 
-                //새로운 주문이 아니고 "응찰" 상태였던 이전 주문이라면
-                if (lastlyOrder != ord && ord.getStatus().equals(OrderStatus.WAITING_FOR_BID)) {
-                    //logger.info(ord.getPayments().getPaymentsId().toString());
-
-                    ord.updateStatus(OrderStatus.FAILED_BID);   //이전 응찰은 "패찰"로 변해야 함
+                    //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
+                    ord.updateStatus(failedBidStatus);
 
                     float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
@@ -369,10 +384,10 @@ public class PaymentsServiceImpl implements PaymentsService {
 
                     // 실시간 응찰 내역에 패찰 정보 저장
                     Bids failedBid = Bids.builder()
-                            .productsId(paymentsRequestDto.getProductsId())
+                            .productsId(productId)
                             .email(ord.getEmail())
                             .nowPrice(ord.getPayments().getCost())
-                            .status(OrderStatus.FAILED_BID)
+                            .status(failedBidStatus)
                             .bidsCode(UUID.randomUUID().toString())
                             .build();
                     bidsRepository.save(failedBid);
@@ -380,21 +395,6 @@ public class PaymentsServiceImpl implements PaymentsService {
                 }
             }
         }
-
-        //결제 페이지 탈출 로그 생성 전에 체크
-        LocalDateTime exitTime = LocalDateTime.now();
-        if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
-            throw new AppException(ErrorCode.AUCTION_ENDED);
-        }
-
-        //낙찰일 경우 상품 삭제
-        if (timeDifference < 3 * 60 * 1000) {
-            deleteProduct(product.getProductsId());
-        }
-
-        logPageExit(logId);
-
-        return order.getOrdersId();
     }
 
     private void saveBidInfo(PaymentsRequestDto paymentsRequestDto, String email, Orders order) {
@@ -403,7 +403,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
                 .nowPrice(paymentsRequestDto.getPrice()) // 현재 응찰 가격
-                .status(order.getStatus()) // 초기 상태는 '응찰'로 설정
+                .status(order.getOStatus()) // 초기 상태는 '응찰'로 설정
                 .bidsCode(UUID.randomUUID().toString()) // 고유한 Bids Code 생성
                 .build();
 
@@ -423,11 +423,11 @@ public class PaymentsServiceImpl implements PaymentsService {
         return log.getPageAccessLogsId();
     }
 
-    private Orders createOrderAndPaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, String email, OrderStatus status) {
+    private Orders createOrderAndPaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, String email, OStatusEnum status) {
         Orders order = Orders.builder()
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
-                .status(status)
+                .oStatus(status)
                 .build();
         ordersRepository.save(order);
 

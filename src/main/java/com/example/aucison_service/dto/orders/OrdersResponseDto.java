@@ -1,7 +1,7 @@
 package com.example.aucison_service.dto.orders;
 
 
-import com.example.aucison_service.enums.OrderStatus;
+import com.example.aucison_service.enums.OStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +16,7 @@ public class OrdersResponseDto {
     private String category; // 경매여부(경매/비경매)
     private Long ordersId;  //주문번호
     private String createdTime;  //주문일자(formatter로 인한 string 형 변환)
-    private OrderStatus status;  //주문상태
+    private OStatusEnum status;  //주문상태
 
     private float price; //구매 가격
 
