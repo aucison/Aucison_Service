@@ -41,7 +41,7 @@ public class ProductsDocument {
 
 
     public ProductsDocument(String id, String name, String kind, String category,
-                            String information, String tags, PStatusEnum pStatus, String email, Long productsId, List<String> images,
+                            String information, String tags, String pStatus, String email, Long productsId, List<String> images,
                             Long aucEnd, Float aucStartPrice, Float salePrice) {
         this.id = id;
         this.name = name;
@@ -49,7 +49,7 @@ public class ProductsDocument {
         this.category = category;
         this.information = information;
         this.tags = tags;
-        this.pStatus = pStatus;
+        this.pStatus = PStatusEnum.valueOf(pStatus); // 문자열을 enum으로 변환
         this.email = email;
         this.productsId = productsId;
         this.images = images;

@@ -56,7 +56,7 @@ public class ProductsIndexService {
                 productEntity.getKind(),
                 productEntity.getCategory(),
                 productEntity.getInformation(),
-                productEntity.getPStatus(),
+                productEntity.getPStatus().name(),
                 productEntity.getTags(),
                 productEntity.getEmail(),
                 productEntity.getProductsId(),
