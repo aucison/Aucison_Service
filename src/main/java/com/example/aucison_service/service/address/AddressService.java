@@ -7,9 +7,9 @@ import com.example.aucison_service.dto.payments.AddrInfoResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 
-@Service
 public interface AddressService {
     // 배송지 등록
     void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto);

@@ -3,8 +3,10 @@ package com.example.aucison_service.service.member;
 
 import com.example.aucison_service.dto.mypage.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 public interface MypageService {
     // 기본 구매 내역 조회
