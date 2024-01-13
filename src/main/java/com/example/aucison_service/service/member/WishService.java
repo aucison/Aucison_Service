@@ -7,13 +7,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
-public interface WishService {
-
-    //찜 추가
-    //찜 삭제
-    //찜 리스트 조회
-
-    void addWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
-    void deleteWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
-    List<WishResponseDto> getMemberWishList(@AuthenticationPrincipal MemberDetails principal);
-}
+//public interface WishService {
+//
+//    //찜 추가
+//    //찜 삭제
+//    //찜 리스트 조회
+//
+//    void addWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
+//    void deleteWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
+//    List<WishResponseDto> getMemberWishList(@AuthenticationPrincipal MemberDetails principal);
+//}
