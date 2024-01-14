@@ -2,7 +2,6 @@ package com.example.aucison_service.jpa.product.entity;
 
 
 import com.example.aucison_service.BaseTimeEntity;
-import com.example.aucison_service.enums.OrderStatus;
 import com.example.aucison_service.enums.PStatusEnum;
 import jakarta.persistence.*;
 import lombok.Builder;
