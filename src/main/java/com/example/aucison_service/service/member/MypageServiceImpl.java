@@ -96,7 +96,7 @@ public class MypageServiceImpl implements MypageService {
                                 .category(historiesEntity.getCategory())
                                 .ordersId(ordersEntity.getOrdersId())
                                 .createdTime(ordersEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                .status(ordersEntity.getOStatus())
+                                .oStatus(ordersEntity.getOStatus())
                                 .price(historiesEntity.getPrice())
                                 .build();
                     }
@@ -187,7 +187,7 @@ public class MypageServiceImpl implements MypageService {
                 .category(histories.getCategory())
                 .ordersId(ordersId)
                 .orderDate(auctionEndDates.getEndDate().toString())
-                .status(orders.getOStatus())
+                .oStatus(orders.getOStatus())
                 .price(histories.getPrice())
                 .addressInfo(addressInfo)
                 .bidDetails(bidDetails)
@@ -237,7 +237,7 @@ public class MypageServiceImpl implements MypageService {
                 .category(histories.getCategory())
                 .ordersId(ordersId)
                 .orderDate(orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .status(orders.getOStatus())
+                .oStatus(orders.getOStatus())
                 .price(histories.getPrice())
                 .addressInfo(addressInfo)
                 .build();
@@ -289,7 +289,7 @@ public class MypageServiceImpl implements MypageService {
                     .createdDate(createdDate)
                     .soldDate(soldDate)
                     .ordersId(orders.getOrdersId())
-                    .status(orders.getOStatus())
+                    .oStatus(orders.getOStatus())
                     .price(history.getPrice())
                     .build();
         }

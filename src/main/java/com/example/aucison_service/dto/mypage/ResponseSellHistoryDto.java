@@ -18,6 +18,6 @@ public class ResponseSellHistoryDto {
     private String soldDate;    //판매 날짜
 
     private Long ordersId;  //주문번호
-    private OStatusEnum status;  //주문상태
+    private OStatusEnum oStatus;  //주문상태
     private float price; //판매 가격
 }

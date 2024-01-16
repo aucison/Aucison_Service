@@ -20,7 +20,7 @@ public class ResponseOrderDetailsDto {
 
     private Long ordersId; // 주문번호
     private String orderDate; // 주문일자 또는 마감일자
-    private OStatusEnum status; // 주문상태
+    private OStatusEnum oStatus; // 주문상태
     private float price; // 구매 가격
 
     // AddressInfo와 BidDetails는 각각의 DTO로 분리할 수도 있습니다.
