@@ -63,8 +63,11 @@ public class MembersInfoEntity { // 사용자 추가 정보
     }
 
     public void updateCredit(Float newCredit) {
-        if (newCredit != null && newCredit >= 0) { // 유효성 검사, credit이 null이 아니고 음수가 아니어야 함
+        if (newCredit != null) {
             this.credit = newCredit;
+            if (this.credit < 0) {
+                this.credit = 0f; // credit이 음수가 되지 않도록 보장
+            }
         }
     }
 }

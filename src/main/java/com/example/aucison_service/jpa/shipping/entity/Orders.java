@@ -22,9 +22,6 @@ public class Orders extends BaseTimeEntity {   //주문 정보
     @Column(name = "members_code", nullable = false)
     private String email;   //구매자 이메일
 
-//    @Column(name = "created_time", nullable = false)
-//    private LocalDateTime createdTime;            //주문일자
-
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private OStatusEnum oStatus;   //주문상태(낙찰, 응찰, 패찰, 주문완료)
@@ -36,7 +33,6 @@ public class Orders extends BaseTimeEntity {   //주문 정보
 
     @Builder
     public Orders(Long productsId, String email,
-                  //LocalDateTime createdTime,
                   OStatusEnum oStatus) {
         this.productsId = productsId;
         this.email = email;
