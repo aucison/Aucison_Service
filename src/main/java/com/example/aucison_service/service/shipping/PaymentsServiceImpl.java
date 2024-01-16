@@ -5,6 +5,7 @@ import com.example.aucison_service.dto.payments.AddrInfoResponseDto;
 import com.example.aucison_service.dto.payments.PaymentsRequestDto;
 import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
 import com.example.aucison_service.enums.OStatusEnum;
+import com.example.aucison_service.enums.PStatusEnum;
 import com.example.aucison_service.enums.PageType;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
@@ -274,7 +275,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         updateMemberCredit(email, paymentsRequestDto.getPrice());
 
         //상품 삭제
-        deleteProduct(paymentsRequestDto.getProductsId());
+//        deleteProduct(paymentsRequestDto.getProductsId());
+        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
         logPageExit(logId);
@@ -313,10 +315,13 @@ public class PaymentsServiceImpl implements PaymentsService {
             aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출(응찰)
             aucsInfosRepository.save(aucsInfo);
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
+            updateProductStatus(productId, PStatusEnum.B000);
         } else if (timeDifference < 3 * 60 * 1000) {    //낙찰
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
+            updateProductStatus(productId, PStatusEnum.C000);
         } else {    //응찰
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
+            updateProductStatus(productId, PStatusEnum.B000);
         }
 
         // Bids 정보 저장
@@ -336,14 +341,24 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.AUCTION_ENDED);
         }
 
-        //낙찰일 경우 상품 삭제
-        if (timeDifference < 3 * 60 * 1000) {
-            deleteProduct(product.getProductsId());
-        }
+//        //낙찰일 경우 상품 삭제
+//        if (timeDifference < 3 * 60 * 1000) {
+//            deleteProduct(product.getProductsId());
+//        }
 
         logPageExit(logId);
 
         return order.getOrdersId();
+    }
+
+    private void updateProductStatus(Long productId, PStatusEnum pStatusEnum) {
+        ProductsEntity product = productsRepository.findByProductsId(productId);
+
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_EXIST);
+        }
+
+        product.updatePStatus(pStatusEnum);
     }
 
     private void processRefundsForAuction(Long productId, Orders order, long timeDifference) {
