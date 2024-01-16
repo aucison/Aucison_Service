@@ -22,7 +22,7 @@ public class Orders extends BaseTimeEntity {   //주문 정보
     @Column(name = "members_code", nullable = false)
     private String email;   //구매자 이메일
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "o_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private OStatusEnum oStatus;   //주문상태(낙찰, 응찰, 패찰, 주문완료)
 

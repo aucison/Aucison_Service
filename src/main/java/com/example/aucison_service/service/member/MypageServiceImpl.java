@@ -174,7 +174,7 @@ public class MypageServiceImpl implements MypageService {
         // Build BidDetails
         List<ResponseOrderDetailsDto.BidDetails> bidDetails = bidsList.stream()
                 .map(bid -> ResponseOrderDetailsDto.BidDetails.builder()
-                        .bidStatus(bid.getStatus())
+                        .bidStatus(bid.getOStatus())
                         .bidTime(bid.getCreatedDate())
                         .build())
                 .collect(Collectors.toList());
