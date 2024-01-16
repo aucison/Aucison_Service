@@ -1,5 +1,6 @@
 package com.example.aucison_service.dto.orders;
 
+import com.example.aucison_service.enums.OStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,5 +11,5 @@ public class OrdersCreateDto {
     private Long productsId;    //상품 id
     private String email;   //구매자 이메일
 //    private LocalDateTime createdTime;  //주문일자
-    private Enum status;    //주문상태
+    private OStatusEnum oStatus;    //주문상태
 }

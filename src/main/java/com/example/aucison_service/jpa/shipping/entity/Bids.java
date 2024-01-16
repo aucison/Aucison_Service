@@ -26,25 +26,25 @@ public class Bids extends BaseTimeEntity { //실시간 응찰 내역
     @Column(name = "now_price", nullable = false)
     private float nowPrice;    //응찰가격
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "o_status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private OStatusEnum status;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
+    private OStatusEnum oStatus;   //응찰 상태(낙찰, 응찰, 패찰, 주문완료)
 
     @Column(name = "bids_code", nullable = false)
     private String bidsCode;    //응찰 고유 코드
 
     @Builder
     public Bids(Long productsId, String email,
-                float nowPrice, OStatusEnum status, String bidsCode) {
+                float nowPrice, OStatusEnum oStatus, String bidsCode) {
         this.productsId = productsId;
         this.email = email;
         this.nowPrice = nowPrice;
-        this.status = status;
+        this.oStatus = oStatus;
         this.bidsCode = bidsCode;
     }
 
-    public void updateStatus(OStatusEnum status) {  //경매 상품 미낙찰 시 status를 변경하는 메서드
-        this.status = status;
+    public void updateStatus(OStatusEnum oStatus) {  //경매 상품 미낙찰 시 status를 변경하는 메서드
+        this.oStatus = oStatus;
     }
 
 }

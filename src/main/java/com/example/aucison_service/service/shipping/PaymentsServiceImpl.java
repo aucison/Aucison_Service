@@ -419,7 +419,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                             .productsId(productId)
                             .email(ord.getEmail())
                             .nowPrice(ord.getPayments().getCost())
-                            .status(failedBidStatus)
+                            .oStatus(failedBidStatus)
                             .bidsCode(UUID.randomUUID().toString())
                             .build();
                     bidsRepository.save(failedBid);
@@ -435,7 +435,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .productsId(paymentsRequestDto.getProductsId())
                 .email(email)
                 .nowPrice(paymentsRequestDto.getPrice()) // 현재 응찰 가격
-                .status(order.getOStatus()) // 초기 상태는 '응찰'로 설정
+                .oStatus(order.getOStatus()) // 초기 상태는 '응찰'로 설정
                 .bidsCode(UUID.randomUUID().toString()) // 고유한 Bids Code 생성
                 .build();
 
