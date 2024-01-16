@@ -33,17 +33,13 @@ public class ProductsEntity extends BaseTimeEntity {
     @Column(name = "category", nullable = false)
     private String category;        // 경매여부(경매(AUCS) / 비경매(SALE))
 
-//    @Column(name = "createdTime", nullable = false)
+    //    @Column(name = "createdTime", nullable = false)
 //    private LocalDateTime createdTime;        //등록 시간 ->이게 주석인게 맞다네??, 상속만 받으면 됨
     @Column(name = "information", nullable = false, columnDefinition = "VARCHAR(10000)")
     private String information;     //상품 정보
 
-//    @Column(name = "summary", nullable = false)
+    //    @Column(name = "summary", nullable = false)
 //    private String summary;         //상품 한줄 설명
-
-    @Column(name = "brand", nullable = false)
-    private String brand;           //브랜드명
-
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -69,13 +65,12 @@ public class ProductsEntity extends BaseTimeEntity {
 
     @Builder
     public ProductsEntity(String name, String kind, String category,
-                          String information,  String brand, String tags, PStatusEnum pStatus, String email) {
+                          String information, String tags, PStatusEnum pStatus, String email) {
         this.name = name;
         this.kind = kind;
         this.category = category;
         this.information = information;
         this.tags = tags;
-        this.brand = brand;
         this.pStatus = pStatus;
         this.email = email;
     }
@@ -89,3 +84,5 @@ public class ProductsEntity extends BaseTimeEntity {
         this.pStatus = pStatus;
     }
 }
+
+
