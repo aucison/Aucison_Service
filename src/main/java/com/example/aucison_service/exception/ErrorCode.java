@@ -51,6 +51,8 @@ public enum ErrorCode {
     INSUFFICIENT_CREDIT(HttpStatus.BAD_REQUEST, "잔액이 부족합니다."),
     SHIPPING_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "배송지를 새로 등록해주세요."),
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "로그를 찾을 수 없습니다."),
+    SELLER_CANNOT_BUY_OWN_PRODUCT(HttpStatus.FORBIDDEN, "판매자는 자신이 등록한 상품을 구매할 수 없습니다."),
+
 
     WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "찜 상품이 아닙니다."),
     DUPLICATE_WISH(HttpStatus.BAD_REQUEST, "이미 찜한 상품입니다.");
