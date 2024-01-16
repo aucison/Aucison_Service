@@ -2,6 +2,7 @@ package com.example.aucison_service.dto.wish;
 
 
 
+import com.example.aucison_service.enums.PStatusEnum;
 import lombok.Builder;
 
 import lombok.Data;
@@ -18,7 +19,7 @@ public class WishResponseDto {
     private String category; // 경매 여부(경매/비경매)
     private String kind;
     private String tags;
-    //private String status;
+    private PStatusEnum pStatus;
 
 
     //경매상품
