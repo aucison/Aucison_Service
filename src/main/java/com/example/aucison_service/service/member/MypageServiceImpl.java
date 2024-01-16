@@ -321,16 +321,23 @@ public class MypageServiceImpl implements MypageService {
     @Transactional
     public void patchMemberDetails(MemberDetails principal, RequestMembersInfoDto requestMembersInfoDto) {
         String email = principal.getMember().getEmail();
+
         MembersEntity member = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
         MembersInfoEntity memberInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
-                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND));
 
         // Update nickname, phone, and subEmail
-        member.updateNickname(requestMembersInfoDto.getNickName());
-        memberInfo.updatePhone(requestMembersInfoDto.getPhone());
-        memberInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
+        if (requestMembersInfoDto.getNickName() != null) {
+            member.updateNickname(requestMembersInfoDto.getNickName());
+        }
+        if (requestMembersInfoDto.getPhone() != null) {
+            memberInfo.updatePhone(requestMembersInfoDto.getPhone());
+        }
+        if (requestMembersInfoDto.getSubEmail() != null) {
+            memberInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
+        }
 
 
         // 이미지 처리
