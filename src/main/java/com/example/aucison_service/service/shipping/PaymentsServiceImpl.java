@@ -15,14 +15,8 @@ import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
 import com.example.aucison_service.jpa.member.repository.AddressesRepository;
 import com.example.aucison_service.jpa.member.repository.MembersInfoRepository;
 import com.example.aucison_service.jpa.member.repository.MembersRepository;
-import com.example.aucison_service.jpa.product.entity.AucsInfosEntity;
-import com.example.aucison_service.jpa.product.entity.ProductImgEntity;
-import com.example.aucison_service.jpa.product.entity.ProductsEntity;
-import com.example.aucison_service.jpa.product.entity.SaleInfosEntity;
-import com.example.aucison_service.jpa.product.repository.AucsInfosRepository;
-import com.example.aucison_service.jpa.product.repository.ProductImgRepository;
-import com.example.aucison_service.jpa.product.repository.ProductsRepository;
-import com.example.aucison_service.jpa.product.repository.SaleInfosRepository;
+import com.example.aucison_service.jpa.product.entity.*;
+import com.example.aucison_service.jpa.product.repository.*;
 import com.example.aucison_service.jpa.shipping.entity.*;
 import com.example.aucison_service.jpa.shipping.repository.*;
 import com.example.aucison_service.service.member.MemberDetails;
@@ -54,6 +48,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     private final SaleInfosRepository saleInfosRepository;
     private final AucsInfosRepository aucsInfosRepository;
    private final ProductImgRepository productImgRepository;
+   private final BidCountsRepository bidCountsRepository;
 
     @Autowired
     public PaymentsServiceImpl(BidsRepository bidsRepository, PageAccessLogsRepository pageAccessLogsRepository,
@@ -62,7 +57,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                                ProductsRepository productsRepository, MembersRepository membersRepository,
                                MembersInfoRepository membersInfoRepository, AddressesRepository addressesRepository,
                                SaleInfosRepository saleInfosRepository, AucsInfosRepository aucsInfosRepository
-                               , ProductImgRepository productImgRepository) {
+                               , ProductImgRepository productImgRepository, BidCountsRepository bidCountsRepository) {
         this.bidsRepository = bidsRepository;
         this.pageAccessLogsRepository = pageAccessLogsRepository;
         this.ordersRepository = ordersRepository;
@@ -76,6 +71,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         this.saleInfosRepository = saleInfosRepository;
         this.aucsInfosRepository = aucsInfosRepository;
         this.productImgRepository = productImgRepository;
+        this.bidCountsRepository = bidCountsRepository;
     }
 
     @Override
@@ -340,7 +336,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         // Bids 정보 저장
-        saveBidInfo(paymentsRequestDto, email, order);
+        saveBidAndBidCount(paymentsRequestDto, email, order);
 
         // 구매자 credit update
         //TODO: 판매자 credit update
@@ -429,7 +425,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
     }
 
-    private void saveBidInfo(PaymentsRequestDto paymentsRequestDto, String email, Orders order) {
+    private void saveBidAndBidCount(PaymentsRequestDto paymentsRequestDto, String email, Orders order) {
         // 새로운 응찰 정보 생성
         Bids newBid = Bids.builder()
                 .productsId(paymentsRequestDto.getProductsId())
@@ -442,6 +438,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         // Bids 정보 저장
         bidsRepository.save(newBid);
 
+        BidCountsEntity bidCount = bidCountsRepository.findByProductsId(paymentsRequestDto.getProductsId());
+
+        bidCount.plusTotCnt();
     }
 
     // 페이지에 접근했을 때의 로그 생성
