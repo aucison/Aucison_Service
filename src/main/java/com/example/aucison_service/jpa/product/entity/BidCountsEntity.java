@@ -28,4 +28,7 @@ public class BidCountsEntity {
         this.totCnt = totCnt;
     }
 
+    public void plusTotCnt() {
+        this.totCnt++;
+    }
 }
