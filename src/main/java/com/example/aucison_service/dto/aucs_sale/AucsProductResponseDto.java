@@ -25,4 +25,6 @@ public class AucsProductResponseDto {
     private String bidsCode;
 
     private Long wishCount; // 추가된 찜 횟수 필드
+
+    private int totCnt;    // 낙찰자 수
 }

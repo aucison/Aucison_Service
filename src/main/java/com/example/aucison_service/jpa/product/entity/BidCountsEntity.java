@@ -22,4 +22,10 @@ public class BidCountsEntity {
     @Column(name = "tot_cnt")
     private int totCnt; //입찰자 수
 
+    @Builder
+    public BidCountsEntity(Long productsId, int totCnt){
+        this.productsId = productsId;
+        this.totCnt = totCnt;
+    }
+
 }

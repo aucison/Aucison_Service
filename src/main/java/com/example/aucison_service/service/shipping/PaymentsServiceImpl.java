@@ -441,6 +441,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         // Bids 정보 저장
         bidsRepository.save(newBid);
+
     }
 
     // 페이지에 접근했을 때의 로그 생성

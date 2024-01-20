@@ -15,11 +15,9 @@ import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.repository.MembersRepository;
 import com.example.aucison_service.jpa.member.repository.WishesRepository;
-import com.example.aucison_service.jpa.product.entity.AucsInfosEntity;
-import com.example.aucison_service.jpa.product.entity.ProductImgEntity;
-import com.example.aucison_service.jpa.product.entity.ProductsEntity;
-import com.example.aucison_service.jpa.product.entity.SaleInfosEntity;
+import com.example.aucison_service.jpa.product.entity.*;
 import com.example.aucison_service.jpa.product.repository.AucsInfosRepository;
+import com.example.aucison_service.jpa.product.repository.BidCountsRepository;
 import com.example.aucison_service.jpa.product.repository.ProductsRepository;
 import com.example.aucison_service.jpa.product.repository.SaleInfosRepository;
 import com.example.aucison_service.service.member.MemberDetails;
@@ -62,23 +60,25 @@ public class ProductServiceImpl implements ProductService{
     AucsInfosRepository aucs_infosRepository;
     MembersRepository membersRepository;
     WishesRepository wishesRepository;
+
+    BidCountsRepository bidCountsRepository;
     S3Service s3Service;
 
     ElasticsearchOperations elasticsearchOperations;
 
 
-
-
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
-                              WishesRepository wishesRepository, S3Service s3Service,
+                              WishesRepository wishesRepository, BidCountsRepository bidCountsRepository,
+                              S3Service s3Service,
                               ElasticsearchOperations elasticsearchOperations){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
         this.membersRepository=membersRepository;
         this.wishesRepository=wishesRepository;
+        this.bidCountsRepository = bidCountsRepository;
         this.s3Service=s3Service;
         this.elasticsearchOperations = elasticsearchOperations;
     }
@@ -126,6 +126,8 @@ public class ProductServiceImpl implements ProductService{
 
                     Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
 
+                    BidCountsEntity bidCountsEntity = bidCountsRepository.findByProductsId(product.getProductsId());
+
                     return AucsProductResponseDto.builder()
                             .productsId(product.getProductsId())
                             .name(product.getName())
@@ -135,6 +137,7 @@ public class ProductServiceImpl implements ProductService{
                             .bidsCode(aucsInfo.getBidsCode())
                             .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                             .wishCount(wishCount) // 찜 횟수 추가
+                            .totCnt(bidCountsEntity.getTotCnt())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -160,6 +163,8 @@ public class ProductServiceImpl implements ProductService{
 
             Long wishCount = wishesRepository.countByProductId(product.getProductsId());    //찜 집계
 
+            BidCountsEntity bidCountsEntity = bidCountsRepository.findByProductsId(product.getProductsId());
+
             return AucsProductResponseDto.builder()
                     .productsId(product.getProductsId())
                     .name(product.getName())
@@ -169,6 +174,7 @@ public class ProductServiceImpl implements ProductService{
                     .bidsCode(aucsInfo.getBidsCode())
                     .imageUrl(firstImageUrl) // 이미지 URL 목록 추가
                     .wishCount(wishCount) // 찜 횟수 추가
+                    .totCnt(bidCountsEntity.getTotCnt())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -280,6 +286,14 @@ public class ProductServiceImpl implements ProductService{
         }
 
         productsRepository.save(product);
+
+        //기본적으로 낙찰자 수 0 셋팅
+        BidCountsEntity bidCount = BidCountsEntity.builder()
+                .productsId(product.getProductsId())
+                .totCnt(0)
+                .build();
+
+        bidCountsRepository.save(bidCount);
 
 
         //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장
@@ -423,6 +437,9 @@ public class ProductServiceImpl implements ProductService{
 
         Long wishCount = wishesRepository.countByProductId(productsId); //찜 집계
 
+        BidCountsEntity bidCount = bidCountsRepository.findByProductsId(productsId);
+
+
         ProductDetailResponseDto.ProductDetailResponseDtoBuilder dto = ProductDetailResponseDto.builder()
                 .name(product.getName())
                 .kind(product.getKind())
@@ -436,7 +453,9 @@ public class ProductServiceImpl implements ProductService{
         if ("AUCS".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
             dto.startPrice(product.getAucsInfosEntity().getStartPrice())
                     .end(product.getAucsInfosEntity().getEnd())
-                    .high(product.getAucsInfosEntity().getStartPrice());
+                    .high(product.getAucsInfosEntity().getStartPrice())
+                    .totCnt(bidCount.getTotCnt());
+
         }
 
         // 비경매 상품 추가정보

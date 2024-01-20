@@ -36,5 +36,7 @@ public class ProductDetailResponseDto {
 
     private Long wishCount; // 추가된 찜 횟수 필드
 
+    private int totCnt;
+
 
 }

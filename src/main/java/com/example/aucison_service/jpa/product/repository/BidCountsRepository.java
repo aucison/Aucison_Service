@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BidCountsRepository extends JpaRepository<BidCountsEntity, Long> {
+   BidCountsEntity findByProductsId(Long productsId);
 }
