@@ -9,8 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>Aucison_Service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>spring-webapp.jar</artifactId>
     <name>Aucison_Service</name>
     <description>Aucison_Service</description>
     <properties>
