@@ -11,6 +11,7 @@
     <groupId>com.example</groupId>
     <artifactId>spring-webapp</artifactId>
     <name>Aucison_Service</name>
+    <version>1.0.0</version>
     <description>Aucison_Service</description>
     <properties>
         <java.version>17</java.version>
