@@ -19,7 +19,6 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -40,4 +39,4 @@ jobs:
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      uses: advanced-security/maven-dependency-submission-action@0d13054264b0bb894ded474f08ebb30921341cee
