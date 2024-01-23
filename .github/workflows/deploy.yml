@@ -5,8 +5,6 @@ on:
     branches:
       - main
 
-# 본인이 설정한 값을 여기서 채움
-# 리전, 버킷 이름, CodeDeploy 앱 이름, CodeDeploy 배포 그룹 이름
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: my-github-actions-s3-bucket-aucison
@@ -23,23 +21,23 @@ jobs:
     environment: production
 
     steps:
-    # (1) 기본 체크아웃
     - name: Checkout
       uses: actions/checkout@v3
 
-    # (2) JDK 11 세팅
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
 
-    # (3) Maven build (Test 제외)
     - name: Build with Maven
       run: mvn clean package -DskipTests
 
-
-    # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
+    # Maven 빌드 결과물 압축 단계 추가
+    - name: Zip build artifacts
+      run: |
+        zip -r build-${{ github.sha }}.zip target/
+        
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -47,16 +45,16 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    # (5) 빌드 결과물을 S3 버킷에 업로드!
+    # 수정된 S3 업로드 단계, 정확한 .zip 파일 경로 사용
     - name: Upload to AWS S3
-      run: aws s3 cp --region ap-northeast-2 --acl private ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/
+      run: |
+        aws s3 cp --region ap-northeast-2 --acl private ./build-${{ github.sha }}.zip s3://$S3_BUCKET_NAME/
 
-
-    # (6) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
     - name: Deploy to AWS EC2 from S3
       run: |
         aws deploy create-deployment \
           --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-          --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+          --s3-location bucket=$S3_BUCKET_NAME,key=build-${{ github.sha }}.zip,bundleType=zip
+
