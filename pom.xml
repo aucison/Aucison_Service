@@ -15,9 +15,7 @@
     <properties>
         <java.version>17</java.version>
     </properties>
-    <build>
-        <finalName>spring-webapp</finalName> <!-- 최종 파일명 지정 -->
-    </build>
+
          
     <dependencies>
         <dependency>
@@ -163,6 +161,7 @@
     </dependencies>
 
     <build>
+        <finalName>spring-webapp</finalName> <!-- 최종 파일명 지정 -->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
