@@ -47,14 +47,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # (5-1) 빌드 결과물을 zip 파일로 압축
-      - name: Zip the build
-        run: zip -r build.zip target/
+      # (5-1) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
+      - name: Create deployment package
+        run: zip -r deployment-package.zip target/* appspec.yml scripts/*
 
-      # (5-2) 빌드 결과물을 S3 버킷에 업로드
-      - name: Upload to AWS S3
-        run: |
-          aws s3 cp build.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+      # (5-2) zip 파일을 S3 버킷에 업로드
+      - name: Upload deployment package to AWS S3
+        run: aws s3 cp deployment-package.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
 
       # (6) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
       - name: Deploy to AWS EC2 from S3
