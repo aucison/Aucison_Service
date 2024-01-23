@@ -187,8 +187,12 @@ hs_err_pid*
 replay_pid*
 
 ### Maven ###
-/target/*
-!/target/appspec.yml
+# Ignore everything in the target directory
+target/*
+
+# Except for the appspec.yml file
+!target/appspec.yml
+
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
