@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 
-# 배포 파일에 대한 설정
+# 배포 파일에 대한 설정!
 files:
   - source: target/spring-webapp.jar
     destination: /home/ubuntu/app/   # 인스턴스에서 파일이 복사되는 위치
