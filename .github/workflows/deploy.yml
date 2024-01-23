@@ -47,19 +47,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Maven build 후 appspec.yml 파일과 배포 스크립트를 target 디렉토리로 복사하고, 전체 디렉토리를 압축하여 S3로 업로드하는 수정된 단계
-      # (5) Prepare deployment package
-      - name: Prepare deployment package
-        run: |
-          cp appspec.yml target/
-          cp -R scripts target/ # 배포 스크립트도 포함되어야 한다면
-          cd target
-          zip -r deployment-package.zip ./*
+      # (5-1) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
+      - name: Create deployment package
+        run: zip -r deployment-package.zip target/* appspec.yml scripts/*
 
       # (5-2) zip 파일을 S3 버킷에 업로드
       - name: Upload deployment package to AWS S3
-        run: |
-          aws s3 cp target/deployment-package.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+        run: aws s3 cp deployment-package.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+
 
       # (6) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
       - name: Deploy to AWS EC2 from S3
