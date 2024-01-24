@@ -1,0 +1,46 @@
+server:
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: ${{ secrets.SSL_PASSWORD }}
+    key-store-type: PKCS12
+spring:
+  datasource:
+    username: ${{ secrets.DATABASE_USERNAME }}
+    url: ${{ secrets.DATABASE_URL }}
+    password: ${{ secrets.DATABASE_PASSWORD }}
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+            client-id: ${{ secrets.GOOGLE_CLIENTID }}
+            client-secret: ${{ secrets.GOOGLE_CLIENTSECRET }}
+            redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}
+            scope:
+              - email
+              - profile
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG
+
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
+    credentials:
+      accessKey: ${{ secrets.IMG_AWS_ACCESSKEY }}
+      secretKey: ${{ secrets.IMG_AWS_SECRETKEY }}
+    s3:
+      bucket: aucisonbucket
