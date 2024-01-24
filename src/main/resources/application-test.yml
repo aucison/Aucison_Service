@@ -1,13 +1,13 @@
 server:
   ssl:
     key-store: classpath:keystore.p12
-    key-store-password: ${{ secrets.SSL_PASSWORD }}
+    key-store-password: ${SSL_PASSWORD} # 환경 변수 참조
     key-store-type: PKCS12
 spring:
   datasource:
-    username: ${{ secrets.DATABASE_USERNAME }}
-    url: ${{ secrets.DATABASE_URL }}
-    password: ${{ secrets.DATABASE_PASSWORD }}
+    username: ${DATABASE_USERNAME} # 환경 변수 참조
+    url: ${DATABASE_URL} # 환경 변수 참조
+    password: ${DATABASE_PASSWORD} # 환경 변수 참조
   jpa:
     database: mysql
     show-sql: true
@@ -21,9 +21,9 @@ spring:
       client:
         registration:
           google:
-            client-id: ${{ secrets.GOOGLE_CLIENTID }}
-            client-secret: ${{ secrets.GOOGLE_CLIENSECRET }}
-            redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}
+            client-id: ${GOOGLE_CLIENTID} # 환경 변수 참조
+            client-secret: ${GOOGLE_CLIENSECRET} # 환경 변수 참조
+            redirect-uri: ${GOOGLE_REDIRECTURI} # 환경 변수 참조
             scope:
               - email
               - profile
@@ -41,7 +41,7 @@ cloud:
     region:
       static: ap-northeast-2
     credentials:
-      accessKey: ${{ secrets.IMG_AWS_ACCESSKEY }}
-      secretKey: ${{ secrets.IMG_AWS_SECRETKEY }}
+      accessKey: ${IMG_AWS_ACCESSKEY} # 환경 변수 참조
+      secretKey: ${IMG_AWS_SECRETKEY} # 환경 변수 참조
     s3:
       bucket: aucisonbucket
