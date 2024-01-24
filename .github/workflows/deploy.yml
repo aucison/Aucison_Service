@@ -45,6 +45,7 @@ jobs:
 
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
+        run: mvn clean package -DskipTests
         env:
 #          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
@@ -56,7 +57,7 @@ jobs:
           IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
           IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: mvn clean package -DskipTests
+#        run: mvn clean package -DskipTests
 
 
       # (5) AWS 인증
