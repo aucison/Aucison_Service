@@ -37,6 +37,17 @@ jobs:
       # (3) Maven build (Test 제외)
       - name: Build with Maven
         run: mvn clean package -DskipTests
+        env:
+          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          GOOGLE_CLIENTID: ${{ secrets.GOOGLE_CLIENTID }}
+          GOOGLE_CLIENSECRET: ${{ secrets.GOOGLE_CLIENSECRET }}
+          GOOGLE_REDIRECTURI: ${{ secrets.GOOGLE_REDIRECTURI }}
+          IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
+          IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       # 여기에 keystore.p12 파일 디코드 단계 추가
       - name: Decode keystore file
