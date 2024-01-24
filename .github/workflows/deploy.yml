@@ -35,10 +35,7 @@ jobs:
           java-version: '17'
 
       # (3) Maven build (Test 제외)
-      - name: Set Environment Variables
-            # (3) Maven build (Test 제외)
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
+      - name: Set Environment Variables and build with maven
         env:
           SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
@@ -50,6 +47,7 @@ jobs:
           IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
           IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: mvn clean package -DskipTests
       # 여기에 keystore.p12 파일 디코드 단계 추가
       - name: Decode keystore file
         run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
