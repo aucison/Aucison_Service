@@ -40,7 +40,7 @@ src/main/resources/application-aws.yml
 src/main/resources/application-google.yml
 src/main/resources/application-https.yml
 src/main/resources/application-test.yml
-keystore.p12
+src/main/resources/keystore.p12
 
 src/main/java/com/example/aucison_service/admin/
 src/main/java/com/example/aucison_service/admin/*
