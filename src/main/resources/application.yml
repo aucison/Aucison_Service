@@ -7,10 +7,11 @@ spring:
     database: mysql
     show-sql: 'true'
     hibernate:
-#      ddl-auto: validate  #배포 환경에서만 사용
-    profiles:
+      ddl-auto: update
+    #      ddl-auto: validate  #배포 환경에서만 사용
+  profiles:
 #      include: aws, google, https
-      include: test
+    include: test
 
   #
   #  redis:
@@ -20,8 +21,13 @@ spring:
   #    console:
   #      enabled: true
 
-  server:
+server:
   port: 443
+
+jwt:
+  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==
+  expiration: 2592000
+
 
 
 #logging:
