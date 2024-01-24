@@ -49,7 +49,7 @@ jobs:
 
       # (5-1) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
       - name: Create deployment package
-        run: zip -r deployment-package.zip target/* appspec.yml scripts/*
+        run: zip -r deployment-package.zip target/spring-webapp-1.0.0.jar appspec.yml scripts/*
 
       # (5-2) zip 파일을 S3 버킷에 업로드
       - name: Upload deployment package to AWS S3
