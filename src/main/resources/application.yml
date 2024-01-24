@@ -3,12 +3,12 @@ spring:
     uris: "http://localhost:9200"
 #    username: elastic  # Elasticsearch 사용자 이름
 #    password: abcd1234  # Elasticsearch 비밀번호
-  jpa:
-    database: mysql
-    show-sql: 'true'
-    hibernate:
-      ddl-auto: update
-    #      ddl-auto: validate  #배포 환경에서만 사용
+#  jpa:
+#    database: mysql
+#    show-sql: 'true'
+#    hibernate:
+#      ddl-auto: update
+#    #      ddl-auto: validate  #배포 환경에서만 사용
   profiles:
 #      include: aws, google, https
     include: test
