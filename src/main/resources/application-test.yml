@@ -20,8 +20,9 @@ spring:
     oauth2:
       client:
         registration:
+          google:
             client-id: ${{ secrets.GOOGLE_CLIENTID }}
-            client-secret: ${{ secrets.GOOGLE_CLIENTSECRET }}
+            client-secret: ${{ secrets.GOOGLE_CLIENSECRET }}
             redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}
             scope:
               - email
