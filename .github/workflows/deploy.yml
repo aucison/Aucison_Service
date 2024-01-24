@@ -5,8 +5,7 @@ on:
     branches:
       - main
 
-# 본인이 설정한 값을 여기서 채움
-# 리전, 버킷 이름, CodeDeploy 앱 이름, CodeDeploy 배포 그룹 이름
+# 설정된 환경 변수
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: my-github-actions-s3-bucket-aucison
@@ -27,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # (2) JDK 17 세팅
+      # (2) JDK 17 설정
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -48,12 +47,12 @@ jobs:
           IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: mvn clean package -DskipTests
-      # 여기에 keystore.p12 파일 디코드 단계 추가
+
+      # (4) keystore.p12 파일 디코드
       - name: Decode keystore file
         run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
 
-
-      # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
+      # (5) AWS 인증
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -61,16 +60,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # (5-1) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
+      # (6) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
       - name: Create deployment package
         run: zip -r deployment-package.zip target/* appspec.yml scripts/*
 
-      # (5-2) zip 파일을 S3 버킷에 업로드
+      # (7) zip 파일을 S3 버킷에 업로드
       - name: Upload deployment package to AWS S3
         run: aws s3 cp deployment-package.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
 
-
-      # (6) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
+      # (8) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
       - name: Deploy to AWS EC2 from S3
         run: |
           aws deploy create-deployment \
@@ -78,3 +76,11 @@ jobs:
             --deployment-config-name CodeDeployDefault.AllAtOnce \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
             --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+
+      # 추가된 민감한 파일 복원 단계
+      - name: Retrieve secrets
+        env:
+          MY_SECRETS_ARCHIVE: ${{ secrets.MY_SECRETS_ARCHIVE }}
+        run: |
+          echo "$MY_SECRETS_ARCHIVE" | base64 --decode > secrets.tar.gz
+          tar -xzvf secrets.tar.gz -C ./src/main/resources/
