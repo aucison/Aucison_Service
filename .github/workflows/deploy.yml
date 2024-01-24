@@ -40,6 +40,10 @@ jobs:
           echo "$MY_SECRETS_ARCHIVE" | base64 --decode > secrets.tar.gz
           tar xzvf secrets.tar.gz -C src/main/resources
 
+      # (4) keystore.p12 파일 디코드
+      - name: Decode keystore file
+        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
+
       # (3) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         env:
@@ -55,9 +59,6 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: mvn clean package -DskipTests
 
-      # (4) keystore.p12 파일 디코드
-      - name: Decode keystore file
-        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
 
       # (5) AWS 인증
       - name: Configure AWS credentials
