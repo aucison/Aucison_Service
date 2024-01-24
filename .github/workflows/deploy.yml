@@ -39,8 +39,8 @@ jobs:
 
 
       # (3-2)keystore.p12 파일 디코드 후 적절한 위치로 이동
-      - name: Move keystore file to resources
-        run: mv keystore.p12 src/main/resources/
+#      - name: Move keystore file to resources
+#        run: mv keystore.p12 src/main/resources/
 
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
