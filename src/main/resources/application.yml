@@ -7,8 +7,8 @@ spring:
     database: mysql
     show-sql: 'true'
   profiles:
-#    include: aws, google, https
-    include: test
+    include: aws, google, https
+#    include: test
 
 
 #  redis:
@@ -19,7 +19,7 @@ spring:
 #      enabled: true
 
 server:
-  port: 443
+  port: 80
 
 
 jwt:
