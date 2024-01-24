@@ -33,9 +33,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # (3-1) keystore.p12 파일 디코드
-      - name: Decode keystore file
-        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
+#       tmp
+#      # (3-1) keystore.p12 파일 디코드
+#      - name: Decode keystore file
+#        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
 
 
       # (3-2)keystore.p12 파일 디코드 후 적절한 위치로 이동
@@ -45,7 +46,7 @@ jobs:
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         env:
-          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}
+#          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
