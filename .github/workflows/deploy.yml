@@ -38,6 +38,10 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
+      # 여기에 keystore.p12 파일 디코드 단계 추가
+      - name: Decode keystore file
+        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
+
 
       # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
       - name: Configure AWS credentials
