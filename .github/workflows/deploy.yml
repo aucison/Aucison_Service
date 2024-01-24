@@ -33,13 +33,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Retrieve secrets
-        env:
-          MY_SECRETS_ARCHIVE: ${{ secrets.MY_SECRETS_ARCHIVE }}
-        run: |
-          echo "$MY_SECRETS_ARCHIVE" | base64 --decode > secrets.tar.gz
-          tar xzvf secrets.tar.gz -C src/main/resources
-
       # (4) keystore.p12 파일 디코드
       - name: Decode keystore file
         run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
