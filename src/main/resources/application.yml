@@ -40,7 +40,7 @@ logging:
 server:
   port: 443
   ssl:
-    key-store: classpath:keystore.p12
+    key-store: file:${SSL_KEYSTORE_PATH} # 환경 변수를 참조하여 파일 경로 지정
     key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
     key-store-type: PKCS12
 
