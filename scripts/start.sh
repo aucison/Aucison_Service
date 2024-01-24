@@ -15,6 +15,7 @@ cp $PROJECT_ROOT/target/*.jar $JAR_FILE
 
 # jar 파일 실행
 echo "$TIME_NOW > $JAR_FILE 파일 실행" >> $DEPLOY_LOG
+echo "$TIME_NOW > 에러 로그 출력" >> $ERROR_LOG
 sudo nohup java -jar $JAR_FILE > $APP_LOG 2> $ERROR_LOG &
 
 CURRENT_PID=$(pgrep -f $JAR_FILE)
