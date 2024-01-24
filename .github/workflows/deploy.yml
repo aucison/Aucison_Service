@@ -33,6 +33,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # 여기에 민감한 파일 복원 단계 추가
+      - name: Retrieve secrets
+        env:
+          MY_SECRETS_ARCHIVE: ${{ secrets.MY_SECRETS_ARCHIVE }}
+        run: |
+          echo "$MY_SECRETS_ARCHIVE" | base64 --decode > secrets.tar.gz
+          tar -xzvf secrets.tar.gz -C ./src/main/resources/
+
       # (3) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         env:
@@ -76,11 +84,3 @@ jobs:
             --deployment-config-name CodeDeployDefault.AllAtOnce \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
             --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
-
-      # 추가된 민감한 파일 복원 단계
-      - name: Retrieve secrets
-        env:
-          MY_SECRETS_ARCHIVE: ${{ secrets.MY_SECRETS_ARCHIVE }}
-        run: |
-          echo "$MY_SECRETS_ARCHIVE" | base64 -d > secrets.tar.gz
-          tar -xzvf secrets.tar.gz -C ./src/main/resources/
