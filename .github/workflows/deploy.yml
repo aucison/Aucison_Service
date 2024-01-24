@@ -45,7 +45,7 @@ jobs:
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         env:
-          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}
+#          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
