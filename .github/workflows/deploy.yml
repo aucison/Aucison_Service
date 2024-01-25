@@ -55,6 +55,10 @@ jobs:
 #      - name: Move keystore file to resources
 #        run: mv keystore.p12 src/main/resources/
 
+      # (4) Maven build (Test 제외)
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
+
 #      # (4) Maven build (Test 제외)
 #      - name: Set Environment Variables and build with maven
 #        run: mvn clean package -DskipTests
