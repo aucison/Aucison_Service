@@ -1,71 +1,71 @@
-spring:
-  elasticsearch:
-    uris: "http://localhost:9200"
-  #    username: elastic  # Elasticsearch 사용자 이름
-  #    password: abcd1234  # Elasticsearch 비밀번호
-  jpa:
-    database: mysql
-    show-sql: 'true'
-    hibernate:
-      #      ddl-auto: validate  #배포 환경에서만 사용
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-  datasource:
-    username: ${DATABASE_USERNAME} # 환경 변수 사용
-    url: ${DATABASE_URL} # 환경 변수 사용
-    password: ${DATABASE_PASSWORD} # 환경 변수 사용
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENTID} # 환경 변수 사용
-            client-secret: ${GOOGLE_CLIENSECRET} # 환경 변수 사용
-            redirect-uri: ${GOOGLE_REDIRECTURI} # 환경 변수 사용
-            scope:
-              - email
-              - profile
-
-
-jwt:
-  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==
-  expiration: 2592000
-
-logging:
-  level:
-    root: info
-
-server:
-  port: 9876
-#  tmp
-#  ssl:
-#    key-store: classpath:keystore.p12 # 환경 변수를 참조하여 파일 경로 지정
-#    key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
-#    key-store-type: PKCS12
-
-cloud:
-  aws:
-    stack:
-      auto: false
-    region:
-      static: ap-northeast-2
-    credentials:
-      accessKey: ${IMG_AWS_ACCESSKEY} # 환경 변수 사용
-      secretKey: ${IMG_AWS_SECRETKEY} # 환경 변수 사용
-    s3:
-      bucket: aucisonbucket
-
-
+#spring:
+#  elasticsearch:
+#    uris: "http://localhost:9200"
+#  #    username: elastic  # Elasticsearch 사용자 이름
+#  #    password: abcd1234  # Elasticsearch 비밀번호
+#  jpa:
+#    database: mysql
+#    show-sql: 'true'
+#    hibernate:
+#      #      ddl-auto: validate  #배포 환경에서만 사용
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        format_sql: true
+#  datasource:
+#    username: ${DATABASE_USERNAME} # 환경 변수 사용
+#    url: ${DATABASE_URL} # 환경 변수 사용
+#    password: ${DATABASE_PASSWORD} # 환경 변수 사용
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: ${GOOGLE_CLIENTID} # 환경 변수 사용
+#            client-secret: ${GOOGLE_CLIENSECRET} # 환경 변수 사용
+#            redirect-uri: ${GOOGLE_REDIRECTURI} # 환경 변수 사용
+#            scope:
+#              - email
+#              - profile
+#
+#
+#jwt:
+#  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==
+#  expiration: 2592000
+#
 #logging:
 #  level:
-#    org:
-#      springframework:
-#        security: DEBUG
-#        web: DEBUG
-
-
-#  redis:
-#    host: localhost
-#    port: 6379
+#    root: info
+#
+#server:
+#  port: 9876
+##  tmp
+##  ssl:
+##    key-store: classpath:keystore.p12 # 환경 변수를 참조하여 파일 경로 지정
+##    key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
+##    key-store-type: PKCS12
+#
+#cloud:
+#  aws:
+#    stack:
+#      auto: false
+#    region:
+#      static: ap-northeast-2
+#    credentials:
+#      accessKey: ${IMG_AWS_ACCESSKEY} # 환경 변수 사용
+#      secretKey: ${IMG_AWS_SECRETKEY} # 환경 변수 사용
+#    s3:
+#      bucket: aucisonbucket
+#
+#
+##logging:
+##  level:
+##    org:
+##      springframework:
+##        security: DEBUG
+##        web: DEBUG
+#
+#
+##  redis:
+##    host: localhost
+##    port: 6379
