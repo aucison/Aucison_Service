@@ -33,10 +33,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin' # 'temurin'은 Eclipse Foundation에서 관리하는 OpenJDK 배포판입니다
 
-    - name: Add application.properties
+    - name: Add application.yml
+      env:
+        APPLICATION_YML_CONTENT: ${{ secrets.PROPERTIES }}
       run: |
         mkdir -p ./src/main/resources/
-        echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
+        echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
       shell: bash
 
     # maven 사용
