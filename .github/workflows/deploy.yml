@@ -104,6 +104,18 @@ jobs:
 #          echo "    s3:" >> src/main/resources/application.yml
 #          echo "      bucket: aucisonbucket" >> src/main/resources/application.yml
 
+      - name: Set Environment Variables
+        run: |
+          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> $GITHUB_ENV
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
+          echo "GOOGLE_CLIENTID=${{ secrets.GOOGLE_CLIENTID }}" >> $GITHUB_ENV
+          echo "GOOGLE_CLIENSECRET=${{ secrets.GOOGLE_CLIENSECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_REDIRECTURI=${{ secrets.GOOGLE_REDIRECTURI }}" >> $GITHUB_ENV
+          echo "IMG_AWS_ACCESSKEY=${{ secrets.IMG_AWS_ACCESSKEY }}" >> $GITHUB_ENV
+          echo "IMG_AWS_SECRETKEY=${{ secrets.IMG_AWS_SECRETKEY }}" >> $GITHUB_ENV
+          
+
 
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
