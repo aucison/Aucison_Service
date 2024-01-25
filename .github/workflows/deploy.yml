@@ -43,14 +43,6 @@ jobs:
       #      - name: Move keystore file to resources
       #        run: mv keystore.p12 src/main/resources/
 
-      # Print environment variables step
-      - name: Print environment variables
-        run: |
-          echo "Database URL: $DATABASE_URL"
-          echo "Database Username: $DATABASE_USERNAME"
-          echo "Database Password: $DATABASE_PASSWORD"
-
-
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         run: mvn clean package -DskipTests
