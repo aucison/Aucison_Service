@@ -3,7 +3,8 @@ name: Deploy to Amazon EC2
 on:
   push:
     branches:
-      - main
+      - sm-test
+#      - main
 
 # 설정된 환경 변수
 env:
