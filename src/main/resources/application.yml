@@ -12,18 +12,18 @@ spring:
     properties:
       hibernate:
         format_sql: true
-#  datasource:
-#    username: ${DATABASE_USERNAME} # 환경 변수 사용
-#    url: ${DATABASE_URL} # 환경 변수 사용
-#    password: ${DATABASE_PASSWORD} # 환경 변수 사용
+  datasource:
+    username: ${DATABASE_USERNAME} # 환경 변수 사용
+    url: ${DATABASE_URL} # 환경 변수 사용
+    password: ${DATABASE_PASSWORD} # 환경 변수 사용
   security:
     oauth2:
       client:
         registration:
           google:
-#            client-id: ${GOOGLE_CLIENTID} # 환경 변수 사용
-#            client-secret: ${GOOGLE_CLIENSECRET} # 환경 변수 사용
-#            redirect-uri: ${GOOGLE_REDIRECTURI} # 환경 변수 사용
+            client-id: ${GOOGLE_CLIENTID} # 환경 변수 사용
+            client-secret: ${GOOGLE_CLIENSECRET} # 환경 변수 사용
+            redirect-uri: ${GOOGLE_REDIRECTURI} # 환경 변수 사용
             scope:
               - email
               - profile
@@ -51,9 +51,9 @@ cloud:
       auto: false
     region:
       static: ap-northeast-2
-#    credentials:
-#      accessKey: ${IMG_AWS_ACCESSKEY} # 환경 변수 사용
-#      secretKey: ${IMG_AWS_SECRETKEY} # 환경 변수 사용
+    credentials:
+      accessKey: ${IMG_AWS_ACCESSKEY} # 환경 변수 사용
+      secretKey: ${IMG_AWS_SECRETKEY} # 환경 변수 사용
     s3:
       bucket: aucisonbucket
 
