@@ -59,6 +59,15 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
       #        run: mvn clean package -DskipTests
 
+      #Test
+      - shell: bash
+        name: Secret Test
+        env:
+          TEST: ${{ secrets.TEST }}
+        run: |
+          if [ $TEST==test1234 ]; then echo same ; fi
+
+
 
       # (5) AWS 인증
       - name: Configure AWS credentials

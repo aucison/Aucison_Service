@@ -10,7 +10,8 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main" ]
+#    branches: [ "main" ] #테스트를 위한 임시주석
+    branches: [ "sm-test" ]
   pull_request:
     branches: [ "main" ]
 
@@ -37,8 +38,9 @@ jobs:
       # maven 사용
       - name: Build with Maven
         uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
+#       중복
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#          cache: 'maven'
       - run: mvn -B clean install # -B 옵션은 배치 모드(비대화형)로 실행
