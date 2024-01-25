@@ -33,21 +33,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-#       tmp
-#      # (3-1) keystore.p12 파일 디코드
-#      - name: Decode keystore file
-#        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
+      #       tmp
+      #      # (3-1) keystore.p12 파일 디코드
+      #      - name: Decode keystore file
+      #        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
 
 
       # (3-2)keystore.p12 파일 디코드 후 적절한 위치로 이동
-#      - name: Move keystore file to resources
-#        run: mv keystore.p12 src/main/resources/
+      #      - name: Move keystore file to resources
+      #        run: mv keystore.p12 src/main/resources/
+
+      # Print environment variables step
+      - name: Print environment variables
+        run: |
+          echo "Database URL: $DATABASE_URL"
+          echo "Database Username: $DATABASE_USERNAME"
+          echo "Database Password: $DATABASE_PASSWORD"
+
 
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         run: mvn clean package -DskipTests
         env:
-#          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
+          #          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
@@ -57,7 +65,7 @@ jobs:
           IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
           IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-#        run: mvn clean package -DskipTests
+      #        run: mvn clean package -DskipTests
 
 
       # (5) AWS 인증
