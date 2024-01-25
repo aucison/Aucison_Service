@@ -93,8 +93,9 @@ jobs:
           echo "      secretKey: \${{ secrets.IMG_AWS_SECRETKEY }}" >> src/main/resources/application.yml
           echo "    s3:" >> src/main/resources/application.yml
           echo "      bucket: \${{ secrets.S3_BUCKET_NAME }}" >> src/main/resources/application.yml
-
-
+      
+      
+      
 
       # (4) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
