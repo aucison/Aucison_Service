@@ -10,7 +10,8 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main" ]
+#    branches: [ "main" ] #테스트를 위한 임시주석
+    branches: [ "sm-test" ]
   pull_request:
     branches: [ "main" ]
 
@@ -32,7 +33,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin' # 'temurin'은 Eclipse Foundation에서 관리하는 OpenJDK 배포판입니다
-          cacache: 'maven' # Maven 의존성 캐시
 
       # maven 사용
       - name: Build with Maven
