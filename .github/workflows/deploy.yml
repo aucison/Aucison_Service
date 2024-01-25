@@ -33,6 +33,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # application.properties 파일을 프로젝트에 포함
+      - name: Add Application.properties
+        run: |
+          mkdir -p ./src/main/resources/
+          touch ./src/main/resources/application.properties
+        shell: bash
+
+      - name: Copy Application.properties
+        run: |
+          echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.properties
+        shell: bash
+
 #       tmp
 #      # (3-1) keystore.p12 파일 디코드
 #      - name: Decode keystore file
@@ -43,21 +55,21 @@ jobs:
 #      - name: Move keystore file to resources
 #        run: mv keystore.p12 src/main/resources/
 
-      # (4) Maven build (Test 제외)
-      - name: Set Environment Variables and build with maven
-        run: mvn clean package -DskipTests
-        env:
-#          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
-          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          GOOGLE_CLIENTID: ${{ secrets.GOOGLE_CLIENTID }}
-          GOOGLE_CLIENSECRET: ${{ secrets.GOOGLE_CLIENSECRET }}
-          GOOGLE_REDIRECTURI: ${{ secrets.GOOGLE_REDIRECTURI }}
-          IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
-          IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#      # (4) Maven build (Test 제외)
+#      - name: Set Environment Variables and build with maven
 #        run: mvn clean package -DskipTests
+#        env:
+##          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
+#          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+#          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+#          GOOGLE_CLIENTID: ${{ secrets.GOOGLE_CLIENTID }}
+#          GOOGLE_CLIENSECRET: ${{ secrets.GOOGLE_CLIENSECRET }}
+#          GOOGLE_REDIRECTURI: ${{ secrets.GOOGLE_REDIRECTURI }}
+#          IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
+#          IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
+#          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+##        run: mvn clean package -DskipTests
 
 
       # (5) AWS 인증
