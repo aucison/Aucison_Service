@@ -34,15 +34,15 @@ jobs:
           java-version: '17'
 
       # application.properties 파일을 프로젝트에 포함
-      - name: Add Application.properties
+      - name: Add Application.yml
         run: |
           mkdir -p ./src/main/resources/
-          touch ./src/main/resources/application.properties
+          touch ./src/main/resources/application.yml
         shell: bash
 
       - name: Copy Application.properties
         run: |
-          echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.properties
+          echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
         shell: bash
 
 #       tmp
