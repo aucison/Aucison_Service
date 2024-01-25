@@ -39,8 +39,8 @@ jobs:
       - name: Build with Maven
         uses: actions/setup-java@v3
 #       중복
-#        with:
-#          java-version: '17'
-#          distribution: 'temurin'
-#          cache: 'maven'
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
       - run: mvn -B clean install # -B 옵션은 배치 모드(비대화형)로 실행
