@@ -59,6 +59,8 @@ jobs:
           IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
         run: |
           echo "spring:" > src/main/resources/application.yml
+          echo "  elasticsearch:" >> src/main/resources/application.yml
+          echo "    uris: \"http://localhost:9200\"" >> src/main/resources/application.yml
           echo "  jpa:" >> src/main/resources/application.yml
           echo "    database: mysql" >> src/main/resources/application.yml
           echo "    show-sql: 'true'" >> src/main/resources/application.yml
@@ -68,7 +70,7 @@ jobs:
           echo "      hibernate:" >> src/main/resources/application.yml
           echo "        format_sql: true" >> src/main/resources/application.yml
           echo "  datasource:" >> src/main/resources/application.yml
-          echo "    username: \${DATABASE_USERNAME}" >> src/main/resources/application.yml
+          echo "    username: \${{ secrets.DATABASE_USERNAME }}" >> src/main/resources/application.yml
           echo "    url: \${DATABASE_URL}" >> src/main/resources/application.yml
           echo "    password: \${DATABASE_PASSWORD}" >> src/main/resources/application.yml
           echo "  security:" >> src/main/resources/application.yml
