@@ -3,8 +3,7 @@ name: Deploy to Amazon EC2
 on:
   push:
     branches:
-      - sm-test
-#      - main
+      - main
 
 # 설정된 환경 변수
 env:
@@ -64,10 +63,26 @@ jobs:
       - shell: bash
         name: Secret Test
         env:
-          TEST: ${{ secrets.TEST }}
+          #          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          GOOGLE_CLIENTID: ${{ secrets.GOOGLE_CLIENTID }}
+          GOOGLE_CLIENSECRET: ${{ secrets.GOOGLE_CLIENSECRET }}
+          GOOGLE_REDIRECTURI: ${{ secrets.GOOGLE_REDIRECTURI }}
+          IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
+          IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          if [ $TEST==test1234 ]; then echo same ; fi
-
+          if [ $DATABASE_USERNAME == admin ]; then echo "DATABASE_USERNAME is same"; else echo "DATABASE_USERNAME is not same"; fi
+          if [ $DATABASE_URL == aucison-db.cwwa1obel4ek.ap-northeast-2.rds.amazonaws.com ]; then echo "DATABASE_URL is same"; else echo "DATABASE_URL is not same"; fi
+          if [ $DATABASE_PASSWORD == aucison1234 ]; then echo "DATABASE_PASSWORD is same"; else echo "DATABASE_PASSWORD is not same"; fi
+          if [ $GOOGLE_CLIENTID == 76213274445-a48jff50a3frvb7s1urp6eog1ukdckj2.apps.googleusercontent.com ]; then echo "GOOGLE_CLIENTID is same"; else echo "GOOGLE_CLIENTID is not same"; fi
+          if [ $GOOGLE_CLIENSECRET == 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 ]; then echo "GOOGLE_CLIENSECRET is same"; else echo "GOOGLE_CLIENSECRET is not same"; fi
+          if [ $GOOGLE_REDIRECTURI == https://localhost:443/api/auth/google/callback ]; then echo "GOOGLE_REDIRECTURI is same"; else echo "GOOGLE_REDIRECTURI is not same"; fi
+          if [ $IMG_AWS_ACCESSKEY == AKIAQQVOQ57RBSDZXCPL ]; then echo "IMG_AWS_ACCESSKEY is same"; else echo "IMG_AWS_ACCESSKEY is not same"; fi
+          if [ $IMG_AWS_SECRETKEY == 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 ]; then echo "IMG_AWS_SECRETKEY is same"; else echo "IMG_AWS_SECRETKEY is not same"; fi
+          if [ $JWT_SECRET == MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ== ]; then echo "JWT_SECRET is same"; else echo "JWT_SECRET is not same"; fi
 
 
       # (5) AWS 인증
