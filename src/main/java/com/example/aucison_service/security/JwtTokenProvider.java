@@ -51,7 +51,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
                 .compact();
     }
 
@@ -72,7 +72,7 @@ public class JwtTokenProvider {
 
     public String getEmailFromToken(String token) {
         try {
-            String email = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+            String email = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody().getSubject();
             logger.info("JwtTokenProvider - Extracted email from token: {}", email); // 이메일 추출 로그
             return email;
         } catch (Exception e) {
@@ -82,7 +82,7 @@ public class JwtTokenProvider {
     }
 
     public Role getRoleFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
         String roleStr = (String) claims.get("auth");
         return Role.valueOf(roleStr);
     }
