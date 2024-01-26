@@ -447,6 +447,7 @@ public class ProductServiceImpl implements ProductService{
                 .information(product.getInformation())
                 .pStatus(product.getPStatus())
                 .tags(product.getTags())
+                .email(product.getEmail())
                 .wishCount(wishCount); // 찜 횟수 추가;
 
         // 경매 상품 추가정보
