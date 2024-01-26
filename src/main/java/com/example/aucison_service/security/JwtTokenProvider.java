@@ -90,7 +90,7 @@ public class JwtTokenProvider {
     // 토큰의 유효성 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token);    //240126 getBytes 추가
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             logger.error("Token validation error: ", e);

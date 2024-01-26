@@ -37,17 +37,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      #       tmp
-      #      # (3-1) keystore.p12 파일 디코드
-      #      - name: Decode keystore file
-      #        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
+
+      # (3-1) keystore.p12 파일 디코드
+      - name: Decode keystore file
+        run: echo "${{ secrets.KESTORE_P12_BASE64 }}" | base64 -d > keystore.p12
 
 
-      # (3-2)keystore.p12 파일 디코드 후 적절한 위치로 이동
-      #      - name: Move keystore file to resources
-      #        run: mv keystore.p12 src/main/resources/
+      # (3-2) keystore.p12 파일 디코드 후 적절한 위치로 이동
+      - name: Move keystore file to resources
+        run: mv keystore.p12 src/main/resources/
 
-      # 환경 변수를 사용하여 application.yml 파일 생성 및 이동
+      # (4) 환경 변수를 사용하여 application.yml 파일 생성 및 이동
       - name: Generate and Move application.yml
         uses: microsoft/variable-substitution@v1
         with:
@@ -62,13 +62,14 @@ jobs:
           spring.security.oauth2.client.registration.google.redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}
           cloud.aws.credentials.accessKey: ${{ secrets.IMG_AWS_ACCESSKEY }}
           cloud.aws.credentials.secretKey: ${{ secrets.IMG_AWS_SECRETKEY }}
+          key-store-password: ${{secrets.SSL_PASSWORD}}
 
 
-      # (4) Maven build (Test 제외)
+      # (5) Maven build (Test 제외)
       - name: Set Environment Variables and build with maven
         run: mvn clean package -DskipTests
 
-      # (5) AWS 인증
+      # (6) AWS 인증
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -76,15 +77,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # (6) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
+      # (7) 빌드 결과물과 appspec.yml을 포함하여 zip 파일 생성
       - name: Create deployment package
         run: zip -r deployment-package.zip target/* appspec.yml scripts/*
 
-      # (7) zip 파일을 S3 버킷에 업로드
+      # (8) zip 파일을 S3 버킷에 업로드
       - name: Upload deployment package to AWS S3
         run: aws s3 cp deployment-package.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
 
-      # (8) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
+      # (9) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
       - name: Deploy to AWS EC2 from S3
         run: |
           aws deploy create-deployment \

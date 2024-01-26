@@ -38,12 +38,11 @@ logging:
     root: info
 
 server:
-  port: 9876
-#  tmp
-#  ssl:
-#    key-store: classpath:keystore.p12 # 환경 변수를 참조하여 파일 경로 지정
-#    key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
-#    key-store-type: PKCS12
+  port: 443
+  ssl:
+    key-store: classpath:keystore.p12 # 환경 변수를 참조하여 파일 경로 지정
+    key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
+    key-store-type: PKCS12
 
 cloud:
   aws:
