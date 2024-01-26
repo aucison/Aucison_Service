@@ -10,8 +10,8 @@ name: Java CI with Maven
 
 on:
   push:
-#    branches: [ "main" ] #테스트를 위한 임시주석
-    branches: [ "sm-test" ]
+    branches: [ "main" ] #테스트를 위한 임시주석
+#    branches: [ "sm-test" ]
   pull_request:
     branches: [ "main" ]
 

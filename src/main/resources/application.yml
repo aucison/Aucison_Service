@@ -13,7 +13,7 @@ spring:
       hibernate:
         format_sql: true
   datasource:
-    username: ${{ DATABASE_USERNAME }} # 환경 변수 사용
+    username: ${DATABASE_USERNAME} # 환경 변수 사용
     url: ${DATABASE_URL} # 환경 변수 사용
     password: ${DATABASE_PASSWORD} # 환경 변수 사용
   security:

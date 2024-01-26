@@ -3,8 +3,8 @@ name: Deploy to Amazon EC2
 on:
   push:
     branches:
-      - sm-test
-#      - main
+#      - sm-test
+      - main
 
 # 설정된 환경 변수
 env:
@@ -45,75 +45,64 @@ jobs:
       #      - name: Move keystore file to resources
       #        run: mv keystore.p12 src/main/resources/
 
-#      # 환경 변수를 사용하여 application.yml 파일 생성 및 이동
-#      - name: Generate and Move application.yml
-#        env:
-#          #          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
-#          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-#          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-#          GOOGLE_CLIENTID: ${{ secrets.GOOGLE_CLIENTID }}
-#          GOOGLE_CLIENSECRET: ${{ secrets.GOOGLE_CLIENSECRET }}
-#          GOOGLE_REDIRECTURI: ${{ secrets.GOOGLE_REDIRECTURI }}
-#          IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
-#          IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
-#        run: |
-#          echo "spring:" > src/main/resources/application.yml
-#          echo "  elasticsearch:" >> src/main/resources/application.yml
-#          echo "    uris: \"http://localhost:9200\"" >> src/main/resources/application.yml
-#          echo "  jpa:" >> src/main/resources/application.yml
-#          echo "    database: mysql" >> src/main/resources/application.yml
-#          echo "    show-sql: 'true'" >> src/main/resources/application.yml
-#          echo "    hibernate:" >> src/main/resources/application.yml
-#          echo "      ddl-auto: update" >> src/main/resources/application.yml
-#          echo "    properties:" >> src/main/resources/application.yml
-#          echo "      hibernate:" >> src/main/resources/application.yml
-#          echo "        format_sql: true" >> src/main/resources/application.yml
-#          echo "  datasource:" >> src/main/resources/application.yml
-#          echo "    username: ${{ secrets.DATABASE_USERNAME }}" >> src/main/resources/application.yml
-#          echo "    url: ${{ secrets.DATABASE_URL }}" >> src/main/resources/application.yml
-#          echo "    password: ${{ secrets.DATABASE_PASSWORD }}" >> src/main/resources/application.yml
-#          echo "  security:" >> src/main/resources/application.yml
-#          echo "    oauth2:" >> src/main/resources/application.yml
-#          echo "      client:" >> src/main/resources/application.yml
-#          echo "        registration:" >> src/main/resources/application.yml
-#          echo "          google:" >> src/main/resources/application.yml
-#          echo "            client-id: ${{ secrets.GOOGLE_CLIENTID }}" >> src/main/resources/application.yml
-#          echo "            client-secret: ${{ secrets.GOOGLE_CLIENSECRET }}" >> src/main/resources/application.yml
-#          echo "            redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}" >> src/main/resources/application.yml
-#          echo "            scope:" >> src/main/resources/application.yml
-#          echo "              - email" >> src/main/resources/application.yml
-#          echo "              - profile" >> src/main/resources/application.yml
-#          echo "jwt:" >> src/main/resources/application.yml
-#          echo "  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==" >> src/main/resources/application.yml
-#          echo "  expiration: 2592000" >> src/main/resources/application.yml
-#          echo "logging:" >> src/main/resources/application.yml
-#          echo "  level:" >> src/main/resources/application.yml
-#          echo "    root: info" >> src/main/resources/application.yml
-#          echo "server:" >> src/main/resources/application.yml
-#          echo "  port: 9876" >> src/main/resources/application.yml
-#          echo "cloud:" >> src/main/resources/application.yml
-#          echo "  aws:" >> src/main/resources/application.yml
-#          echo "    stack:" >> src/main/resources/application.yml
-#          echo "      auto: false" >> src/main/resources/application.yml
-#          echo "    region:" >> src/main/resources/application.yml
-#          echo "      static: ap-northeast-2" >> src/main/resources/application.yml
-#          echo "    credentials:" >> src/main/resources/application.yml
-#          echo "      accessKey: ${{ secrets.IMG_AWS_ACCESSKEY }}" >> src/main/resources/application.yml
-#          echo "      secretKey: ${{ secrets.IMG_AWS_SECRETKEY }}" >> src/main/resources/application.yml
-#          echo "    s3:" >> src/main/resources/application.yml
-#          echo "      bucket: aucisonbucket" >> src/main/resources/application.yml
-
-      - name: Set Environment Variables
+      # 환경 변수를 사용하여 application.yml 파일 생성 및 이동
+      - name: Generate and Move application.yml
+        env:
+          #          SSL_PASSWORD: ${{ secrets.SSL_PASSWORD }}  #tmp
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          GOOGLE_CLIENTID: ${{ secrets.GOOGLE_CLIENTID }}
+          GOOGLE_CLIENSECRET: ${{ secrets.GOOGLE_CLIENSECRET }}
+          GOOGLE_REDIRECTURI: ${{ secrets.GOOGLE_REDIRECTURI }}
+          IMG_AWS_ACCESSKEY: ${{ secrets.IMG_AWS_ACCESSKEY }}
+          IMG_AWS_SECRETKEY: ${{ secrets.IMG_AWS_SECRETKEY }}
         run: |
-          echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> $GITHUB_ENV
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
-          echo "GOOGLE_CLIENTID=${{ secrets.GOOGLE_CLIENTID }}" >> $GITHUB_ENV
-          echo "GOOGLE_CLIENSECRET=${{ secrets.GOOGLE_CLIENSECRET }}" >> $GITHUB_ENV
-          echo "GOOGLE_REDIRECTURI=${{ secrets.GOOGLE_REDIRECTURI }}" >> $GITHUB_ENV
-          echo "IMG_AWS_ACCESSKEY=${{ secrets.IMG_AWS_ACCESSKEY }}" >> $GITHUB_ENV
-          echo "IMG_AWS_SECRETKEY=${{ secrets.IMG_AWS_SECRETKEY }}" >> $GITHUB_ENV
+          echo "spring:" > src/main/resources/application.yml
+          echo "  elasticsearch:" >> src/main/resources/application.yml
+          echo "    uris: \"http://localhost:9200\"" >> src/main/resources/application.yml
+          echo "  jpa:" >> src/main/resources/application.yml
+          echo "    database: mysql" >> src/main/resources/application.yml
+          echo "    show-sql: 'true'" >> src/main/resources/application.yml
+          echo "    hibernate:" >> src/main/resources/application.yml
+          echo "      ddl-auto: update" >> src/main/resources/application.yml
+          echo "    properties:" >> src/main/resources/application.yml
+          echo "      hibernate:" >> src/main/resources/application.yml
+          echo "        format_sql: true" >> src/main/resources/application.yml
+          echo "  datasource:" >> src/main/resources/application.yml
+          echo "    username: ${{ secrets.DATABASE_USERNAME }}" >> src/main/resources/application.yml
+          echo "    url: ${{ secrets.DATABASE_URL }}" >> src/main/resources/application.yml
+          echo "    password: ${{ secrets.DATABASE_PASSWORD }}" >> src/main/resources/application.yml
+          echo "  security:" >> src/main/resources/application.yml
+          echo "    oauth2:" >> src/main/resources/application.yml
+          echo "      client:" >> src/main/resources/application.yml
+          echo "        registration:" >> src/main/resources/application.yml
+          echo "          google:" >> src/main/resources/application.yml
+          echo "            client-id: ${{ secrets.GOOGLE_CLIENTID }}" >> src/main/resources/application.yml
+          echo "            client-secret: ${{ secrets.GOOGLE_CLIENSECRET }}" >> src/main/resources/application.yml
+          echo "            redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}" >> src/main/resources/application.yml
+          echo "            scope:" >> src/main/resources/application.yml
+          echo "              - email" >> src/main/resources/application.yml
+          echo "              - profile" >> src/main/resources/application.yml
+          echo "jwt:" >> src/main/resources/application.yml
+          echo "  secret: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKb/4snaHoUpcJJuEghayTVfy3w3EUg19ftxM524fbpFwZsF2YqHP1HlaDcAtLdvNSuQWHemq53+fyxnQCyAFiUCAwEAAQ==" >> src/main/resources/application.yml
+          echo "  expiration: 2592000" >> src/main/resources/application.yml
+          echo "logging:" >> src/main/resources/application.yml
+          echo "  level:" >> src/main/resources/application.yml
+          echo "    root: info" >> src/main/resources/application.yml
+          echo "server:" >> src/main/resources/application.yml
+          echo "  port: 9876" >> src/main/resources/application.yml
+          echo "cloud:" >> src/main/resources/application.yml
+          echo "  aws:" >> src/main/resources/application.yml
+          echo "    stack:" >> src/main/resources/application.yml
+          echo "      auto: false" >> src/main/resources/application.yml
+          echo "    region:" >> src/main/resources/application.yml
+          echo "      static: ap-northeast-2" >> src/main/resources/application.yml
+          echo "    credentials:" >> src/main/resources/application.yml
+          echo "      accessKey: ${{ secrets.IMG_AWS_ACCESSKEY }}" >> src/main/resources/application.yml
+          echo "      secretKey: ${{ secrets.IMG_AWS_SECRETKEY }}" >> src/main/resources/application.yml
+          echo "    s3:" >> src/main/resources/application.yml
+          echo "      bucket: aucisonbucket" >> src/main/resources/application.yml
           
 
 
