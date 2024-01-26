@@ -210,7 +210,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                                                                      float newCredit) {
         return VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())
-                .name(product.getName())
+                .productName(product.getName())
                 .productImg(image)
                 .price(price)
                 .addrName(addresses.getAddrName())
