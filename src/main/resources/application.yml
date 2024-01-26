@@ -38,7 +38,7 @@ logging:
     root: info
 
 server:
-  port: 443
+  port: 9876
   ssl:
     key-store: /etc/letsencrypt/live/keystore.p12
     key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
