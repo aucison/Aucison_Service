@@ -15,6 +15,7 @@ public class VirtualPaymentResponseDto {
 
     private String productName; //상품명
     private String productImg; //상품 사진
+    private LocalDateTime end;  //마감 시간(경매일 경우)
     private float nowPrice; //(경매) 응찰가
     private float price;    //(비경매) 등록가격
 

@@ -50,6 +50,18 @@ public class AddressServiceImpl implements AddressService {
             throw new AppException(ErrorCode.ADDRESS_NAME_ALREADY_EXISTS); // 배송지명이 이미 존재하면 예외 발생
         }
 
+        //대표 배송지 있는지 검사
+        if (requestAddressDto.isPrimary()) {
+            // 모든 기존 주소에서 대표 배송지 설정 제거
+            List<AddressesEntity> allAddresses = addressesRepository.findAllByMembersInfoEntity(membersInfo);
+            for (AddressesEntity addr : allAddresses) {
+                if (addr.isPrimary()) {
+                    addr.updateIsPrimary(false);
+                    addressesRepository.save(addr);
+                }
+            }
+        }
+
         AddressesEntity address = AddressesEntity.builder()
                 .addrName(requestAddressDto.getAddrName())
                 .isPrimary(requestAddressDto.isPrimary())

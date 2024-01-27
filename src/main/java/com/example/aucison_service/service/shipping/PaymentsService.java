@@ -15,10 +15,10 @@ public interface PaymentsService {
      *
      * @param productsId 상품 ID
      * @param addrName 배송지명
-     * @param percent 구매자가 올린 퍼센트
+     * @param bidAmount 입찰희망가
      * @return PaymentPageResponse
      */
-    VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName, Optional<Integer> percent);
+    VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName, Optional<Float> bidAmount);
 
 //    /**
 //     * 배송지 새롭게 조회

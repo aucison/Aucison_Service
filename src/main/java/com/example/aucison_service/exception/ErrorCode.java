@@ -24,7 +24,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"인증되지 않은 사용자입니다"),
 
     //상품 결제 관련 에러 코드들
-    INVALID_PERCENT(HttpStatus.BAD_REQUEST,"퍼센트 값이 올바르지 않습니다."),
+    INVALID_BIDCOUNT(HttpStatus.BAD_REQUEST,"유효하지 않은 입찰가입니다."),
 
     // Members 관련 에러 코드들
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
