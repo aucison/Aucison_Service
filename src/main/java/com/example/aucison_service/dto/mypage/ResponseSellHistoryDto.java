@@ -14,6 +14,7 @@ public class ResponseSellHistoryDto {
     private String productName; // 상품명
     private String productDescription; // 상품 한줄 설명
     private String productImgUrl; // 상품 이미지
+
     private String category; // 경매 여부(경매/비경매)
     private String kind;
 
