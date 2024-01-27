@@ -15,8 +15,8 @@ public class ResponseOrderHistoryDto {
     private String productName; // 상품명
     private String productDescription; // 상품 한줄 설명
     private String productImgUrl; // 상품 이미지
-    private Category category; // 경매 여부(경매/비경매)
-    private Kind kind;  //일반/핸드메이드
+    private String category; // 경매 여부(경매/비경매)
+    private String kind;  //일반/핸드메이드
 
 
     private Long ordersId;  //주문번호

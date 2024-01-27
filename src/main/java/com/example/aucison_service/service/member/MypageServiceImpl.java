@@ -121,7 +121,7 @@ public class MypageServiceImpl implements MypageService {
 //            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
 //        }
 
-        if (histories.getCategory() == Category.AUC) {  //경매일 때
+        if (histories.getCategory().equals("AUCS")) {  //경매일 때
             return getAuctionOrderDetail(ordersId, email);
         } else {    //비경매일 때
             return getNonAuctionOrderDetail(ordersId, email);
@@ -268,8 +268,8 @@ public class MypageServiceImpl implements MypageService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // '경매' 이고 '낙찰' 일 때 또는 '비경매' 이고 '판매완료' 일 때
-        if ((history.getCategory() == Category.AUC && orders.getOStatus() == OStatusEnum.C001) ||
-                (history.getCategory() == Category.NOR && orders.getOStatus() == OStatusEnum.COOO)) {
+        if ((history.getCategory().equals("AUCS") && orders.getOStatus() == OStatusEnum.C001) ||
+                (history.getCategory().equals("NORM") && orders.getOStatus() == OStatusEnum.COOO)) {
             //TODO: productsRepository에 메서드 추가?
             ProductsEntity product = productsRepository.findById(orders.getProductsId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
