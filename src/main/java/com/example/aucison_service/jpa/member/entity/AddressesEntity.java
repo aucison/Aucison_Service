@@ -22,6 +22,9 @@ public class AddressesEntity { // 주소
     @Column(name = "addresses_id")
     private Long id; // 주소 id
 
+    @Column(name = "is_primary", nullable = false)
+    private boolean isPrimary = false; // 대표 배송지 여부
+
     @Column(name = "addr_name", nullable = false)
     private String addrName; // 배송지명(사용자 지정값)
 
@@ -46,11 +49,16 @@ public class AddressesEntity { // 주소
 
     // 업데이트 메소드
     public void update(RequestUpdateAddressDto updateAddressDto) {
+        this.isPrimary = updateAddressDto.isPrimary();
         if (updateAddressDto.getAddrName() != null) this.addrName = updateAddressDto.getAddrName();
         if (updateAddressDto.getZipNum() != null) this.zipNum = updateAddressDto.getZipNum();
         if (updateAddressDto.getAddr() != null) this.addr = updateAddressDto.getAddr();
         if (updateAddressDto.getAddrDetail() != null) this.addrDetail = updateAddressDto.getAddrDetail();
         if (updateAddressDto.getName() != null) this.name = updateAddressDto.getName();
         if (updateAddressDto.getTel() != null) this.tel = updateAddressDto.getTel();
+    }
+
+    public void updateIsPrimary(boolean isPrimary) {
+        this.isPrimary = isPrimary;
     }
 }

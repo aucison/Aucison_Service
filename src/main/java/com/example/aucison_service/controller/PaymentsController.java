@@ -29,8 +29,8 @@ public class PaymentsController {
     public ApiResponse<VirtualPaymentResponseDto> getVirtualPaymentInfo(@PathVariable Long productsId,
                                                                         @AuthenticationPrincipal MemberDetails principal,
                                                                         @RequestParam String addrName,
-                                                                        @RequestParam Optional<Integer> percent) {
-        return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, addrName, percent));
+                                                                        @RequestParam Optional<Float> bidAmount) {
+        return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, addrName, bidAmount));
     }
 
 

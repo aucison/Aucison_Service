@@ -76,7 +76,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     @Transactional
     public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName,
-                                                           Optional<Integer> percent) {
+                                                           Optional<Float> bidAmount) {
         ProductsEntity product = productsRepository.findByProductsId(productsId);
         String email = principal.getMember().getEmail();
 
@@ -84,10 +84,12 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.SELLER_CANNOT_BUY_OWN_PRODUCT);
         }
 
+
         switch (product.getCategory()) {
             case "AUCS":
-                return getAucsVirtualPaymentInfo(productsId, email, addrName, percent.orElseThrow(()
-                        -> new AppException(ErrorCode.INVALID_PERCENT)));
+                // bidAmount의 값을 추출하고, 값이 없으면 예외를 발생
+                Float actualBidAmount = bidAmount.orElseThrow(() -> new AppException(ErrorCode.INVALID_BIDCOUNT));
+                return getAucsVirtualPaymentInfo(productsId, email, addrName, actualBidAmount);
             case "SALE":
                 return getSaleVirtualPaymentInfo(productsId, email, addrName);
             default:
@@ -131,7 +133,7 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email,
-                                                               String addrName, int percent) {  //가상 결제(경매)
+                                                               String addrName, Float bidAmount) {  //가상 결제(경매)
         //가상 결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
         if(!isBeforeAuctionEndDate(productsId, accessTime)) {
@@ -162,6 +164,15 @@ public class PaymentsServiceImpl implements PaymentsService {
             nowPrice = aucsInfo.getStartPrice();
         }
 
+        // 최소 입찰 금액 및 최대 입찰 금액 계산
+        float minBidAmount = nowPrice * 1.03f; // 현재 가격의 3% 증가
+        float maxBidAmount = nowPrice * 1.25f; // 현재 가격의 25% 증가
+
+        // bidAmount 검증
+        if (bidAmount < minBidAmount || bidAmount > maxBidAmount) {
+            throw new AppException(ErrorCode.INVALID_BIDCOUNT);
+        }
+
         //배송지 정보 가져오기
         AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
 
@@ -172,7 +183,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         float newCredit = currentCredit - nowPrice;
         validateCredit(newCredit);
 
-        float newPrice = nowPrice + (nowPrice * (percent / 100));   //응찰가
+        float newPrice = bidAmount;   //응찰가
 
         //product 이미지 중 대표(첫 번째 url 반환)
         String image = fetchProductImage(productsId);
@@ -207,7 +218,8 @@ public class PaymentsServiceImpl implements PaymentsService {
                                                                      AddrInfoResponseDto addresses,
                                                                      float currentCredit,
                                                                      float newCredit) {
-        return VirtualPaymentResponseDto.builder()
+
+        VirtualPaymentResponseDto.VirtualPaymentResponseDtoBuilder builder = VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())
                 .kind(product.getKind())
                 .productName(product.getName())
@@ -220,8 +232,14 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .addr(addresses.getAddr())
                 .addrDetail(addresses.getAddrDetail())
                 .credit(currentCredit)
-                .newCredit(newCredit)
-                .build();
+                .newCredit(newCredit);
+
+        if ("AUCS".equals(product.getCategory())) {
+            AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
+            builder.end(aucsInfo.getEnd()); // 여기서 product.getEnd()는 경매 마감 시간을 반환한다고 가정합니다.
+        }
+
+        return builder.build();
     }
 
     private AddrInfoResponseDto getShippingInfo(String email, String addrName) {  //배송지명으로 배송지 조회

@@ -2,6 +2,7 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
+import com.example.aucison_service.enums.Kind;
 import com.example.aucison_service.enums.OStatusEnum;
 import com.example.aucison_service.enums.PStatusEnum;
 import lombok.Builder;
@@ -14,6 +15,7 @@ public class ResponseSellHistoryDto {
     private String productDescription; // 상품 한줄 설명
     private String productImgUrl; // 상품 이미지
     private Category category; // 경매 여부(경매/비경매)
+    private Kind kind;
 
     private String createdDate; //등록 날짜
     private String soldDate;    //판매 날짜

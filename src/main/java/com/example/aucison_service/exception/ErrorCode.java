@@ -24,7 +24,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"인증되지 않은 사용자입니다"),
 
     //상품 결제 관련 에러 코드들
-    INVALID_PERCENT(HttpStatus.BAD_REQUEST,"퍼센트 값이 올바르지 않습니다."),
+    INVALID_BIDCOUNT(HttpStatus.BAD_REQUEST,"유효하지 않은 입찰가입니다."),
 
     // Members 관련 에러 코드들
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
@@ -53,6 +53,7 @@ public enum ErrorCode {
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "로그를 찾을 수 없습니다."),
     SELLER_CANNOT_BUY_OWN_PRODUCT(HttpStatus.FORBIDDEN, "판매자는 자신이 등록한 상품을 구매할 수 없습니다."),
 
+    PRIMARY_ADDRESS_CANNOT_BE_DELETED(HttpStatus.BAD_REQUEST, "대표 배송지는 삭제할 수 없습니다."),
 
     WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "찜 상품이 아닙니다."),
     DUPLICATE_WISH(HttpStatus.BAD_REQUEST, "이미 찜한 상품입니다.");
