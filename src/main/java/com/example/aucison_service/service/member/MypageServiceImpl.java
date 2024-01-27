@@ -289,6 +289,7 @@ public class MypageServiceImpl implements MypageService {
                     .productDescription(history.getProductDetail())
                     .productImgUrl(historyImg.getUrl())
                     .category(history.getCategory())
+                    .kind(history.getKind())
                     .createdDate(createdDate)
                     .soldDate(soldDate)
                     .ordersId(orders.getOrdersId())

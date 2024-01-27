@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class RequestAddressDto {
     private String addrName; // 배송지명
+    private boolean isPrimary;  //대표 배송지
     private String name; // 받는 사람 이름
     private String tel; // 전화번호
     private String addr; // 주소

@@ -52,6 +52,7 @@ public class AddressServiceImpl implements AddressService {
 
         AddressesEntity address = AddressesEntity.builder()
                 .addrName(requestAddressDto.getAddrName())
+                .isPrimary(requestAddressDto.isPrimary())
                 .zipNum(requestAddressDto.getZipNum())
                 .addr(requestAddressDto.getAddr())
                 .addrDetail(requestAddressDto.getAddrDetail())
@@ -74,6 +75,10 @@ public class AddressServiceImpl implements AddressService {
 
         AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
 
+        if (address.isPrimary()) {
+            new AppException((ErrorCode.PRIMARY_ADDRESS_CANNOT_BE_DELETED));
+        }
+
         addressesRepository.delete(address);
     }
 
@@ -87,6 +92,18 @@ public class AddressServiceImpl implements AddressService {
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
         MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+
+        // 대표 배송지를 새로 설정하는 경우
+        if (requestUpdateAddressDto.isPrimary()) {
+            // 모든 기존 주소에서 대표 배송지 설정 제거
+            List<AddressesEntity> allAddresses = addressesRepository.findAllByMembersInfoEntity(membersInfo);
+            for (AddressesEntity addr : allAddresses) {
+                if (addr.isPrimary()) {
+                    addr.updateIsPrimary(false);
+                    addressesRepository.save(addr);
+                }
+            }
+        }
 
         AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
 
@@ -107,6 +124,7 @@ public class AddressServiceImpl implements AddressService {
 
         return addresses.stream()
                 .map(address -> ResponseAddressDto.builder()
+                        .isPrimary(address.isPrimary())
                         .addrName(address.getAddrName())
                         .name(address.getName())
                         .zipNum(address.getZipNum())
