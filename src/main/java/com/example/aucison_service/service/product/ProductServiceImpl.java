@@ -323,6 +323,7 @@ public class ProductServiceImpl implements ProductService{
             String bidsCode = generateBidsCode(); // 고유한 bidsCode 생성
             AucsInfosEntity aucInfo = AucsInfosEntity.builder()
                     .startPrice(dto.getStartPrice())
+                    .highestPrice(dto.getStartPrice())  //시작가가 자동으로 최고가
                     .end(dto.getEnd())
                     .bidsCode(bidsCode)
                     .productsEntity(product)
@@ -527,7 +528,7 @@ public class ProductServiceImpl implements ProductService{
         if ("AUCS".equals(product.getCategory()) && product.getAucsInfosEntity() != null) {
             dto.startPrice(product.getAucsInfosEntity().getStartPrice())
                     .end(product.getAucsInfosEntity().getEnd())
-                    .high(product.getAucsInfosEntity().getStartPrice())
+                    .high(product.getAucsInfosEntity().getHighestPrice())
                     .totCnt(bidCount.getTotCnt());
 
         }
