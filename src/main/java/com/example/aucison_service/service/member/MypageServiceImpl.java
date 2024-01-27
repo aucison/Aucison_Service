@@ -264,40 +264,28 @@ public class MypageServiceImpl implements MypageService {
     }
 
     private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity history) {
-        Orders orders = ordersRepository.findById(history.getOrdersId())
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        // '경매' 이고 '낙찰' 일 때 또는 '비경매' 이고 '판매완료' 일 때
-        if ((history.getCategory().equals("AUCS") && orders.getOStatus() == OStatusEnum.C001) ||
-                (history.getCategory().equals("NORM") && orders.getOStatus() == OStatusEnum.COOO)) {
-            //TODO: productsRepository에 메서드 추가?
-            ProductsEntity product = productsRepository.findById(orders.getProductsId())
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
-            HistoriesImgEntity historyImg = historiesImgRepository.findByHistoriesEntity(history);
-            if (historyImg == null) {
-                throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
-            }
-
-            //등록 날짜, 판매 날짜
-            String createdDate = product.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String soldDate = orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            return ResponseSellHistoryDto.builder()
-                    .productName(history.getProductName())
-                    .productDescription(history.getProductDetail())
-                    .productImgUrl(historyImg.getUrl())
-                    .category(history.getCategory())
-                    .kind(history.getKind())
-                    .createdDate(createdDate)
-                    .soldDate(soldDate)
-                    .ordersId(orders.getOrdersId())
-                    .pStatus(product.getPStatus())
-                    .price(history.getPrice())
-                    .build();
+        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+        HistoriesImgEntity historyImg = historiesImgRepository.findByHistoriesEntity(history);
+        if (historyImg == null) {
+            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
         }
-        return null; // Return null if not meeting the criteria
+
+        //등록 날짜
+        String createdDate = history.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        ProductsEntity product = productsRepository.findByProductsId(history.getProductsId());
+
+        return ResponseSellHistoryDto.builder()
+                .productName(history.getProductName())
+                .productDescription(history.getProductDetail())
+                .productImgUrl(historyImg.getUrl())
+                .category(history.getCategory())
+                .kind(history.getKind())
+                .createdDate(createdDate)
+                .pStatus(product.getPStatus())
+                .price(history.getPrice())
+                .build();
     }
 
 

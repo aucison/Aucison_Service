@@ -30,6 +30,9 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
 //    @Enumerated(EnumType.STRING)
     private String kind; // 상품 분류(일반/핸드메이드)
 
+    @Column(name = "products_id", nullable = false)
+    private Long productsId;    //상품 id
+
     @Column(name = "product_name", nullable = false)
     private String productName; // 상품명
 
@@ -49,12 +52,13 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
     private HistoriesImgEntity historiesImg;
 
     @Builder
-    public HistoriesEntity(OrderType orderType, String category, String kind,
+    public HistoriesEntity(OrderType orderType, String category, String kind, Long productsId,
                            String productName, String productDetail, Float price, Long ordersId,
                            MembersInfoEntity membersInfoEntity) {
         this.orderType = orderType;
         this.category = category;
         this.kind = kind;
+        this.productsId = productsId;
         this.productName = productName;
         this.productDetail = productDetail;
         this.price = price;
