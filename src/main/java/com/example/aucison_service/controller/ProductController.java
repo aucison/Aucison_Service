@@ -102,10 +102,17 @@ public class ProductController {
 
     // 상품 상세 정보 조회
     @GetMapping("/detail/{productId}")
-    public ApiResponse<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId) {
-        ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId, @AuthenticationPrincipal MemberDetails principal) {
+        ProductDetailResponseDto productDetail = productService.getProductDetail(productId, principal);
         return ApiResponse.createSuccess(productDetail);
     }
 
+    //상품의 실시간 가격 갱신
+    @GetMapping("/detail/{productId}/re")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<?> updateOnlyCost(@PathVariable Long productId, @AuthenticationPrincipal MemberDetails principal) {
+        return ApiResponse.createSuccess(productService.updateOnlyCost(productId, principal));
+    }
 
 }
