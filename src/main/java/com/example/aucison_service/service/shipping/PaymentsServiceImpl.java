@@ -393,8 +393,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         // HistoriesEntity 생성 및 저장
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.BUY) // 판매로 설정
-                .category(Category.NOR) // 비경매로 설정
-                .kind(Kind.valueOf(paymentsRequestDto.getKind())) // 상품 분류 설정
+                .category(paymentsRequestDto.getCategory()) // 비경매로 설정
+                .kind(paymentsRequestDto.getKind()) // 상품 분류 설정
                 .productName(product.getName()) // 상품명 설정
                 .productDetail(product.getInformation()) // 상품 상세 정보 설정
                 .price(paymentsRequestDto.getPrice()) // 가격 설정

@@ -288,8 +288,8 @@ public class ProductServiceImpl implements ProductService{
 
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.SELL)
-                .category(Category.valueOf(dto.getCategory())) // Category 열거형 사용
-                .kind(Kind.valueOf(dto.getKind())) // Kind 열거형 사용
+                .category(dto.getCategory()) // Category 열거형 사용
+                .kind(dto.getKind()) // Kind 열거형 사용
                 .productName(dto.getName())
                 .productDetail(dto.getInformation())
                 .price(dto.getPrice()) // 가격 설정
