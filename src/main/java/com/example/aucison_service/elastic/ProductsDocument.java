@@ -26,7 +26,7 @@ public class ProductsDocument {
     private String information;
 
     private String tags;
-    private PStatusEnum pStatus;
+    private String pStatus;
     private String email;
 
 
@@ -49,7 +49,7 @@ public class ProductsDocument {
         this.category = category;
         this.information = information;
         this.tags = tags;
-        this.pStatus = PStatusEnum.valueOf(pStatus); // 문자열을 enum으로 변환
+        this.pStatus = pStatus; // 문자열을 enum으로 변환
         this.email = email;
         this.productsId = productsId;
         this.images = images;
