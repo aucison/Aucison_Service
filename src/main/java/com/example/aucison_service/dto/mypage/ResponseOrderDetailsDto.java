@@ -2,6 +2,7 @@ package com.example.aucison_service.dto.mypage;
 
 
 import com.example.aucison_service.enums.Category;
+import com.example.aucison_service.enums.Kind;
 import com.example.aucison_service.enums.OStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ public class ResponseOrderDetailsDto {
     private String productDescription; // 상품 한줄 설명
     private String productImgUrl; // 상품 이미지
     private Category category; // 경매 여부
+    private Kind kind;
 
     private Long ordersId; // 주문번호
     private String orderDate; // 주문일자 또는 마감일자

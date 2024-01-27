@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 @Entity
 @Table(name = "histories_img")
@@ -25,4 +24,10 @@ public class HistoriesImgEntity { // 상품 사진
     @OneToOne
     @JoinColumn(name = "histories_id") // 연관관계 주인
     private HistoriesEntity historiesEntity; // 사용자 구매/판매 내역
+
+    @Builder
+    public HistoriesImgEntity(String url, HistoriesEntity historiesEntity) {
+        this.url = url;
+        this.historiesEntity = historiesEntity;
+    }
 }
