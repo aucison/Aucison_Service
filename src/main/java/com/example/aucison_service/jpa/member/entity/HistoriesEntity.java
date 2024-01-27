@@ -38,8 +38,8 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
 
     @Column(name = "price", nullable = false)
     private Float price; // 구매/판매 가격
-    @Column(name = "orders_id")
-    private Long ordersId;;    //주문번호
+    @Column(name = "orders_id", nullable = true)
+    private Long ordersId;    //주문번호
 
     @ManyToOne
     @JoinColumn(name = "members_info_id") // 연관관계 주인
