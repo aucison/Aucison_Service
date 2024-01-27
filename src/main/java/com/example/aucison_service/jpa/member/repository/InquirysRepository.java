@@ -1,4 +1,4 @@
-package com.example.aucison_service.jpa.product.repository;
+package com.example.aucison_service.jpa.member.repository;
 
 import com.example.aucison_service.jpa.member.entity.InquirysEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

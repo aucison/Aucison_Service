@@ -17,7 +17,7 @@ public class InquirysEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inquirys_id")
-    private Long productsId;       //PK
+    private Long inauirysId;       //PK
 
     @Column(name = "q_Email", nullable = false)
     private String qEmail;           //문의자 이메일
