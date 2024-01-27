@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 public class BoardServiceImpl implements BoardService{
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger logger = LoggerFactory.getLogger(BoardServiceImpl.class);
     PostsRepository postsRepository;
     CommentsRepository commentsRepository;
 
