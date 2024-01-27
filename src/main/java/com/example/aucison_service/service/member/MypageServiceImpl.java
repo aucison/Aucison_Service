@@ -90,10 +90,11 @@ public class MypageServiceImpl implements MypageService {
 
                         return ResponseOrderHistoryDto.builder()
                                 .historiesId(historiesEntity.getId())
-                                .productName(historiesEntity.getName())
+                                .productName(historiesEntity.getProductName())
                                 .productImgUrl(historiesImg.getUrl())
-                                .productDescription(historiesEntity.getInfo())
+                                .productDescription(historiesEntity.getProductDetail())
                                 .category(historiesEntity.getCategory())
+                                .kind(historiesEntity.getKind())
                                 .ordersId(ordersEntity.getOrdersId())
                                 .createdTime(ordersEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                                 .oStatus(ordersEntity.getOStatus())
@@ -181,10 +182,11 @@ public class MypageServiceImpl implements MypageService {
 
         // Build and return the ResponseOrderDetailsDto
         return ResponseOrderDetailsDto.builder()
-                .productName(histories.getName())
-                .productDescription(histories.getInfo())
+                .productName(histories.getProductName())
+                .productDescription(histories.getProductDetail())
                 .productImgUrl(historiesImg.getUrl())
                 .category(histories.getCategory())
+                .kind(histories.getKind())
                 .ordersId(ordersId)
                 .orderDate(auctionEndDates.getEndDate().toString())
                 .oStatus(orders.getOStatus())
@@ -231,10 +233,11 @@ public class MypageServiceImpl implements MypageService {
 
         // Build and return the ResponseOrderDetailsDto without bid details
         return ResponseOrderDetailsDto.builder()
-                .productName(histories.getName())
-                .productDescription(histories.getInfo())
+                .productName(histories.getProductName())
+                .productDescription(histories.getProductDetail())
                 .productImgUrl(historiesImg.getUrl())
                 .category(histories.getCategory())
+                .kind(histories.getKind())
                 .ordersId(ordersId)
                 .orderDate(orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .oStatus(orders.getOStatus())
@@ -282,14 +285,14 @@ public class MypageServiceImpl implements MypageService {
             String soldDate = orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             return ResponseSellHistoryDto.builder()
-                    .productName(history.getName())
-                    .productDescription(history.getInfo())
+                    .productName(history.getProductName())
+                    .productDescription(history.getProductDetail())
                     .productImgUrl(historyImg.getUrl())
                     .category(history.getCategory())
                     .createdDate(createdDate)
                     .soldDate(soldDate)
                     .ordersId(orders.getOrdersId())
-                    .oStatus(orders.getOStatus())
+                    .pStatus(product.getPStatus())
                     .price(history.getPrice())
                     .build();
         }

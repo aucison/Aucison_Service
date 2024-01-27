@@ -4,17 +4,11 @@ package com.example.aucison_service.service.shipping;
 import com.example.aucison_service.dto.payments.AddrInfoResponseDto;
 import com.example.aucison_service.dto.payments.PaymentsRequestDto;
 import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
-import com.example.aucison_service.enums.OStatusEnum;
-import com.example.aucison_service.enums.PStatusEnum;
-import com.example.aucison_service.enums.PageType;
+import com.example.aucison_service.enums.*;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.entity.AddressesEntity;
-import com.example.aucison_service.jpa.member.entity.MembersEntity;
-import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
-import com.example.aucison_service.jpa.member.repository.AddressesRepository;
-import com.example.aucison_service.jpa.member.repository.MembersInfoRepository;
-import com.example.aucison_service.jpa.member.repository.MembersRepository;
+import com.example.aucison_service.jpa.member.entity.*;
+import com.example.aucison_service.jpa.member.repository.*;
 import com.example.aucison_service.jpa.product.entity.*;
 import com.example.aucison_service.jpa.product.repository.*;
 import com.example.aucison_service.jpa.shipping.entity.*;
@@ -49,6 +43,8 @@ public class PaymentsServiceImpl implements PaymentsService {
     private final AucsInfosRepository aucsInfosRepository;
    private final ProductImgRepository productImgRepository;
    private final BidCountsRepository bidCountsRepository;
+   private final HistoriesRepository historiesRepository;
+   private final HistoriesImgRepository historiesImgRepository;
 
     @Autowired
     public PaymentsServiceImpl(BidsRepository bidsRepository, PageAccessLogsRepository pageAccessLogsRepository,
@@ -57,7 +53,8 @@ public class PaymentsServiceImpl implements PaymentsService {
                                ProductsRepository productsRepository, MembersRepository membersRepository,
                                MembersInfoRepository membersInfoRepository, AddressesRepository addressesRepository,
                                SaleInfosRepository saleInfosRepository, AucsInfosRepository aucsInfosRepository
-                               , ProductImgRepository productImgRepository, BidCountsRepository bidCountsRepository) {
+                               , ProductImgRepository productImgRepository, BidCountsRepository bidCountsRepository,
+                               HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository) {
         this.bidsRepository = bidsRepository;
         this.pageAccessLogsRepository = pageAccessLogsRepository;
         this.ordersRepository = ordersRepository;
@@ -72,6 +69,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         this.aucsInfosRepository = aucsInfosRepository;
         this.productImgRepository = productImgRepository;
         this.bidCountsRepository = bidCountsRepository;
+        this.historiesRepository = historiesRepository;
+        this.historiesImgRepository = historiesImgRepository;
     }
 
     @Override
@@ -210,7 +209,8 @@ public class PaymentsServiceImpl implements PaymentsService {
                                                                      float newCredit) {
         return VirtualPaymentResponseDto.builder()
                 .category(product.getCategory())
-                .name(product.getName())
+                .kind(product.getKind())
+                .productName(product.getName())
                 .productImg(image)
                 .price(price)
                 .addrName(addresses.getAddrName())
@@ -277,7 +277,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.COOO);
 
         // credit 정보 가져오기
-        //TODO: 판매자 credit update
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
 
         String buyerEmail = email;
@@ -285,9 +284,11 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         updateMemberCredit(buyerEmail, sellerEmail, paymentsRequestDto.getPrice());
 
+        saveSaleHistory(orders, email, product, paymentsRequestDto);
+
         //상품 삭제
 //        deleteProduct(paymentsRequestDto.getProductsId());
-        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
+//        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
         logPageExit(logId);
@@ -348,6 +349,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         //상품 id로 해당 상품 주문 정보를 모두 찾음
         processRefundsForAuction(productId, order, timeDifference);
 
+        saveSaleHistory(order, email, product, paymentsRequestDto);
+
         //결제 페이지 탈출 로그 생성 전에 체크
         LocalDateTime exitTime = LocalDateTime.now();
         if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
@@ -362,6 +365,44 @@ public class PaymentsServiceImpl implements PaymentsService {
         logPageExit(logId);
 
         return order.getOrdersId();
+    }
+
+    private void saveSaleHistory(Orders orders, String email, ProductsEntity product, PaymentsRequestDto paymentsRequestDto) {
+        MembersEntity buyer = membersRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(buyer);
+
+        // HistoriesEntity 생성 및 저장
+        HistoriesEntity history = HistoriesEntity.builder()
+                .orderType(OrderType.BUY) // 판매로 설정
+                .category(Category.NOR) // 비경매로 설정
+                .kind(Kind.valueOf(paymentsRequestDto.getKind())) // 상품 분류 설정
+                .productName(product.getName()) // 상품명 설정
+                .productDetail(product.getInformation()) // 상품 상세 정보 설정
+                .price(paymentsRequestDto.getPrice()) // 가격 설정
+                .ordersId(orders.getOrdersId()) // 주문번호 설정
+                .membersInfoEntity(membersInfo)
+                .build();
+
+        history = historiesRepository.save(history);
+
+        // HistoriesImgEntity 생성 및 저장
+        // 상품의 첫 번째 이미지 URL을 가져옴
+        List<ProductImgEntity> productImages = product.getImages();
+        String firstImageUrl = null;
+        if (productImages != null && !productImages.isEmpty()) {
+            firstImageUrl = productImages.get(0).getUrl(); // 첫 번째 이미지 URL
+        }
+
+        // 첫 번째 이미지 URL을 사용하여 HistoriesImgEntity 생성 및 저장
+        if (firstImageUrl != null) {
+            HistoriesImgEntity historyImg = HistoriesImgEntity.builder()
+                    .url(firstImageUrl)
+                    .historiesEntity(history)
+                    .build();
+
+            historiesImgRepository.save(historyImg);
+        }
     }
 
     private void updateProductStatus(Long productId, PStatusEnum pStatusEnum) {

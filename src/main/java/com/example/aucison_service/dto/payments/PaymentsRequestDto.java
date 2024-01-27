@@ -10,6 +10,7 @@ public class PaymentsRequestDto {
     //결제 저장(결제 완료) 에 사용하는 dto
     private Long productsId;    //상품 id
     private String category; // 경매여부(경매/비경매)
+    private String kind;    //일반/핸드메이드
     private String addrName;    //배송지명
     private String zipNum;  //우편번호
     private String addr;    //주소

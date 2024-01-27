@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class VirtualPaymentResponseDto {
     //가상 결제 페이지 조회 시 사용하는 dto
     private String category;    //경매 여부(경매/판매)
+    private String kind;    //일반/핸드메이드
 
     private String productName; //상품명
     private String productImg; //상품 사진

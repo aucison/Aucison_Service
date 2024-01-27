@@ -10,11 +10,16 @@ import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.elastic.ProductsDocument;
+import com.example.aucison_service.enums.Category;
+import com.example.aucison_service.enums.Kind;
+import com.example.aucison_service.enums.OrderType;
 import com.example.aucison_service.enums.PStatusEnum;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
-import com.example.aucison_service.jpa.member.repository.MembersRepository;
-import com.example.aucison_service.jpa.member.repository.WishesRepository;
+import com.example.aucison_service.jpa.member.entity.HistoriesEntity;
+import com.example.aucison_service.jpa.member.entity.HistoriesImgEntity;
+import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
+import com.example.aucison_service.jpa.member.repository.*;
 import com.example.aucison_service.jpa.product.entity.*;
 import com.example.aucison_service.jpa.product.repository.AucsInfosRepository;
 import com.example.aucison_service.jpa.product.repository.BidCountsRepository;
@@ -60,6 +65,9 @@ public class ProductServiceImpl implements ProductService{
     AucsInfosRepository aucs_infosRepository;
     MembersRepository membersRepository;
     WishesRepository wishesRepository;
+    HistoriesRepository historiesRepository;
+    HistoriesImgRepository historiesImgRepository;
+    MembersInfoRepository membersInfoRepository;
 
     BidCountsRepository bidCountsRepository;
     S3Service s3Service;
@@ -71,6 +79,8 @@ public class ProductServiceImpl implements ProductService{
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
                               AucsInfosRepository aucs_infosRepository, MembersRepository membersRepository,
                               WishesRepository wishesRepository, BidCountsRepository bidCountsRepository,
+                              HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
+                              MembersInfoRepository membersInfoRepository,
                               S3Service s3Service,
                               ElasticsearchOperations elasticsearchOperations){
         this.productsRepository=productsRepository;
@@ -79,6 +89,9 @@ public class ProductServiceImpl implements ProductService{
         this.membersRepository=membersRepository;
         this.wishesRepository=wishesRepository;
         this.bidCountsRepository = bidCountsRepository;
+        this.historiesRepository = historiesRepository;
+        this.historiesImgRepository = historiesImgRepository;
+        this.membersInfoRepository = membersInfoRepository;
         this.s3Service=s3Service;
         this.elasticsearchOperations = elasticsearchOperations;
     }
@@ -270,9 +283,26 @@ public class ProductServiceImpl implements ProductService{
                 .build();
         // 'createdTime'이 자동으로 설정될 것이므로 필요 x
 
+        // HistoriesEntity 생성 및 저장
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(principal.getMember());
+
+        HistoriesEntity history = HistoriesEntity.builder()
+                .orderType(OrderType.SELL)
+                .category(Category.valueOf(dto.getCategory())) // Category 열거형 사용
+                .kind(Kind.valueOf(dto.getKind())) // Kind 열거형 사용
+                .productName(dto.getName())
+                .productDetail(dto.getInformation())
+                .price(dto.getPrice()) // 가격 설정
+                .membersInfoEntity(membersInfo)
+                .build();
+
+        historiesRepository.save(history);
+
         // 이미지 저장
         List<MultipartFile> images = dto.getImages();
         if (images != null && !images.isEmpty() && images.size() <= 10) {
+            boolean isFirstImage = true;
+
             for (MultipartFile file : images) {
                 if (!file.isEmpty()) {
                     String imageUrl = s3Service.uploadFileAndGetUrl(file, "product");
@@ -281,42 +311,53 @@ public class ProductServiceImpl implements ProductService{
                             .product(product)
                             .build();
                     product.addImage(productImg); // 상품 엔티티에 이미지 추가
+
+                    // 첫 번째 이미지일 경우 HistoriesImgEntity에 저장
+                    if (isFirstImage) {
+                        HistoriesImgEntity historyImg = HistoriesImgEntity.builder()
+                                .url(imageUrl)
+                                .historiesEntity(history)
+                                .build();
+                        historiesImgRepository.save(historyImg);
+
+                        isFirstImage = false; // 첫 번째 이미지 처리 완료
+                    }
                 }
             }
-        }
 
-        productsRepository.save(product);
+            productsRepository.save(product);
 
-        //기본적으로 낙찰자 수 0 셋팅
-        BidCountsEntity bidCount = BidCountsEntity.builder()
-                .productsId(product.getProductsId())
-                .totCnt(0)
-                .build();
-
-        bidCountsRepository.save(bidCount);
-
-
-        //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장
-        if ("AUCS".equals(dto.getCategory())) {
-            String bidsCode = generateBidsCode(); // 고유한 bidsCode 생성
-            AucsInfosEntity aucInfo = AucsInfosEntity.builder()
-                    .startPrice(dto.getStartPrice())
-                    .end(dto.getEnd())
-                    .bidsCode(bidsCode)
-                    .productsEntity(product)
+            //기본적으로 낙찰자 수 0 셋팅
+            BidCountsEntity bidCount = BidCountsEntity.builder()
+                    .productsId(product.getProductsId())
+                    .totCnt(0)
                     .build();
 
-            aucs_infosRepository.save(aucInfo);
+            bidCountsRepository.save(bidCount);
 
-        } else if ("SALE".equals(dto.getCategory())) {
-            SaleInfosEntity norInfo = SaleInfosEntity.builder()
-                    .price(dto.getPrice())
-                    .productsEntity(product)
-                    .build();
 
-            sale_infosRepository.save(norInfo);
+            //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장
+            if ("AUCS".equals(dto.getCategory())) {
+                String bidsCode = generateBidsCode(); // 고유한 bidsCode 생성
+                AucsInfosEntity aucInfo = AucsInfosEntity.builder()
+                        .startPrice(dto.getStartPrice())
+                        .end(dto.getEnd())
+                        .bidsCode(bidsCode)
+                        .productsEntity(product)
+                        .build();
+
+                aucs_infosRepository.save(aucInfo);
+
+            } else if ("SALE".equals(dto.getCategory())) {
+                SaleInfosEntity norInfo = SaleInfosEntity.builder()
+                        .price(dto.getPrice())
+                        .productsEntity(product)
+                        .build();
+
+                sale_infosRepository.save(norInfo);
+            }
+
         }
-
     }
 
     @Override

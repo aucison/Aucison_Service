@@ -43,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
         MembersInfoEntity membersInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
-                .orElseThrow(() -> new AppException(ErrorCode.HISTORY_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+                .orElseThrow(() -> new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
 
         // 동일한 배송지명이 있는지 검사
         if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
