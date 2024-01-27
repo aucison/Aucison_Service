@@ -26,7 +26,7 @@ public class ProductsDocument {
     private String information;
 
     private String tags;
-    private String pStatus;
+    private PStatusEnum pStatus;
     private String email;
 
 
@@ -41,7 +41,7 @@ public class ProductsDocument {
 
 
     public ProductsDocument(String id, String name, String kind, String category,
-                            String information, String tags, String pStatus, String email, Long productsId, List<String> images,
+                            String information, String tags, PStatusEnum pStatus, String email, Long productsId, List<String> images,
                             Long aucEnd, Float aucStartPrice, Float salePrice) {
         this.id = id;
         this.name = name;
