@@ -290,6 +290,7 @@ public class ProductServiceImpl implements ProductService{
                 .orderType(OrderType.SELL)
                 .category(dto.getCategory()) // Category 열거형 사용
                 .kind(dto.getKind()) // Kind 열거형 사용
+                .productsId(product.getProductsId())
                 .productName(dto.getName())
                 .productDetail(dto.getInformation())
                 .price(dto.getPrice()) // 가격 설정

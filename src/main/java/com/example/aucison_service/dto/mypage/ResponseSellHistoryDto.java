@@ -21,7 +21,7 @@ public class ResponseSellHistoryDto {
     private String createdDate; //등록 날짜
     private String soldDate;    //판매 날짜
 
-    private Long ordersId;  //주문번호
+//    private Long ordersId;  //주문번호
 //    private OStatusEnum oStatus;  //주문상태
     private PStatusEnum pStatus;  //주문상태
     private float price; //판매 가격

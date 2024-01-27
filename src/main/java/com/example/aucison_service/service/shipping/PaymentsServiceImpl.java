@@ -395,6 +395,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .orderType(OrderType.BUY) // 판매로 설정
                 .category(paymentsRequestDto.getCategory()) // 비경매로 설정
                 .kind(paymentsRequestDto.getKind()) // 상품 분류 설정
+                .productsId(paymentsRequestDto.getProductsId())
                 .productName(product.getName()) // 상품명 설정
                 .productDetail(product.getInformation()) // 상품 상세 정보 설정
                 .price(paymentsRequestDto.getPrice()) // 가격 설정
