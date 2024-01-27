@@ -25,6 +25,7 @@ public class AucsInfosEntity extends BaseTimeEntity {
     private float startPrice;     //경매 시작가
 
 
+
     @Column(name = "end", nullable = false)
     private LocalDateTime end;             //경매 종료일
 

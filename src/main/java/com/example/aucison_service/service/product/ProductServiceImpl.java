@@ -8,6 +8,7 @@ import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
+import com.example.aucison_service.dto.product.UpdateOnlyCostResponseDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.elastic.ProductsDocument;
 import com.example.aucison_service.enums.Category;
@@ -369,109 +370,27 @@ public class ProductServiceImpl implements ProductService{
         }
 
     }
-//    @Override
-//    @Transactional
-//    public void registerProduct(ProductRegisterRequestDto dto,@AuthenticationPrincipal MemberDetails principal) {
-//        //상품 등록 서비스 로직
-//
-//        if (principal == null) {
-//            logger.info("인증되지 않은 사용자입니다!");
-//            throw new AppException(ErrorCode.UNAUTHORIZED);
-//        }
-//
-//
-//        //아래 코드로 변경
-//        String email = principal.getMember().getEmail();
-//
-//        //ProductsEntity를 먼저 저장을 한다.
-//        ProductsEntity product = ProductsEntity.builder()
-//                .name(dto.getName())
-//                .kind(dto.getKind())
-//                .category(dto.getCategory())
-//                .information(dto.getInformation())
-//                .tags(dto.getTags())
-//                .pStatus(PStatusEnum.S000)  //enum은 이렇게함
-//                .email(email) //  OAuth2 인증을 통해 가져온 이메일 설정
-//                .build();
-//        // 'createdTime'이 자동으로 설정될 것이므로 필요 x
-//
-//        // HistoriesEntity 생성 및 저장
-//        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(principal.getMember());
-//
-//        HistoriesEntity history = HistoriesEntity.builder()
-//                .orderType(OrderType.SELL)
-//                .category(dto.getCategory()) // Category 열거형 사용
-//                .kind(dto.getKind()) // Kind 열거형 사용
-//                .productsId(product.getProductsId())
-//                .productName(dto.getName())
-//                .productDetail(dto.getInformation())
-//                .price(dto.getPrice()) // 가격 설정
-//                .membersInfoEntity(membersInfo)
-//                .build();
-//
-//        historiesRepository.save(history);
-//
-//        // 이미지 저장
-//        List<MultipartFile> images = dto.getImages();
-//        if (images != null && !images.isEmpty() && images.size() <= 10) {
-//            boolean isFirstImage = true;
-//
-//            for (MultipartFile file : images) {
-//                if (!file.isEmpty()) {
-//                    String imageUrl = s3Service.uploadFileAndGetUrl(file, "product");
-//                    ProductImgEntity productImg = ProductImgEntity.builder()
-//                            .url(imageUrl)
-//                            .product(product)
-//                            .build();
-//                    product.addImage(productImg); // 상품 엔티티에 이미지 추가
-//
-//                    // 첫 번째 이미지일 경우 HistoriesImgEntity에 저장
-//                    if (isFirstImage) {
-//                        HistoriesImgEntity historyImg = HistoriesImgEntity.builder()
-//                                .url(imageUrl)
-//                                .historiesEntity(history)
-//                                .build();
-//                        historiesImgRepository.save(historyImg);
-//
-//                        isFirstImage = false; // 첫 번째 이미지 처리 완료
-//                    }
-//                }
-//            }
-//
-//            productsRepository.save(product);
-//
-//            //기본적으로 낙찰자 수 0 셋팅
-//            BidCountsEntity bidCount = BidCountsEntity.builder()
-//                    .productsId(product.getProductsId())
-//                    .totCnt(0)
-//                    .build();
-//
-//            bidCountsRepository.save(bidCount);
-//
-//
-//            //이후 경매인지 비경매인지 체크를 한 후 추가적으로 저장
-//            if ("AUCS".equals(dto.getCategory())) {
-//                String bidsCode = generateBidsCode(); // 고유한 bidsCode 생성
-//                AucsInfosEntity aucInfo = AucsInfosEntity.builder()
-//                        .startPrice(dto.getStartPrice())
-//                        .end(dto.getEnd())
-//                        .bidsCode(bidsCode)
-//                        .productsEntity(product)
-//                        .build();
-//
-//                aucs_infosRepository.save(aucInfo);
-//
-//            } else if ("SALE".equals(dto.getCategory())) {
-//                SaleInfosEntity norInfo = SaleInfosEntity.builder()
-//                        .price(dto.getPrice())
-//                        .productsEntity(product)
-//                        .build();
-//
-//                sale_infosRepository.save(norInfo);
-//            }
-//
-//        }
-//    }
+
+    @Override
+    public UpdateOnlyCostResponseDto updateOnlyCost(Long productId, @AuthenticationPrincipal MemberDetails principal){
+        ProductsEntity product = productsRepository.findByProductsId(productId);
+
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        UpdateOnlyCostResponseDto.UpdateOnlyCostResponseDtoBuilder dto = UpdateOnlyCostResponseDto.builder();
+
+        if("AUCS".equals(product.getCategory())){
+
+        } else if("SALE".equals(product.getCategory())){
+            dto.nowPrice(product.getSaleInfosEntity().getPrice());  //일반 상품이면 등록가격 다시 가져오면 됨
+
+        }
+        return dto.build();
+
+    }
+
 
     @Override
     public ProductRegisterFinshResponseDto finshReisterProduct(Long productId, @AuthenticationPrincipal MemberDetails principal) {
@@ -582,7 +501,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     @Transactional(readOnly = true)
-    public ProductDetailResponseDto getProductDetail(Long productsId) {
+    public ProductDetailResponseDto getProductDetail(Long productsId, @AuthenticationPrincipal MemberDetails principal) {
         ProductsEntity product = productsRepository.findByProductsId(productsId);
 
         if (product == null) {
