@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "histories")
-public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매 내역
+public class HistoriesEntity { // 사용자 구매/판매 내역
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,5 +52,9 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
         this.soldDate = soldDate;
         this.ordersId = ordersId;
         this.membersInfoEntity = membersInfoEntity;
+    }
+
+    public void updateSoldDate(LocalDateTime soldDate) {
+        this.soldDate = soldDate;
     }
 }

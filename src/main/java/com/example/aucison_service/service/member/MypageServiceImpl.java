@@ -85,8 +85,16 @@ public class MypageServiceImpl implements MypageService {
                             .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND)); // ordersId로 해당 Orders 조회, 없으면 예외 발생
 
                     if (historiesEntity.getOrderType() == OrderType.BUY) {  //'구매' 인 경우
-                        HistoriesImgEntity historiesImg = Optional.ofNullable(historiesImgRepository.findByHistoriesEntity(historiesEntity))
-                                .orElseThrow(() -> new AppException(ErrorCode.IMG_NOT_FOUND)); // 이미지 조회, 없으면 예외 발생
+//
+//                        HistoriesImgEntity historiesImg = Optional.ofNullable(historiesImgRepository.findByHistoriesEntity(historiesEntity))
+////                                .orElseThrow(() -> new AppException(ErrorCode.IMG_NOT_FOUND)); // 이미지 조회, 없으면 예외 발생
+                        String url = null;
+                        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(historiesEntity);
+                        if (historiesImg == null) {
+                            url = null;
+                        } else {
+                            url = historiesImg.getUrl();
+                        }
 
                         ProductsEntity product = Optional.ofNullable(productsRepository.findByProductsId(historiesEntity.getProductsId()))
                                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -94,7 +102,7 @@ public class MypageServiceImpl implements MypageService {
                         return ResponseOrderHistoryDto.builder()
                                 .historiesId(historiesEntity.getId())
                                 .productName(product.getName())
-                                .productImgUrl(historiesImg.getUrl())
+                                .productImgUrl(url)
                                 .category(product.getCategory())
                                 .kind(product.getKind())
                                 .ordersId(ordersEntity.getOrdersId())
@@ -148,10 +156,17 @@ public class MypageServiceImpl implements MypageService {
             throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
         }
 
-        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+//        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+//        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(histories);
+//        if (historiesImg == null) {
+//            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+//        }
+        String url = null;
         HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(histories);
         if (historiesImg == null) {
-            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+            url = null;
+        } else {
+            url = historiesImg.getUrl();
         }
 
         ProductsEntity product = productsRepository.findByProductsId(histories.getProductsId());
@@ -194,7 +209,7 @@ public class MypageServiceImpl implements MypageService {
         // Build and return the ResponseOrderDetailsDto
         return ResponseOrderDetailsDto.builder()
                 .productName(product.getName())
-                .productImgUrl(historiesImg.getUrl())
+                .productImgUrl(url)
                 .category(product.getCategory())
                 .kind(product.getKind())
                 .ordersId(ordersId)
@@ -220,10 +235,17 @@ public class MypageServiceImpl implements MypageService {
             throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
         }
 
-        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+//        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+//        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(histories);
+//        if (historiesImg == null) {
+//            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+//        }
+        String url = null;
         HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(histories);
         if (historiesImg == null) {
-            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+            url = null;
+        } else {
+            url = historiesImg.getUrl();
         }
 
         ProductsEntity product = productsRepository.findByProductsId(histories.getProductsId());
@@ -250,7 +272,7 @@ public class MypageServiceImpl implements MypageService {
         // Build and return the ResponseOrderDetailsDto without bid details
         return ResponseOrderDetailsDto.builder()
                 .productName(product.getName())
-                .productImgUrl(historiesImg.getUrl())
+                .productImgUrl(url)
                 .category(product.getCategory())
                 .kind(product.getKind())
                 .ordersId(ordersId)
@@ -270,7 +292,8 @@ public class MypageServiceImpl implements MypageService {
         String email = principal.getMember().getEmail();
 
         //'판매' 에 해당하는 histories 조회
-        List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntity_MembersEntity_EmailAndAndOrderType(email, OrderType.SELL);
+        List<HistoriesEntity> sellHistories = historiesRepository.findByEmailAndOrderType(email, OrderType.SELL);
+        System.out.println(sellHistories.size());
 
         return sellHistories.stream()
                 .map(this::buildResponseSellHistoryDto)
@@ -280,10 +303,17 @@ public class MypageServiceImpl implements MypageService {
 
     private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity history) {
 
-        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
-        HistoriesImgEntity historyImg = historiesImgRepository.findByHistoriesEntity(history);
-        if (historyImg == null) {
-            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+//        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
+//        HistoriesImgEntity historyImg = historiesImgRepository.findByHistoriesEntity(history);
+//        if (historyImg == null) {
+//            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
+//        }
+        String url = null;
+        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(history);
+        if (historiesImg == null) {
+            url = null;
+        } else {
+            url = historiesImg.getUrl();
         }
 
         ProductsEntity product = productsRepository.findByProductsId(history.getProductsId());
@@ -304,10 +334,10 @@ public class MypageServiceImpl implements MypageService {
 
         return ResponseSellHistoryDto.builder()
                 .productName(product.getName())
-                .productImgUrl(historyImg.getUrl())
+                .productImgUrl(url)
                 .category(product.getCategory())
                 .kind(product.getKind())
-                .createdDate(history.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .createdDate(product.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .soldDate(soldDate)
                 .pStatus(product.getPStatus())
                 .price(price)

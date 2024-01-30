@@ -304,6 +304,9 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         saveSaleHistory(orders, email, product, paymentsRequestDto);
 
+        updateSoldDate(product);
+
+
         //상품 삭제
 //        deleteProduct(paymentsRequestDto.getProductsId());
 //        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
@@ -349,6 +352,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         } else if (timeDifference < 3 * 60 * 1000) {    //낙찰
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
             updateProductStatus(productId, PStatusEnum.C000);
+            updateSoldDate(product);
         } else {    //응찰
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
             updateProductStatus(productId, PStatusEnum.B000);
@@ -383,6 +387,15 @@ public class PaymentsServiceImpl implements PaymentsService {
         logPageExit(logId);
 
         return order.getOrdersId();
+    }
+
+    private void updateSoldDate(ProductsEntity product) {
+        HistoriesEntity history = historiesRepository.findByProductsIdAndEmail(product.getProductsId(), product.getEmail());
+        if (history == null) {
+            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
+        } else {
+            history.updateSoldDate(LocalDateTime.now());
+        }
     }
 
     private void saveSaleHistory(Orders orders, String email, ProductsEntity product, PaymentsRequestDto paymentsRequestDto) {
