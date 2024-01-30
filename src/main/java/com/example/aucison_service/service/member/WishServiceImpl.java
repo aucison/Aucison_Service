@@ -2,8 +2,10 @@ package com.example.aucison_service.service.member;
 
 
 
+import com.example.aucison_service.dto.board.PostCRUDResponseDto;
 import com.example.aucison_service.dto.wish.WishRequestDto;
 import com.example.aucison_service.dto.wish.WishResponseDto;
+import com.example.aucison_service.dto.wish.WishSimpleResponseDto;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.entity.MembersEntity;
@@ -47,7 +49,7 @@ public class WishServiceImpl implements WishService {
     //찜 추가
     @Override
     @Transactional
-    public void addWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+    public WishSimpleResponseDto addWish(WishRequestDto wishRequestDto, MemberDetails principal) {
         validatePrincipal(principal);
 
 
@@ -72,12 +74,17 @@ public class WishServiceImpl implements WishService {
                 .build();
         wishesRepository.save(wish);
 
+        return WishSimpleResponseDto.builder().productId(wishRequestDto.getProductsId()).build();
+
     }
 
     //찜 삭제
     @Override
     @Transactional
-    public void deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+    public WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+
+
+
         //사용자 정보 가져옴
         MembersEntity member = membersRepository.findByEmail(principal.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
@@ -90,7 +97,7 @@ public class WishServiceImpl implements WishService {
 
         // 찜 삭제
         wishesRepository.delete(wish);
-
+        return WishSimpleResponseDto.builder().productId(wishRequestDto.getProductsId()).build();
     }
 
     //찜 목록 조회
