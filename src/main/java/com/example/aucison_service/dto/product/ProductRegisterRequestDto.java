@@ -33,6 +33,7 @@ public class ProductRegisterRequestDto {
 
     // 경매상품 정보
     private Float startPrice;
+    private float high;
     private LocalDateTime end;
     private String bidsCode;
 

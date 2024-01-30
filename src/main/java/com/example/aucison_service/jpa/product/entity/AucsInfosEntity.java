@@ -25,6 +25,9 @@ public class AucsInfosEntity extends BaseTimeEntity {
     private float startPrice;     //경매 시작가
 
 
+    @Column(name = "highest_price", nullable = false)
+    private float highestPrice;     //경매 최고가
+
     @Column(name = "end", nullable = false)
     private LocalDateTime end;             //경매 종료일
 
@@ -38,8 +41,9 @@ public class AucsInfosEntity extends BaseTimeEntity {
 
 
     @Builder
-    public AucsInfosEntity(float startPrice, LocalDateTime end, String bidsCode, ProductsEntity productsEntity){
+    public AucsInfosEntity(float startPrice, float highestPrice, LocalDateTime end, String bidsCode, ProductsEntity productsEntity){
         this.startPrice = startPrice;
+        this.highestPrice = highestPrice;
         this.end = end;
         this.bidsCode=bidsCode;
         this.productsEntity=productsEntity;

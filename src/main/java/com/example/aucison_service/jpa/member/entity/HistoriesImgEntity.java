@@ -18,7 +18,7 @@ public class HistoriesImgEntity { // 상품 사진
     @Column(name = "histories_imgs_id")
     private Long id; // 사용자 프로필 사진 id
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String url; // 이미지 경로
 
     @OneToOne

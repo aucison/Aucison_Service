@@ -6,6 +6,7 @@ import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
+import com.example.aucison_service.dto.product.UpdateOnlyCostResponseDto;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,12 +25,14 @@ public interface ProductService {
     List<ProductSearchResponseDto> searchProductByName(String name);
 
     //상품 상세 정보 조회하기
-    ProductDetailResponseDto getProductDetail(Long productsId);
+    ProductDetailResponseDto getProductDetail(Long productsId, @AuthenticationPrincipal MemberDetails principal);
 
     //상품의 찜 갯수
 //    List<ProductWishCountDto> getWishCounts();
 
     ProductRegisterFinshResponseDto finshReisterProduct(Long productId, @AuthenticationPrincipal MemberDetails principal);
+
+    UpdateOnlyCostResponseDto updateOnlyCost(Long productId, @AuthenticationPrincipal MemberDetails principal);
 
 
 }
