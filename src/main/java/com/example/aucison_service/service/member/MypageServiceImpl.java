@@ -283,6 +283,7 @@ public class MypageServiceImpl implements MypageService {
                 .category(history.getCategory())
                 .kind(history.getKind())
                 .createdDate(createdDate)
+//                .soldDate(soldDate)
                 .pStatus(product.getPStatus())
                 .price(history.getPrice())
                 .build();

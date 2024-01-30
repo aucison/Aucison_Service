@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @Getter
 @Entity
@@ -65,4 +67,5 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
         this.ordersId = ordersId;
         this.membersInfoEntity = membersInfoEntity;
     }
+
 }
