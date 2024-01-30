@@ -25,7 +25,7 @@ public class WishController {
     private final WishService wishService;
 
     // 찜 추가
-    @GetMapping("/add")
+    @PostMapping("/add")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<WishSimpleResponseDto> addWish(@RequestBody WishRequestDto wishRequestDto,
                                                       @AuthenticationPrincipal MemberDetails principal){
