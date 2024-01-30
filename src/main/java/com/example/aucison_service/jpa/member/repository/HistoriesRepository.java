@@ -12,5 +12,6 @@ import java.util.List;
 public interface HistoriesRepository extends JpaRepository<HistoriesEntity, Long> {
     List<HistoriesEntity> findByMembersInfoEntity(MembersInfoEntity membersInfoEntity);
     HistoriesEntity findByOrdersId(Long ordersId);
-    List<HistoriesEntity> findByMembersInfoEntity_MembersEntity_EmailAndAndOrderType(String email, OrderType orderType);
+    List<HistoriesEntity> findByEmailAndOrderType(String email, OrderType orderType);
+    HistoriesEntity findByProductsIdAndEmail(Long productsId, String email);
 }

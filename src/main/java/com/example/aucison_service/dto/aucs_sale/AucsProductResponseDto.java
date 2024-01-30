@@ -20,7 +20,7 @@ public class AucsProductResponseDto {
     private PStatusEnum pStatus;
     private String imageUrl; // 상품 이미지 URL 목록
 
-    private float startPrice;
+    private Float startPrice;
     private LocalDateTime end;
     private String bidsCode;
 

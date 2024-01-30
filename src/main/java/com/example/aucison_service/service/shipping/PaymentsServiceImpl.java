@@ -304,6 +304,9 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         saveSaleHistory(orders, email, product, paymentsRequestDto);
 
+        updateSoldDate(product);
+
+
         //상품 삭제
 //        deleteProduct(paymentsRequestDto.getProductsId());
 //        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
@@ -349,6 +352,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         } else if (timeDifference < 3 * 60 * 1000) {    //낙찰
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
             updateProductStatus(productId, PStatusEnum.C000);
+            updateSoldDate(product);
         } else {    //응찰
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
             updateProductStatus(productId, PStatusEnum.B000);
@@ -385,6 +389,15 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
+    private void updateSoldDate(ProductsEntity product) {
+        HistoriesEntity history = historiesRepository.findByProductsIdAndEmail(product.getProductsId(), product.getEmail());
+        if (history == null) {
+            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
+        } else {
+            history.updateSoldDate(LocalDateTime.now());
+        }
+    }
+
     private void saveSaleHistory(Orders orders, String email, ProductsEntity product, PaymentsRequestDto paymentsRequestDto) {
         MembersEntity buyer = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
@@ -393,12 +406,9 @@ public class PaymentsServiceImpl implements PaymentsService {
         // HistoriesEntity 생성 및 저장
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.BUY) // 판매로 설정
-                .category(paymentsRequestDto.getCategory()) // 비경매로 설정
-                .kind(paymentsRequestDto.getKind()) // 상품 분류 설정
                 .productsId(paymentsRequestDto.getProductsId())
-                .productName(product.getName()) // 상품명 설정
-                .productDetail(product.getInformation()) // 상품 상세 정보 설정
-                .price(paymentsRequestDto.getPrice()) // 가격 설정
+                .email(email)
+                .soldDate(LocalDateTime.now())
                 .ordersId(orders.getOrdersId()) // 주문번호 설정
                 .membersInfoEntity(membersInfo)
                 .build();

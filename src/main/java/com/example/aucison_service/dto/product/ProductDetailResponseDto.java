@@ -29,7 +29,7 @@ public class ProductDetailResponseDto {
     // 경매상품 정보
     private Float startPrice;
     private LocalDateTime end;
-    private float high;
+    private Float high;
 
     // 비경매상품 정보
     private Float price;

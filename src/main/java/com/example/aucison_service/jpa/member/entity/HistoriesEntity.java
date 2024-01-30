@@ -7,11 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @Getter
 @Entity
 @Table(name = "histories")
-public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매 내역
+public class HistoriesEntity { // 사용자 구매/판매 내역
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,25 +24,15 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
     @Enumerated(EnumType.STRING)
     private OrderType orderType; // 상태 분류(구매/판매)
 
-    @Column(name = "category", nullable = false)
-//    @Enumerated(EnumType.STRING)
-    private String category; // 경매 여부(경매/비경매)
-
-    @Column(name = "kind", nullable = false)
-//    @Enumerated(EnumType.STRING)
-    private String kind; // 상품 분류(일반/핸드메이드)
-
     @Column(name = "products_id", nullable = false)
     private Long productsId;    //상품 id
 
-    @Column(name = "product_name", nullable = false)
-    private String productName; // 상품명
+    @Column(name = "email", nullable = false)
+    private String email;
 
-    @Column(name = "product_detail", nullable = false)
-    private String productDetail; // 상품 상세 정보
+    @Column(name = "sold_date", nullable = true)
+    private LocalDateTime soldDate;
 
-    @Column(name = "price", nullable = false)
-    private Float price; // 구매/판매 가격
     @Column(name = "orders_id", nullable = true)
     private Long ordersId;    //주문번호
 
@@ -52,17 +44,17 @@ public class HistoriesEntity extends BaseTimeEntity { // 사용자 구매/판매
     private HistoriesImgEntity historiesImg;
 
     @Builder
-    public HistoriesEntity(OrderType orderType, String category, String kind, Long productsId,
-                           String productName, String productDetail, Float price, Long ordersId,
-                           MembersInfoEntity membersInfoEntity) {
+    public HistoriesEntity(OrderType orderType, Long productsId, String email,
+                           LocalDateTime soldDate, Long ordersId, MembersInfoEntity membersInfoEntity) {
         this.orderType = orderType;
-        this.category = category;
-        this.kind = kind;
         this.productsId = productsId;
-        this.productName = productName;
-        this.productDetail = productDetail;
-        this.price = price;
+        this.email = email;
+        this.soldDate = soldDate;
         this.ordersId = ordersId;
         this.membersInfoEntity = membersInfoEntity;
+    }
+
+    public void updateSoldDate(LocalDateTime soldDate) {
+        this.soldDate = soldDate;
     }
 }

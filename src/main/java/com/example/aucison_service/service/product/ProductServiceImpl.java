@@ -345,12 +345,8 @@ public class ProductServiceImpl implements ProductService{
 
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.SELL)
-                .category(dto.getCategory())
-                .kind(dto.getKind())
                 .productsId(product.getProductsId())
-                .productName(dto.getName())
-                .productDetail(dto.getInformation())
-                .price(dto.getPrice()) // 가격 설정
+                .email(email)
                 .membersInfoEntity(membersInfo)
                 .build();
         historiesRepository.save(history);
