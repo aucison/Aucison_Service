@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 @Data
 public class UpdateOnlyCostResponseDto {
-    private float nowPrice;
+    private Float nowPrice;
 }

@@ -25,7 +25,7 @@ public class ProductRegisterFinshResponseDto {
 
     // 경매상품 정보
     private Float startPrice;
-    private float high;
+    private Float high;
     private LocalDateTime end;
 
     // 비경매상품 정보
