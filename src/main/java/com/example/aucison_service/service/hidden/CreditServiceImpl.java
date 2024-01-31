@@ -25,16 +25,20 @@ public class CreditServiceImpl implements CreditService {
     public float updateCredit(MemberDetails principal, float creditChange) {
         String email = principal.getMember().getEmail();
 
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
-        MembersInfoEntity memberInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
-        float currentCredit = memberInfo.getCredit();
+        float currentCredit = membersInfo.getCredit();
         float updatedCredit = currentCredit + creditChange;
 
-        memberInfo.updateCredit(updatedCredit);
+        membersInfo.updateCredit(updatedCredit);
 
         return updatedCredit;
     }

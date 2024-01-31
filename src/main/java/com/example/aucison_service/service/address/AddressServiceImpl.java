@@ -39,11 +39,16 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto) {
         String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
-        MembersInfoEntity membersInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         // 동일한 배송지명이 있는지 검사
         if (addressesRepository.existsByAddrNameAndMembersInfoEntity(requestAddressDto.getAddrName(), membersInfo)) {
@@ -80,14 +85,21 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void deleteAddress(MemberDetails principal, String addrName) {
         String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
-
-        if (address.isPrimary()) {
+        if (address == null) {
+            throw new AppException(ErrorCode.ADDRESS_NOT_FOUND);
+        } else if (address.isPrimary()) {
             new AppException((ErrorCode.PRIMARY_ADDRESS_CANNOT_BE_DELETED));
         }
 
@@ -100,10 +112,16 @@ public class AddressServiceImpl implements AddressService {
     public void updateAddressByEmailAndAddrName(MemberDetails principal, String addrName,
                                                 RequestUpdateAddressDto requestUpdateAddressDto) {
         String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         // 대표 배송지를 새로 설정하는 경우
         if (requestUpdateAddressDto.isPrimary()) {
@@ -118,6 +136,9 @@ public class AddressServiceImpl implements AddressService {
         }
 
         AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+        if (address == null) {
+            throw new AppException(ErrorCode.ADDRESS_NOT_FOUND);
+        }
 
         // 엔티티의 update 메소드를 호출하여 주소 정보 업데이트
         address.update(requestUpdateAddressDto);
@@ -128,11 +149,21 @@ public class AddressServiceImpl implements AddressService {
     @Transactional(readOnly = true)
     public List<ResponseAddressDto> getAddressInfo(MemberDetails principal) {
         String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
+
         List<AddressesEntity> addresses = addressesRepository.findAllByMembersInfoEntity(membersInfo);
+        if (addresses.isEmpty()) {
+            throw new AppException(ErrorCode.ADDRESSES_NOT_FOUND);
+        }
 
         return addresses.stream()
                 .map(address -> ResponseAddressDto.builder()
@@ -152,23 +183,28 @@ public class AddressServiceImpl implements AddressService {
     public AddrInfoResponseDto getAddressInfoByAddrName(MemberDetails principal, String addrName) {  //배송지명으로 배송지 조회
         String email = principal.getMember().getEmail();
 
-        MembersEntity membersEntity = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-
-        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
-
-        AddressesEntity addressesEntity = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfoEntity, addrName);
-
-        if (addressesEntity == null) {
-            throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
         }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
+
+        AddressesEntity address = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfo, addrName);
+        if (address == null) {
+            throw new AppException(ErrorCode.ADDRESS_NOT_FOUND);
+        }
+
         return AddrInfoResponseDto.builder()
-                .addrName(addressesEntity.getAddrName())
-                .name(addressesEntity.getName())
-                .tel(addressesEntity.getTel())
-                .zipCode(addressesEntity.getZipNum())
-                .addr(addressesEntity.getAddr())
-                .addrDetail(addressesEntity.getAddrDetail())
+                .addrName(address.getAddrName())
+                .name(address.getName())
+                .tel(address.getTel())
+                .zipCode(address.getZipNum())
+                .addr(address.getAddr())
+                .addrDetail(address.getAddrDetail())
                 .build();
     }
 }

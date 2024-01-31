@@ -54,8 +54,10 @@ public class WishServiceImpl implements WishService {
 
 
         //사용자 정보 가져옴
-        MembersEntity member = membersRepository.findByEmail(principal.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity member = membersRepository.findByEmail(principal.getUsername());
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
         // 상품 정보 조회
         Long productId = wishRequestDto.getProductsId();
@@ -86,8 +88,10 @@ public class WishServiceImpl implements WishService {
 
 
         //사용자 정보 가져옴
-        MembersEntity member = membersRepository.findByEmail(principal.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity member = membersRepository.findByEmail(principal.getUsername());
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
         // 찜 정보 조회
         Long productId = wishRequestDto.getProductsId();
@@ -104,8 +108,10 @@ public class WishServiceImpl implements WishService {
     @Override
     public List<WishResponseDto> getMemberWishList(MemberDetails principal) {
 
-        MembersEntity member = membersRepository.findByEmail(principal.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity member = membersRepository.findByEmail(principal.getUsername());
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
         List<WishesEntity> wishes = wishesRepository.findByMembersEntity(member);
 
