@@ -164,17 +164,17 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
         }
 
-        //bids에서 실시간 가격 정보를 받아옴
-        AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
-        // BidsCode를 사용하여 현재 응찰 정보를 조회합니다.
-        Bids currentBid = bidsRepository.findByBidsCode(aucsInfo.getBidsCode());
+//        //bids에서 실시간 가격 정보를 받아옴
+//        AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
+//        // BidsCode를 사용하여 현재 응찰 정보를 조회합니다.
+//        Bids currentBid = bidsRepository.findByBidsCode(aucsInfo.getBidsCode());
 
-        // 현재 응찰 정보가 없는 경우, 시작 가격으로 초기화
-        float nowPrice;
-        if (currentBid != null) {
-            nowPrice = currentBid.getNowPrice();
+        AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
+        Float nowPrice = null;
+        if (aucsInfo == null) {
+            throw new AppException(ErrorCode.AUCS_PRODUCT_NOT_EXIST);
         } else {
-            nowPrice = aucsInfo.getStartPrice();
+            nowPrice = aucsInfo.getHighestPrice();
         }
 
         // 최소 입찰 금액 및 최대 입찰 금액 계산
@@ -193,7 +193,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         float currentCredit = membersInfo.getCredit();
 
         //현재 credit에서 경매 가격을 차감
-        float newCredit = currentCredit - nowPrice;
+        float newCredit = currentCredit - bidAmount;
         validateCredit(newCredit);
 
         float newPrice = bidAmount;   //응찰가
@@ -268,7 +268,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         AddressesEntity addresses = addressesRepository.findByMembersInfoEntityAndIsPrimary(membersInfo, true);
         if (addresses == null) {
-            throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
+            throw new AppException(ErrorCode.ADDRESS_NOT_FOUND);
         }
 
         return AddrInfoResponseDto.builder()
@@ -379,8 +379,10 @@ public class PaymentsServiceImpl implements PaymentsService {
         // Bids 정보 저장
         saveBidAndBidCount(paymentsRequestDto, email, order);
 
-        // 구매자 credit update
-        //TODO: 판매자 credit update
+        //경매상품 최고가 현재 응찰가로 업데이트
+        aucsInfo.updateHighestPrice(paymentsRequestDto.getPrice());
+
+        // 구매자, 판매자 credit update
         String buyerEmail = email;
         String sellerEmail = product.getEmail();
         updateMemberCredit(buyerEmail, sellerEmail, paymentsRequestDto.getPrice());
