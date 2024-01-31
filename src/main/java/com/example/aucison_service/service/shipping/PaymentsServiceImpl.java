@@ -75,8 +75,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName,
-                                                           Optional<Float> bidAmount) {
+    public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, Optional<Float> bidAmount) {
         ProductsEntity product = productsRepository.findByProductsId(productsId);
         String email = principal.getMember().getEmail();
 
@@ -89,16 +88,15 @@ public class PaymentsServiceImpl implements PaymentsService {
             case "AUCS":
                 // bidAmount의 값을 추출하고, 값이 없으면 예외를 발생
                 Float actualBidAmount = bidAmount.orElseThrow(() -> new AppException(ErrorCode.INVALID_BIDCOUNT));
-                return getAucsVirtualPaymentInfo(productsId, email, addrName, actualBidAmount);
+                return getAucsVirtualPaymentInfo(productsId, email, actualBidAmount);
             case "SALE":
-                return getSaleVirtualPaymentInfo(productsId, email, addrName);
+                return getSaleVirtualPaymentInfo(productsId, email);
             default:
                 throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
     }
 
-    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
-                                                               String addrName) {  //가상 결제(비경매)
+    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email) {  //가상 결제(비경매)
 
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
@@ -112,7 +110,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(member);
 
         //배송지 정보 가져오기
-        AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
+        AddrInfoResponseDto addresses = getShippingInfo(email);
 
         //credit 정보 가져오기
         float currentCredit = membersInfoEntity.getCredit();
@@ -132,8 +130,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     }
 
-    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email,
-                                                               String addrName, Float bidAmount) {  //가상 결제(경매)
+    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email, Float bidAmount) {  //가상 결제(경매)
         //가상 결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
         if(!isBeforeAuctionEndDate(productsId, accessTime)) {
@@ -174,7 +171,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         //배송지 정보 가져오기
-        AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
+        AddrInfoResponseDto addresses = getShippingInfo(email);
 
         //credit 정보 가져오기
         float currentCredit = membersInfoEntity.getCredit();
@@ -242,17 +239,20 @@ public class PaymentsServiceImpl implements PaymentsService {
         return builder.build();
     }
 
-    private AddrInfoResponseDto getShippingInfo(String email, String addrName) {  //배송지명으로 배송지 조회
+    private AddrInfoResponseDto getShippingInfo(String email) {  //대표 배송지 조회
         MembersEntity membersEntity = membersRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
+        if (membersInfoEntity == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
-        AddressesEntity addressesEntity = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfoEntity, addrName);
-
+        AddressesEntity addressesEntity = addressesRepository.findByMembersInfoEntityAndIsPrimary(membersInfoEntity, true);
         if (addressesEntity == null) {
             throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
         }
+
         return AddrInfoResponseDto.builder()
                 .addrName(addressesEntity.getAddrName())
                 .name(addressesEntity.getName())
