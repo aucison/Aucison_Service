@@ -76,8 +76,12 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     @Transactional
     public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, Optional<Float> bidAmount) {
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
         String email = principal.getMember().getEmail();
+
+        ProductsEntity product = productsRepository.findByProductsId(productsId);
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
         if (email.equals(product.getEmail())) {
             throw new AppException(ErrorCode.SELLER_CANNOT_BUY_OWN_PRODUCT);
@@ -286,7 +290,11 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Transactional
     public Long savePayment(MemberDetails principal, PaymentsRequestDto paymentsRequestDto) {    //결제완료
         String email = principal.getMember().getEmail();
+
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
         if (email.equals(product.getEmail())) {
             throw new AppException(ErrorCode.SELLER_CANNOT_BUY_OWN_PRODUCT);

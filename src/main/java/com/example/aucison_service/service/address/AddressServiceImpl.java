@@ -110,7 +110,7 @@ public class AddressServiceImpl implements AddressService {
         if (address == null) {
             throw new AppException(ErrorCode.ADDRESS_NOT_FOUND);
         } else if (address.isPrimary()) {
-            new AppException((ErrorCode.PRIMARY_ADDRESS_CANNOT_BE_DELETED));
+            throw new AppException((ErrorCode.PRIMARY_ADDRESS_CANNOT_BE_DELETED));
         }
 
         addressesRepository.delete(address);
