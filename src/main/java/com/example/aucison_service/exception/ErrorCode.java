@@ -15,6 +15,7 @@ public enum ErrorCode {
     SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 검색어입니다."),
     IMG_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 이미지입니다."),
     IMAGE_PROCESSING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패했습니다"),
+    AUCS_PRODUCT_NOT_EXIST(HttpStatus.NOT_FOUND,"해당 경매 상품이 존재하지 않습니다."),
 
     //게시글 관련
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."),
@@ -53,7 +54,10 @@ public enum ErrorCode {
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "로그를 찾을 수 없습니다."),
     SELLER_CANNOT_BUY_OWN_PRODUCT(HttpStatus.FORBIDDEN, "판매자는 자신이 등록한 상품을 구매할 수 없습니다."),
 
+    //Address 관련 에러 코드들
     PRIMARY_ADDRESS_CANNOT_BE_DELETED(HttpStatus.BAD_REQUEST, "대표 배송지는 삭제할 수 없습니다."),
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소를 찾을 수 없습니다."),
+    ADDRESSES_NOT_FOUND(HttpStatus.NOT_FOUND, "주소 목록을 찾을 수 없습니다."),
 
     WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "찜 상품이 아닙니다."),
     DUPLICATE_WISH(HttpStatus.BAD_REQUEST, "이미 찜한 상품입니다.");

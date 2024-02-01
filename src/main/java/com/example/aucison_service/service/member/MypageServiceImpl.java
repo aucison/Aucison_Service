@@ -72,11 +72,16 @@ public class MypageServiceImpl implements MypageService {
     @Transactional(readOnly = true)
     public List<ResponseOrderHistoryDto> getOrderInfo(MemberDetails principal) {
         String email = principal.getMember().getEmail();
-        MembersEntity members = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
 
-        MembersInfoEntity membersInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(members))
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND)); // 사용자 상세정보 조회, 없으면 예외 발생
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         return historiesRepository.findByMembersInfoEntity(membersInfo)
                 .stream()
@@ -350,15 +355,26 @@ public class MypageServiceImpl implements MypageService {
     @Transactional(readOnly = true)
     public ResponseMemberProfileDto getMemberProfile(MemberDetails principal) {
         String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
 
-        MembersInfoEntity membersInfo = member.getMembersInfoEntity();
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
-        MembersImgEntity membersImg = membersImgRepository.findByMembersInfoEntity(membersInfo);
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
+
+        String membersImgUrl = null;
+        if (membersImgRepository.findByMembersInfoEntity(membersInfo) == null) {
+            membersImgUrl = null;
+        } else {
+            membersImgUrl = membersImgRepository.findByMembersInfoEntity(membersInfo).getUrl();
+        }
 
         return ResponseMemberProfileDto.builder()
-                .profileUrl(membersImg.getUrl())
+                .profileUrl(membersImgUrl)
                 .nickname(member.getNickname())
                 .email(membersInfo.getSubEmail())
                 .phone(membersInfo.getPhone())
@@ -370,21 +386,25 @@ public class MypageServiceImpl implements MypageService {
     public void patchMemberDetails(MemberDetails principal, RequestMembersInfoDto requestMembersInfoDto) {
         String email = principal.getMember().getEmail();
 
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
-        MembersInfoEntity memberInfo = Optional.ofNullable(membersInfoRepository.findByMembersEntity(member))
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND));
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         // Update nickname, phone, and subEmail
         if (requestMembersInfoDto.getNickName() != null) {
             member.updateNickname(requestMembersInfoDto.getNickName());
         }
         if (requestMembersInfoDto.getPhone() != null) {
-            memberInfo.updatePhone(requestMembersInfoDto.getPhone());
+            membersInfo.updatePhone(requestMembersInfoDto.getPhone());
         }
         if (requestMembersInfoDto.getSubEmail() != null) {
-            memberInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
+            membersInfo.updateSubEmail(requestMembersInfoDto.getSubEmail());
         }
 
 
@@ -393,17 +413,17 @@ public class MypageServiceImpl implements MypageService {
             String folderName = "membersProfile"; // 폴더 이름 정의
             String imgUrl = s3Service.uploadFileAndGetUrl(requestMembersInfoDto.getImgUrl(), folderName);
 
-            MembersImgEntity membersImg = memberInfo.getMembersImgEntity();
+            MembersImgEntity membersImg = membersInfo.getMembersImgEntity();
             if (membersImg == null) {
                 membersImg = MembersImgEntity.builder()
                         .url(imgUrl)
-                        .membersInfoEntity(memberInfo)
+                        .membersInfoEntity(membersInfo)
                         .build();
             } else {
                 // 기존 이미지 삭제
                 s3Service.deleteFileFromS3Bucket(membersImg.getUrl(), folderName);
             }
-            membersImg.updateInfo(memberInfo, imgUrl);
+            membersImg.updateInfo(membersInfo, imgUrl);
             membersImgRepository.save(membersImg);
         }
 

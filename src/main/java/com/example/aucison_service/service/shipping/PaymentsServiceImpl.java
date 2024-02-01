@@ -75,10 +75,13 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, String addrName,
-                                                           Optional<Float> bidAmount) {
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
+    public VirtualPaymentResponseDto getVirtualPaymentInfo(Long productsId, MemberDetails principal, Optional<Float> bidAmount) {
         String email = principal.getMember().getEmail();
+
+        ProductsEntity product = productsRepository.findByProductsId(productsId);
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
         if (email.equals(product.getEmail())) {
             throw new AppException(ErrorCode.SELLER_CANNOT_BUY_OWN_PRODUCT);
@@ -89,33 +92,40 @@ public class PaymentsServiceImpl implements PaymentsService {
             case "AUCS":
                 // bidAmount의 값을 추출하고, 값이 없으면 예외를 발생
                 Float actualBidAmount = bidAmount.orElseThrow(() -> new AppException(ErrorCode.INVALID_BIDCOUNT));
-                return getAucsVirtualPaymentInfo(productsId, email, addrName, actualBidAmount);
+                return getAucsVirtualPaymentInfo(productsId, email, actualBidAmount);
             case "SALE":
-                return getSaleVirtualPaymentInfo(productsId, email, addrName);
+                return getSaleVirtualPaymentInfo(productsId, email);
             default:
                 throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
     }
 
-    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email,
-                                                               String addrName) {  //가상 결제(비경매)
+    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email) {  //가상 결제(비경매)
 
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
 
         //product 정보 가져오기
         ProductsEntity product = productsRepository.findByProductsId(productsId);
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
-        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(member);
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         //배송지 정보 가져오기
-        AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
+        AddrInfoResponseDto addresses = getShippingInfo(email);
 
         //credit 정보 가져오기
-        float currentCredit = membersInfoEntity.getCredit();
+        float currentCredit = membersInfo.getCredit();
 
         //등록 가격(비경매) 가져오기
         SaleInfosEntity saleInfosEntity = saleInfosRepository.findByProductsEntity(product);
@@ -132,8 +142,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     }
 
-    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email,
-                                                               String addrName, Float bidAmount) {  //가상 결제(경매)
+    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email, Float bidAmount) {  //가상 결제(경매)
         //가상 결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
         if(!isBeforeAuctionEndDate(productsId, accessTime)) {
@@ -145,23 +154,31 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //product 정보 가져오기
         ProductsEntity product = productsRepository.findByProductsId(productsId);
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
-        MembersEntity membersEntity = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
-        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
-        //bids에서 실시간 가격 정보를 받아옴
+//        //bids에서 실시간 가격 정보를 받아옴
+//        AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
+//        // BidsCode를 사용하여 현재 응찰 정보를 조회합니다.
+//        Bids currentBid = bidsRepository.findByBidsCode(aucsInfo.getBidsCode());
+
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
-        // BidsCode를 사용하여 현재 응찰 정보를 조회합니다.
-        Bids currentBid = bidsRepository.findByBidsCode(aucsInfo.getBidsCode());
-
-        // 현재 응찰 정보가 없는 경우, 시작 가격으로 초기화
-        float nowPrice;
-        if (currentBid != null) {
-            nowPrice = currentBid.getNowPrice();
+        Float nowPrice = null;
+        if (aucsInfo == null) {
+            throw new AppException(ErrorCode.AUCS_PRODUCT_NOT_EXIST);
         } else {
-            nowPrice = aucsInfo.getStartPrice();
+            nowPrice = aucsInfo.getHighestPrice();
         }
 
         // 최소 입찰 금액 및 최대 입찰 금액 계산
@@ -174,13 +191,13 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         //배송지 정보 가져오기
-        AddrInfoResponseDto addresses = getShippingInfo(email, addrName);
+        AddrInfoResponseDto addresses = getShippingInfo(email);
 
         //credit 정보 가져오기
-        float currentCredit = membersInfoEntity.getCredit();
+        float currentCredit = membersInfo.getCredit();
 
         //현재 credit에서 경매 가격을 차감
-        float newCredit = currentCredit - nowPrice;
+        float newCredit = currentCredit - bidAmount;
         validateCredit(newCredit);
 
         float newPrice = bidAmount;   //응찰가
@@ -242,24 +259,29 @@ public class PaymentsServiceImpl implements PaymentsService {
         return builder.build();
     }
 
-    private AddrInfoResponseDto getShippingInfo(String email, String addrName) {  //배송지명으로 배송지 조회
-        MembersEntity membersEntity = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-
-        MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(membersEntity);
-
-        AddressesEntity addressesEntity = addressesRepository.findByMembersInfoEntityAndAddrName(membersInfoEntity, addrName);
-
-        if (addressesEntity == null) {
-            throw new AppException(ErrorCode.SHIPPING_INFO_NOT_FOUND);
+    private AddrInfoResponseDto getShippingInfo(String email) {  //대표 배송지 조회
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
         }
+
+        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
+
+        AddressesEntity addresses = addressesRepository.findByMembersInfoEntityAndIsPrimary(membersInfo, true);
+        if (addresses == null) {
+            throw new AppException(ErrorCode.ADDRESS_NOT_FOUND);
+        }
+
         return AddrInfoResponseDto.builder()
-                .addrName(addressesEntity.getAddrName())
-                .name(addressesEntity.getName())
-                .tel(addressesEntity.getTel())
-                .zipCode(addressesEntity.getZipNum())
-                .addr(addressesEntity.getAddr())
-                .addrDetail(addressesEntity.getAddrDetail())
+                .addrName(addresses.getAddrName())
+                .name(addresses.getName())
+                .tel(addresses.getTel())
+                .zipCode(addresses.getZipNum())
+                .addr(addresses.getAddr())
+                .addrDetail(addresses.getAddrDetail())
                 .build();
     }
 
@@ -268,7 +290,11 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Transactional
     public Long savePayment(MemberDetails principal, PaymentsRequestDto paymentsRequestDto) {    //결제완료
         String email = principal.getMember().getEmail();
+
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
+        if (product == null) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
         if (email.equals(product.getEmail())) {
             throw new AppException(ErrorCode.SELLER_CANNOT_BUY_OWN_PRODUCT);
@@ -361,8 +387,10 @@ public class PaymentsServiceImpl implements PaymentsService {
         // Bids 정보 저장
         saveBidAndBidCount(paymentsRequestDto, email, order);
 
-        // 구매자 credit update
-        //TODO: 판매자 credit update
+        //경매상품 최고가 현재 응찰가로 업데이트
+        aucsInfo.updateHighestPrice(paymentsRequestDto.getPrice());
+
+        // 구매자, 판매자 credit update
         String buyerEmail = email;
         String sellerEmail = product.getEmail();
         updateMemberCredit(buyerEmail, sellerEmail, paymentsRequestDto.getPrice());
@@ -399,9 +427,15 @@ public class PaymentsServiceImpl implements PaymentsService {
     }
 
     private void saveSaleHistory(Orders orders, String email, ProductsEntity product, PaymentsRequestDto paymentsRequestDto) {
-        MembersEntity buyer = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity buyer = membersRepository.findByEmail(email);
+        if (buyer == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
         MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(buyer);
+        if (membersInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
 
         // HistoriesEntity 생성 및 저장
         HistoriesEntity history = HistoriesEntity.builder()
@@ -463,15 +497,21 @@ public class PaymentsServiceImpl implements PaymentsService {
 
                     //credit 정보 가져오기
                     //TODO: 판매자 credit update
-                    MembersEntity member = membersRepository.findByEmail(order.getEmail())
-                            .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
-                    MembersInfoEntity memberInfo = membersInfoRepository.findByMembersEntity(member);
+                    MembersEntity member = membersRepository.findByEmail(order.getEmail());
+                    if (member == null) {
+                        throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+                    }
 
-                    float currentCredit = memberInfo.getCredit();
+                    MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+                    if (membersInfo == null) {
+                        throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+                    }
+
+                    float currentCredit = membersInfo.getCredit();
                     float updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
 
                     // credit 업데이트 요청
-                    memberInfo.updateCredit(updatedCredit);
+                    membersInfo.updateCredit(updatedCredit);
 
                     // 환불 정보 저장
                     Refunds refund = Refunds.builder()
@@ -563,9 +603,16 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     private void updateMemberCredit(String buyerEmail, String sellerEmail, float amount) {
         // 구매자 크레딧 차감
-        MembersEntity buyer = membersRepository.findByEmail(buyerEmail)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity buyer = membersRepository.findByEmail(buyerEmail);
+        if (buyer == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
         MembersInfoEntity buyerInfo = membersInfoRepository.findByMembersEntity(buyer);
+        if (buyerInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
+
         float buyerNewCredit = buyerInfo.getCredit() - amount;
         if (buyerNewCredit < 0) {
             throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
@@ -573,9 +620,16 @@ public class PaymentsServiceImpl implements PaymentsService {
         buyerInfo.updateCredit(buyerNewCredit);
 
         // 판매자 크레딧 증가
-        MembersEntity seller = membersRepository.findByEmail(sellerEmail)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND));
+        MembersEntity seller = membersRepository.findByEmail(sellerEmail);
+        if (seller == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
         MembersInfoEntity sellerInfo = membersInfoRepository.findByMembersEntity(seller);
+        if (sellerInfo == null) {
+            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+        }
+
         float sellerNewCredit = sellerInfo.getCredit() + amount;
         sellerInfo.updateCredit(sellerNewCredit);
     }

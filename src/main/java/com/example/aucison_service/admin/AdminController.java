@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.Member;
 import java.util.Optional;
 
 @RestController
@@ -43,17 +44,17 @@ public class AdminController {
     @GetMapping("/generate-token")
     public ResponseEntity<AuthResponseDto> generateTestToken() {
         // 테스트용 사용자 정보 설정
-        String testEmail = "test3@example.com";
-        String testName = "Test User3";
-        String testNickname = testName + "_nickname3";
+        String testEmail = "buyer@example.com";
+        String testName = "buyer";
+        String testNickname = testName + "_nickname";
         Role testRole = Role.ROLE_CUSTOMER;
 
         // 데이터베이스에서 테스트 사용자 조회
-        Optional<MembersEntity> existingUser = membersRepository.findByEmail(testEmail);
+        MembersEntity existingUser = membersRepository.findByEmail(testEmail);
         MembersEntity user;
         boolean isNewUser = false;
 
-        if (!existingUser.isPresent()) {
+        if (existingUser == null) {
             // 테스트 사용자가 없을 경우, 새로 생성
             isNewUser = true;
             user = MembersEntity.builder()
@@ -65,7 +66,7 @@ public class AdminController {
             membersRepository.save(user);
         } else {
             // 이미 존재하는 사용자인 경우
-            user = existingUser.get();
+            user = existingUser;
         }
 
         // JWT 토큰 생성

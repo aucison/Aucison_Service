@@ -9,7 +9,8 @@ import java.util.List;
 
 @Repository
 public interface AddressesRepository extends JpaRepository<AddressesEntity, Long> {
-    AddressesEntity findByMembersInfoEntityAndAddrName(MembersInfoEntity membersInfoEntity, String addrName);
     List<AddressesEntity> findAllByMembersInfoEntity(MembersInfoEntity membersInfoEntity);
+    AddressesEntity findByMembersInfoEntityAndAddrName(MembersInfoEntity membersInfoEntity, String addrName);
     boolean existsByAddrNameAndMembersInfoEntity(String addrName, MembersInfoEntity membersInfo);
+    AddressesEntity findByMembersInfoEntityAndIsPrimary(MembersInfoEntity membersInfoEntity, boolean isPrimary);
 }

@@ -1,5 +1,7 @@
 package com.example.aucison_service.service.member;
 
+import com.example.aucison_service.exception.AppException;
+import com.example.aucison_service.exception.ErrorCode;
 import com.example.aucison_service.jpa.member.entity.MembersEntity;
 import com.example.aucison_service.jpa.member.repository.MembersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +18,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MembersEntity member = membersRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+        MembersEntity member = membersRepository.findByEmail(username);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 //        return new User(member.getEmail(), "", getAuthorities(member)); // 빈 비밀번호 사용
         return new MemberDetails(member); // MemberDetails 객체를 반환
     }
