@@ -14,6 +14,7 @@ import com.example.aucison_service.jpa.product.repository.*;
 import com.example.aucison_service.jpa.shipping.entity.*;
 import com.example.aucison_service.jpa.shipping.repository.*;
 import com.example.aucison_service.service.member.MemberDetails;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -289,6 +290,9 @@ public class PaymentsServiceImpl implements PaymentsService {
     @Override
     @Transactional
     public Long savePayment(MemberDetails principal, PaymentsRequestDto paymentsRequestDto) {    //결제완료
+        //paymentRequestDto 검증
+        validatePaymentsRequestDto(paymentsRequestDto);
+
         String email = principal.getMember().getEmail();
 
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
@@ -307,6 +311,41 @@ public class PaymentsServiceImpl implements PaymentsService {
                 return saveSalePayment(email, paymentsRequestDto);
             default:
                 throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+    }
+
+    private void validatePaymentsRequestDto(PaymentsRequestDto dto) {
+        // StringUtils.isBlank 체크는 null, 빈 문자열, 공백만 있는 경우를 모두 체크합니다.
+        //내부적 검증이므로(가상결제 조회와 정보가 연동되어야 하기 때문) IllegalArgumentException 표준 예외 사용
+        if (dto.getProductsId() == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
+        if (StringUtils.isBlank(dto.getCategory())) {
+            throw new IllegalArgumentException("Category cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getKind())) {
+            throw new IllegalArgumentException("Kind cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getAddrName())) {
+            throw new IllegalArgumentException("Address Name cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getZipNum())) {
+            throw new IllegalArgumentException("Zip Number cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getAddr())) {
+            throw new IllegalArgumentException("Address cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getAddrDetail())) {
+            throw new IllegalArgumentException("Address Detail cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getName())) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        if (StringUtils.isBlank(dto.getTel())) {
+            throw new IllegalArgumentException("Telephone cannot be null or empty");
+        }
+        if (dto.getPrice() < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
         }
     }
 
