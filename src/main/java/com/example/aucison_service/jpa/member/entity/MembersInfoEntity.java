@@ -30,7 +30,7 @@ public class MembersInfoEntity { // 사용자 추가 정보
     private String subEmail; // 수신 이메일
 
     @OneToOne
-    @JoinColumn(name = "email") // 연관관계 주인
+    @JoinColumn(name = "members_id") // 연관관계 주인
     private MembersEntity membersEntity; // 사용자
 
     @OneToOne(mappedBy = "membersInfoEntity", fetch = FetchType.LAZY) // 양방향 매핑
