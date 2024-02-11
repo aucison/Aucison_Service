@@ -13,6 +13,7 @@ import com.example.aucison_service.jpa.member.repository.AddressesRepository;
 import com.example.aucison_service.jpa.member.repository.MembersInfoRepository;
 import com.example.aucison_service.jpa.member.repository.MembersRepository;
 import com.example.aucison_service.service.member.MemberDetails;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +90,30 @@ public class AddressServiceImpl implements AddressService {
                 .build();
 
         addressesRepository.save(address);
+    }
+
+    private void validateRequestAddressDto(RequestAddressDto dto) {
+        //isPrimary는 타입이 boolean이라 null이 될 수 없으므로 검증 X
+        //외부 API 응답에 사용할 것이므로 AppException 사용
+
+        if (StringUtils.isBlank(dto.getAddrName())) {
+            throw new AppException(ErrorCode.ADDRESS_INVALID_INOUT);
+        }
+        if (StringUtils.isBlank(dto.getName())) {
+            throw new AppException(ErrorCode.ADDRESS_INVALID_INOUT);
+        }
+        if (StringUtils.isBlank(dto.getTel())) {
+            throw new AppException(ErrorCode.ADDRESS_INVALID_INOUT);
+        }
+        if (StringUtils.isBlank(dto.getAddr())) {
+            throw new AppException(ErrorCode.ADDRESS_INVALID_INOUT);
+        }
+        if (StringUtils.isBlank(dto.getZipNum())) {
+            throw new AppException(ErrorCode.ADDRESS_INVALID_INOUT);
+        }
+        if (StringUtils.isBlank(dto.getAddrDetail())) {
+            throw new AppException(ErrorCode.ADDRESS_INVALID_INOUT);
+        }
     }
 
     @Override
