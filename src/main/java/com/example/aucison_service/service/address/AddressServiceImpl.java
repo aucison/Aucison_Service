@@ -39,6 +39,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public void addAddress(MemberDetails principal, RequestAddressDto requestAddressDto) {
+        validateRequestAddressDto(requestAddressDto);
+
         String email = principal.getMember().getEmail();
 
         MembersEntity member = membersRepository.findByEmail(email);
