@@ -43,9 +43,9 @@ public class AdminController {
     @GetMapping("/generate-token")
     public ResponseEntity<AuthResponseDto> generateTestToken() {
         // 테스트용 사용자 정보 설정
-        String testEmail = "test3@example.com";
-        String testName = "Test User3";
-        String testNickname = testName + "_nickname3";
+        String testEmail = "user0212_444@example.com";
+        String testName = "user0212_444";
+        String testNickname = testName + "_nickname";
         Role testRole = Role.ROLE_CUSTOMER;
 
         // 데이터베이스에서 테스트 사용자 조회
