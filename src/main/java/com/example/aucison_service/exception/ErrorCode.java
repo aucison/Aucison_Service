@@ -58,6 +58,7 @@ public enum ErrorCode {
     PRIMARY_ADDRESS_CANNOT_BE_DELETED(HttpStatus.BAD_REQUEST, "대표 배송지는 삭제할 수 없습니다."),
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "주소를 찾을 수 없습니다."),
     ADDRESSES_NOT_FOUND(HttpStatus.NOT_FOUND, "주소 목록을 찾을 수 없습니다."),
+    ADDRESS_INVALID_INOUT(HttpStatus.BAD_REQUEST, "유효하지 않은 주소 형식입니다."),
 
     WISH_NOT_FOUND(HttpStatus.NOT_FOUND, "찜 상품이 아닙니다."),
     DUPLICATE_WISH(HttpStatus.BAD_REQUEST, "이미 찜한 상품입니다.");
