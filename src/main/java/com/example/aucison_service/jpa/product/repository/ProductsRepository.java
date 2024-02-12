@@ -4,6 +4,7 @@ import com.example.aucison_service.jpa.product.entity.ProductsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -14,4 +15,5 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
     ProductsEntity findByProductsId(Long productsId);
 
 
+    List<ProductsEntity> findTop10ByOrderByCreatedDateDesc();
 }
