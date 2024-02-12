@@ -44,6 +44,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -75,6 +78,8 @@ public class ProductServiceImpl implements ProductService{
 
     ElasticsearchOperations elasticsearchOperations;
 
+    KafkaTemplate<String, Object> kafkaTemplate;
+
 
     @Autowired
     public ProductServiceImpl(ProductsRepository productsRepository, SaleInfosRepository sale_infosRepository,
@@ -83,7 +88,7 @@ public class ProductServiceImpl implements ProductService{
                               HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
                               MembersInfoRepository membersInfoRepository,
                               S3Service s3Service,
-                              ElasticsearchOperations elasticsearchOperations){
+                              ElasticsearchOperations elasticsearchOperations, KafkaTemplate<String, Object> kafkaTemplate){
         this.productsRepository=productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
@@ -95,6 +100,7 @@ public class ProductServiceImpl implements ProductService{
         this.membersInfoRepository = membersInfoRepository;
         this.s3Service=s3Service;
         this.elasticsearchOperations = elasticsearchOperations;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -259,6 +265,16 @@ public class ProductServiceImpl implements ProductService{
     }
 
 
+    private void publishProductRegisteredEvent(ProductsEntity product) {
+        // 상품 등록 이벤트 메시지 생성 (예시)
+        Map<String, Object> message = new HashMap<>();
+        message.put("productId", product.getProductsId());
+        message.put("productName", product.getName());
+
+        // Kafka 토픽으로 메시지 발행
+        kafkaTemplate.send("productRegisteredTopic", message);
+    }
+
     @Override
     @Transactional
     public void registerProduct(ProductRegisterRequestDto dto,@AuthenticationPrincipal MemberDetails principal) {
@@ -365,6 +381,10 @@ public class ProductServiceImpl implements ProductService{
                     .build();
             historiesImgRepository.save(historyImg);
         }
+
+        // 상품 등록 성공 후 Kafka 이벤트 발행
+        publishProductRegisteredEvent(product);
+
 
     }
 
