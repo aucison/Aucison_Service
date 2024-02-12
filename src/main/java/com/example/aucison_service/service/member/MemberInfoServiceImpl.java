@@ -25,8 +25,11 @@ public class MemberInfoServiceImpl implements MemberInfoService{
     @Transactional
     public void saveMemberAdditionalInfo(MemberDetails principal, MemberAdditionalInfoRequestDto requestDto) {
         String email = principal.getMember().getEmail();
-        MembersEntity member = membersRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
+        MembersEntity member = membersRepository.findByEmail(email);
+        if (member == null) {
+            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+        }
 
         // 회원의 닉네임 업데이트
         member.updateNickname(requestDto.getNickName());

@@ -28,9 +28,8 @@ public class PaymentsController {
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<VirtualPaymentResponseDto> getVirtualPaymentInfo(@PathVariable Long productsId,
                                                                         @AuthenticationPrincipal MemberDetails principal,
-                                                                        @RequestParam String addrName,
                                                                         @RequestParam Optional<Float> bidAmount) {
-        return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, addrName, bidAmount));
+        return ApiResponse.createSuccess(paymentsService.getVirtualPaymentInfo(productsId, principal, bidAmount));
     }
 
 

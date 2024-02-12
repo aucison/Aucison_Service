@@ -105,13 +105,13 @@ public class GoogleAuthService {
         String name = (String) userInfo.get("name");
 
         // 사용자가 데이터베이스에 존재하는지 확인합니다.
-        Optional<MembersEntity> existingUser = membersRepository.findByEmail(email);
+        MembersEntity member = membersRepository.findByEmail(email);
 
         boolean isNewUser = false;
         MembersEntity user;
-        if (existingUser.isPresent()) {
+        if (member != null) {
             // 이미 존재하는 사용자인 경우, 정보 업데이트
-            user = existingUser.get();
+            user = member;
             user.updateFromGoogle(userInfo); // 사용자 정보 업데이트 메소드
         } else {
             isNewUser = true; // 새 사용자임을 표시

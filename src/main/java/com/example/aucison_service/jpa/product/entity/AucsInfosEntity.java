@@ -55,4 +55,10 @@ public class AucsInfosEntity extends BaseTimeEntity {
             this.end = this.end.plusMinutes(minutes);
         }
     }
+
+    public void updateHighestPrice(float highestPrice) {
+        if (highestPrice != 0.0f) {
+            this.highestPrice = highestPrice;
+        }
+    }
 }
