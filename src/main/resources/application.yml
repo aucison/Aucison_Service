@@ -1,4 +1,15 @@
 spring:
+  kafka:
+    bootstrap-servers: 13.125.185.127:9092 #Kafka 서버 주소
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: my-group # 컨슈머 그룹 ID
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 #  profiles:
 #    active: test  #로컬 테스트용
   elasticsearch:
