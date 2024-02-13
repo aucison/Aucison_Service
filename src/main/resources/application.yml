@@ -10,8 +10,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-#  profiles:
-#    active: test  #로컬 테스트용
+  profiles:
+    active: test  #로컬 테스트용
   elasticsearch:
     uris: "localhost:9200"
   #    username: elastic  # Elasticsearch 사용자 이름
