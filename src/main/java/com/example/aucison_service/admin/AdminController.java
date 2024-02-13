@@ -47,6 +47,7 @@ public class AdminController {
 
         String testEmail = "user0212_111@example.com";
         String testName = "user0212_111";
+
         String testNickname = testName + "_nickname";
         Role testRole = Role.ROLE_CUSTOMER;
 
