@@ -5,6 +5,7 @@ package com.example.aucison_service.controller;
 import com.example.aucison_service.dto.ApiResponse;
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
+import com.example.aucison_service.dto.product.ProductAllResponseDto;
 import com.example.aucison_service.dto.product.ProductDetailResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
 import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
@@ -14,6 +15,10 @@ import com.example.aucison_service.service.product.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -115,4 +120,14 @@ public class ProductController {
         return ApiResponse.createSuccess(productService.updateOnlyCost(productId, principal));
     }
 
+
+    //전체 상품 조회
+    @GetMapping("/all/list")
+    public ApiResponse<Page<ProductAllResponseDto>> getAllProducts(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductAllResponseDto> products = productService.getAllProducts(pageable);
+        return ApiResponse.createSuccess(products);
+    }
 }

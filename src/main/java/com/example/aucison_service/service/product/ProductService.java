@@ -3,12 +3,11 @@ package com.example.aucison_service.service.product;
 
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
-import com.example.aucison_service.dto.product.ProductDetailResponseDto;
-import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
-import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
-import com.example.aucison_service.dto.product.UpdateOnlyCostResponseDto;
+import com.example.aucison_service.dto.product.*;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
@@ -34,5 +33,7 @@ public interface ProductService {
 
     UpdateOnlyCostResponseDto updateOnlyCost(Long productId, @AuthenticationPrincipal MemberDetails principal);
 
+    // 전체 상품 조회 with Pageable
+    Page<ProductAllResponseDto> getAllProducts(Pageable pageable);
 
 }
