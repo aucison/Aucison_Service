@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Table(name = "aucs_infos")
-public class AucsInfosEntity extends BaseTimeEntity {
+public class AucsInfosEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
