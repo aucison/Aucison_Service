@@ -2,8 +2,6 @@ package com.example.aucison_service.service.member;
 
 
 import com.example.aucison_service.dto.mypage.*;
-import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.enums.OStatusEnum;
 import com.example.aucison_service.enums.OrderType;
 import com.example.aucison_service.exception.AppException;
 import com.example.aucison_service.exception.ErrorCode;
@@ -11,11 +9,9 @@ import com.example.aucison_service.jpa.member.entity.*;
 import com.example.aucison_service.jpa.member.repository.*;
 import com.example.aucison_service.jpa.product.entity.ProductsEntity;
 import com.example.aucison_service.jpa.product.repository.ProductsRepository;
-import com.example.aucison_service.jpa.shipping.entity.AuctionEndDatesEntity;
 import com.example.aucison_service.jpa.shipping.entity.Bids;
 import com.example.aucison_service.jpa.shipping.entity.Deliveries;
 import com.example.aucison_service.jpa.shipping.entity.Orders;
-import com.example.aucison_service.jpa.shipping.repository.AuctionEndDatesRepository;
 import com.example.aucison_service.jpa.shipping.repository.BidsRepository;
 import com.example.aucison_service.jpa.shipping.repository.DeliveriesRepository;
 import com.example.aucison_service.jpa.shipping.repository.OrdersRepository;
@@ -38,7 +34,6 @@ public class MypageServiceImpl implements MypageService {
     private final MembersInfoRepository membersInfoRepository;
     private final MembersRepository membersRepository;
     private final OrdersRepository ordersRepository;
-    private final AuctionEndDatesRepository auctionEndDatesRepository;
     private  final DeliveriesRepository deliveriesRepository;
     private final BidsRepository bidsRepository;
     private final ProductsRepository productsRepository;
@@ -49,7 +44,7 @@ public class MypageServiceImpl implements MypageService {
     @Autowired
     public MypageServiceImpl(HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
                              MembersInfoRepository membersInfoRepository, MembersRepository membersRepository,
-                             OrdersRepository ordersRepository, AuctionEndDatesRepository auctionEndDatesRepository,
+                             OrdersRepository ordersRepository,
                              DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
                              ProductsRepository productsRepository, AddressesRepository addressesRepository,
                              MembersImgRepository membersImgRepository, S3Service s3Service) {
@@ -58,7 +53,6 @@ public class MypageServiceImpl implements MypageService {
         this.membersInfoRepository = membersInfoRepository;
         this.membersRepository = membersRepository;
         this.ordersRepository = ordersRepository;
-        this.auctionEndDatesRepository = auctionEndDatesRepository;
         this.deliveriesRepository = deliveriesRepository;
         this.bidsRepository = bidsRepository;
         this.productsRepository = productsRepository;
