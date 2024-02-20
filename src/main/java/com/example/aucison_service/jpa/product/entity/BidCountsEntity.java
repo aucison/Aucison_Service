@@ -16,10 +16,10 @@ public class BidCountsEntity {
     @Column(name ="bid_counts_id")
     private Long bidCountsId;
 
-    @Column(name = "products_id")
+    @Column(name = "products_id", nullable = false)
     private Long productsId;    //일부로 연관관계 없음, products 엔터티의 productsId와 동일
 
-    @Column(name = "tot_cnt")
+    @Column(name = "tot_cnt", nullable = false)
     private int totCnt; //입찰자 수
 
     @Builder

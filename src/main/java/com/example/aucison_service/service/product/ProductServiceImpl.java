@@ -5,10 +5,7 @@ package com.example.aucison_service.service.product;
 
 import com.example.aucison_service.dto.aucs_sale.AucsProductResponseDto;
 import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
-import com.example.aucison_service.dto.product.ProductDetailResponseDto;
-import com.example.aucison_service.dto.product.ProductRegisterFinshResponseDto;
-import com.example.aucison_service.dto.product.ProductRegisterRequestDto;
-import com.example.aucison_service.dto.product.UpdateOnlyCostResponseDto;
+import com.example.aucison_service.dto.product.*;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.elastic.ProductsDocument;
 import com.example.aucison_service.enums.Category;
@@ -36,6 +33,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -409,6 +407,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
 
+
     @Override
     public ProductRegisterFinshResponseDto finshReisterProduct(Long productId, @AuthenticationPrincipal MemberDetails principal) {
         //상품등록 완료 후 확인 페이지 -> 솔직히 프론트 처리가 더 이상적일듯, 이전 페이지 내용 가져오면됨
@@ -555,8 +554,42 @@ public class ProductServiceImpl implements ProductService{
         }
 
         return dto.build();
-
-        //게시판 정보들은 따로 보내준다
+        //
+        //        //게시판 정보들은 따로 보내준다
     }
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductAllResponseDto> getAllProducts(Pageable pageable) {
+        return productsRepository.findAll(pageable).map(product -> {
+            Long wishCount = wishesRepository.countByProductId(product.getProductsId());
+            BidCountsEntity bidCountsEntity = bidCountsRepository.findByProductsId(product.getProductsId());
+            String firstImageUrl = product.getImages().stream()
+                    .findFirst()
+                    .map(ProductImgEntity::getUrl)
+                    .orElse(null); // 첫 번째 이미지 URL 가져오기
+
+            ProductAllResponseDto.ProductAllResponseDtoBuilder builder = ProductAllResponseDto.builder()
+                    .productsId(product.getProductsId())
+                    .name(product.getName())
+                    .pStatus(product.getPStatus())
+                    .imageUrl(firstImageUrl)
+                    .wishCount(wishCount)
+                    .totCnt(bidCountsEntity != null ? bidCountsEntity.getTotCnt() : 0);
+
+            // 경매 상품과 비경매 상품 구분하여 처리
+            if ("AUCS".equals(product.getCategory())) {
+                AucsInfosEntity aucInfo = product.getAucsInfosEntity();
+                builder.startPrice(aucInfo.getStartPrice())
+                        .end(aucInfo.getEnd())
+                        .bidsCode(aucInfo.getBidsCode());
+            } else if ("SALE".equals(product.getCategory())) {
+                SaleInfosEntity saleInfo = product.getSaleInfosEntity();
+                builder.price(saleInfo.getPrice());
+            }
+
+            return builder.build();
+        });
+    }
 }
