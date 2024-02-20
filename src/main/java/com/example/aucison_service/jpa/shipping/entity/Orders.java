@@ -19,7 +19,7 @@ public class Orders extends BaseTimeEntity {   //주문 정보
     private Long ordersId; //PK, 주문번호
     @Column(name = "products_id", nullable = false)
     private Long productsId;    //상품 id
-    @Column(name = "members_code", nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;   //구매자 이메일
 
     @Column(name = "o_status", nullable = false)
