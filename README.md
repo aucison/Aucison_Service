@@ -12,8 +12,8 @@
 
 ## 🚀 배포 주소
 
-> **개발 버전** : [https://aucison.shop/](https://aucison.shop/) <br>
-> **백엔드 서버** : [https://aucison.shop:9876/](https://aucison.shop:9876/)<br>
+> **개발 버전** : 
+> **백엔드 서버** : 
 
 ## 🖥️ 프로젝트 소개
 중고 경매 사이트입니다. <!--추가할 내용 의논-->
@@ -24,7 +24,7 @@
 
 ### 🧑‍🤝‍🧑 멤버구성
 <!--깃허브 링크 달아주기, 담당 서비스 더 자세히 적으면 좋을듯-->
- - 팀장  : 김태현 - 기획 및 백엔드 개발
+ - 팀장  : [김태현](https://github.com/hotcoa922) - 기획 및 백엔드 개발
  - 팀원1 : [오승미](https://github.com/seungmio) - 백엔드 개발
  - 팀원2 : 황동현 - 프론트 개발
  - 팀원3 : 손민재 - 프론트 개발
@@ -34,18 +34,40 @@
 <!--추가할 내용 의논-->
 ## Stacks 🐈
 
-### Environment
+### 개발 환경
 ![Intellij IDEA](https://img.shields.io/badge/intellijidea-000000?style=for-the-badge&logo=intellijidea&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
 ![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)                  
+Java 17 </br>
+IntelliJ </br>
+Ubuntu 22.04 </br>
+Spring Boot 3.1.4 </br>
 
-### Development
-![Java](https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white)
+### 사용 기술
+Kafka </br>
+ElasticSearch </br>
+Docker </br>
+AWS EC2, RDS, S3 </br>
+OAuth2.0 & JWT </br>
+HTTPS </br>
+Spring Security </br>
+GitHub Actions </br>
+Amazon EC2 Auto Scaling </br>
+AWS CodeDeploy </br>
+MySQL </br>
+JPA </br>
 
-### Communication
+### 보안 기술
+JWT  </br>
+HTTPS </br>
+
+### 협업 도구
 ![Jira](https://img.shields.io/badge/jira-0052CC?style=for-the-badge&logo=jira&logoColor=white)
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white)
 ![Discord](https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+
+### 문서화 도구
+Postman
 
 ---
 <!--추가할 내용 의논-->
@@ -73,132 +95,206 @@
 ## 아키텍쳐
 
 ### 디렉토리 구조
-<!--
-```bash
-├── README.md
-├── package-lock.json
-├── package.json
-├── strapi-backend : 
-│   ├── README.md
-│   ├── api : db model, api 관련 정보 폴더
-│   │   ├── about
-│   │   ├── course
-│   │   └── lecture
-│   ├── config : 서버, 데이터베이스 관련 정보 폴더
-│   │   ├── database.js
-│   │   ├── env : 배포 환경(NODE_ENV = production) 일 때 설정 정보 폴더
-│   │   ├── functions : 프로젝트에서 실행되는 함수 관련 정보 폴더
-│   │   └── server.js
-│   ├── extensions
-│   │   └── users-permissions : 권한 정보
-│   ├── favicon.ico
-│   ├── package-lock.json
-│   ├── package.json
-│   └── public
-│       ├── robots.txt
-│       └── uploads : 강의 별 사진
-└── voluntain-app : 프론트엔드
-    ├── README.md
-    ├── components
-    │   ├── CourseCard.js
-    │   ├── Footer.js
-    │   ├── LectureCards.js
-    │   ├── MainBanner.js : 메인 페이지에 있는 남색 배너 컴포넌트, 커뮤니티 이름과 슬로건을 포함.
-    │   ├── MainCard.js
-    │   ├── MainCookieCard.js
-    │   ├── NavigationBar.js : 네비게이션 바 컴포넌트, _app.js에서 공통으로 전체 페이지에 포함됨.
-    │   ├── RecentLecture.js
-    │   └── useWindowSize.js
-    ├── config
-    │   └── next.config.js
-    ├── lib
-    │   ├── context.js
-    │   └── ga
-    ├── next.config.js
-    ├── package-lock.json
-    ├── package.json
-    ├── pages
-    │   ├── _app.js
-    │   ├── _document.js
-    │   ├── about.js
-    │   ├── course
-    │   ├── index.js
-    │   ├── lecture
-    │   ├── newcourse
-    │   ├── question.js
-    │   └── setting.js
-    ├── public
-    │   ├── favicon.ico
-    │   └── logo_about.png
-    └── styles
-        └── Home.module.css
-
-```
--->
-
-<!--
-```bash
-├── README.md : 리드미 파일
-│
-├── strapi-backend/ : 백엔드
-│   ├── api/ : db model, api 관련 정보 폴더
-│   │   └── [table 이름] : database table 별로 분리되는 api 폴더 (table 구조, 해당 table 관련 api 정보 저장)
-│   │       ├── Config/routes.json : api 설정 파일 (api request에 따른 handler 지정)
-│   │       ├── Controllers/ [table 이름].js : api controller 커스텀 파일
-│   │       ├── Models : db model 관련 정보 폴더
-│   │       │   ├── [table 이름].js : (사용 X) api 커스텀 파일
-│   │       │   └── [table 이름].settings.json : model 정보 파일 (field 정보)
-│   │       └─── Services/ course.js : (사용 X) api 커스텀 파일
-│   │ 
-│   ├── config/ : 서버, 데이터베이스 관련 정보 폴더
-│   │   ├── Env/production : 배포 환경(NODE_ENV = production) 일 때 설정 정보 폴더
-│   │   │   └── database.js : production 환경에서 database 설정 파일
-│   │   ├── Functions : 프로젝트에서 실행되는 함수 관련 정보 폴더
-│   │   │   │   ├── responses : (사용 X) 커스텀한 응답 저장 폴더
-│   │   │   │   ├── bootstrap.js : 어플리케이션 시작 시 실행되는 코드 파일
-│   │   │   │   └── cron.js : (사용 X) cron task 관련 파일
-│   │   ├── database.js : 기본 개발 환경(NODE_ENV = development)에서 database 설정 파일
-│   │   └── server.js : 서버 설정 정보 파일
-│   │  
-│   ├── extensions/
-│   │   └── users-permissions/config/ : 권한 정보
-│   │ 
-│   └── public/
-│       └── uploads/ : 강의 별 사진
-│
-└── voluntain-app/ : 프론트엔드
-    ├── components/
-    │   ├── NavigationBar.js : 네비게이션 바 컴포넌트, _app.js에서 공통으로 전체 페이지에 포함됨.
-    │   ├── MainBanner.js : 메인 페이지에 있는 남색 배너 컴포넌트, 커뮤니티 이름과 슬로건을 포함.
-    │   ├── RecentLecture.js : 사용자가 시청 정보(쿠키)에 따라, 현재/다음 강의를 나타내는 컴포넌트 [호출: MainCookieCard]
-    │   ├── MainCookieCard.js : 상위 RecentLecture 컴포넌트에서 전달받은 props를 나타내는 레이아웃 컴포넌트.
-    │   ├── MainCard.js : 현재 등록된 course 정보를 백엔드에서 받아서 카드로 나타내는 컴포넌트 [호출: CourseCard]
-    │   └── CourseCard.js : 상위 MainCard 컴포넌트에서 전달받은 props를 나타내는 레이아웃 컴포넌트
-    │
-    ├── config/
-    │   └── next.config.js
-    │
-    ├── lib/
-    │   └── ga/
-    │   │   └── index.js
-    │   └── context.js
-    │
-    ├── pages/
-    │   ├── courses/
-    │   │   └── [id].js : 강의 페이지
-    │   ├── _app.js : Next.js에서 전체 컴포넌트 구조를 결정, 공통 컴포넌트(navbar, footer)가 선언되도록 customizing 됨.
-    │   ├── _document.js : Next.js에서 전체 html 문서의 구조를 결정, lang 속성과 meta tag가 customizing 됨.
-    │   ├── about.js : 단체 소개 페이지
-    │   ├── index.js : 메인 페이지
-    │   ├── question.js : Q&A 페이지
-    │   └── setting.js : 쿠키, 구글 애널리틱스 정보 수집 정책 페이지
-    │
-    ├── public/
-    │   ├── favicon.ico : 네비게이션바 이미지
-    │   └── logo_about.png : about 페이지 로고 이미지
-    │
-    └── styles/
-        └── Home.module.css
-
-```
--->
+main 
+    java 
+        com 
+            example 
+                aucison_service 
+                    AucisonServiceApplication.java
+                    BaseTimeEntity.java
+                    admin 
+                        AdminController.java
+                    config 
+                        AppConfig.java
+                        CorsConfig.java
+                        ElasticsearchConfig.java
+                        RedisConfig.java
+                        S3Config.java
+                    controller 
+                        AddressController.java
+                        AuthController.java
+                        BoardController.java
+                        CreditController.java
+                        HomeController.java
+                        InquiryController.java
+                        MypageController.java
+                        PaymentsController.java
+                        ProductController.java
+                        WishController.java
+                    dto 
+                        ApiResponse.java
+                        aucs_sale 
+                            AucsProductResponseDto.java
+                            SaleProductResponseDto.java
+                        auth 
+                            AuthResponseDto.java
+                            GoogleTokenRequestDto.java
+                            GoogleTokenResponseDto.java
+                            MemberAdditionalInfoRequestDto.java
+                            MemberDto.java
+                            MemberUpdateDto.java
+                        board 
+                            CommentCRUDResponseDto.java
+                            CommentListResponseDto.java
+                            CommentRegistRequestDto.java
+                            CommentUpdateRequestDto.java
+                            PostCRUDResponseDto.java
+                            PostListResponseDto.java
+                            PostRegistRequestDto.java
+                            PostUpdateRequestDto.java
+                        deliveries 
+                            DeliveriesCreateDto.java
+                            DeliveriesResponseDto.java
+                        home 
+                            HomeResponseDto.java
+                            ProductMainResponseDto.java
+                        inquiry 
+                            InquiryRequestDto.java
+                            InquiryResponseDto.java
+                        mypage 
+                            RequestAddressDto.java
+                            RequestMembersInfoDto.java
+                            RequestUpdateAddressDto.java
+                            ResponseAddressDto.java
+                            ResponseBidsHistoryDto.java
+                            ResponseMemberProfileDto.java
+                            ResponseOrderDetailsDto.java
+                            ResponseOrderHistoryDto.java
+                            ResponseSellHistoryDto.java
+                        orders 
+                            OrdersCreateDto.java
+                            OrdersResponseDto.java
+                        payments 
+                            AddrInfoResponseDto.java
+                            PaymentsRequestDto.java
+                            VirtualPaymentResponseDto.java
+                        product 
+                            ProductAllResponseDto.java
+                            ProductDetailResponseDto.java
+                            ProductRegisterFinshResponseDto.java
+                            ProductRegisterRequestDto.java
+                            UpdateOnlyCostResponseDto.java
+                        search 
+                            ProductSearchRequestDto.java
+                            ProductSearchResponseDto.java
+                        wish 
+                            ProductWishCountDto.java
+                            WishRequestDto.java
+                            WishResponseDto.java
+                            WishSimpleResponseDto.java
+                    elastic 
+                        ProductsDocument.java
+                        ProductsDocumentRepository.java
+                        ProductsIndexService.java
+                    enums 
+                        Category.java
+                        Kind.java
+                        OrderType.java
+                        OStatusEnum.java
+                        PageType.java
+                        PStatusEnum.java
+                        QStatusEnum.java
+                        Role.java
+                    exception 
+                        AppException.java
+                        ErrorCode.java
+                    jpa 
+                        member 
+                            entity 
+                                AddressesEntity.java
+                                HistoriesEntity.java
+                                HistoriesImgEntity.java
+                                InquirysEntity.java
+                                MembersEntity.java
+                                MembersImgEntity.java
+                                MembersInfoEntity.java
+                                WishesEntity.java
+                            repository 
+                                AddressesRepository.java
+                                HistoriesImgRepository.java
+                                HistoriesRepository.java
+                                InquirysRepository.java
+                                MembersImgRepository.java
+                                MembersInfoRepository.java
+                                MembersRepository.java
+                                WishesRepository.java
+                        product 
+                            entity 
+                                AucsInfosEntity.java
+                                BidCountsEntity.java
+                                CommentsEntity.java
+                                PostsEntity.java
+                                ProductImgEntity.java
+                                ProductsEntity.java
+                                SaleInfosEntity.java
+                            repository 
+                                AucsInfosRepository.java
+                                BidCountsRepository.java
+                                CommentsRepository.java
+                                PostsRepository.java
+                                ProductImgRepository.java
+                                ProductsRepository.java
+                                SaleInfosRepository.java
+                        shipping 
+                            entity 
+                                Bids.java
+                                Deliveries.java
+                                Orders.java
+                                PageAccessLogs.java
+                                Payments.java
+                                Refunds.java
+                            repository 
+                                BidsRepository.java
+                                DeliveriesRepository.java
+                                OrdersRepository.java
+                                PageAccessLogsRepository.java
+                                PaymentsRepository.java
+                                RefundsRepository.java
+                    kafka 
+                        KafkaConsumerService.java
+                        config 
+                            KafkaProducerConfig.java
+                    security 
+                        JwtAuthenticationFilter.java
+                        JwtAuthenticationProvider.java
+                        JwtTokenProvider.java
+                        SecurityConfig.java
+                    service 
+                        HomeService.java
+                        HomeServiceImpl.java
+                        address 
+                            AddressService.java
+                            AddressServiceImpl.java
+                        hidden 
+                            CreditService.java
+                            CreditServiceImpl.java
+                        member 
+                            GoogleAuthService.java
+                            InquiryService.java
+                            InquiryServiceImpl.java
+                            MemberDetails.java
+                            MemberInfoService.java
+                            MemberInfoServiceImpl.java
+                            MypageService.java
+                            MypageServiceImpl.java
+                            UserDetailsServiceImpl.java
+                            WishService.java
+                            WishServiceImpl.java
+                        product 
+                            BoardService.java
+                            BoardServiceImpl.java
+                            ProductService.java
+                            ProductServiceImpl.java
+                        s3 
+                            S3Service.java
+                        shipping 
+                            PaymentsService.java
+                            PaymentsServiceImpl.java
+                    util 
+    resources 
+        application.yml
+        application-aws.yml
+        application-google.yml
+        application-https.yml
+        application-test.yml
+        keystore.p12
