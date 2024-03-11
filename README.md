@@ -95,206 +95,208 @@ Postman
 ## 아키텍쳐
 
 ### 디렉토리 구조
-main 
-    java 
-        com 
-            example 
-                aucison_service 
-                    AucisonServiceApplication.java
-                    BaseTimeEntity.java
-                    admin 
-                        AdminController.java
-                    config 
-                        AppConfig.java
-                        CorsConfig.java
-                        ElasticsearchConfig.java
-                        RedisConfig.java
-                        S3Config.java
-                    controller 
-                        AddressController.java
-                        AuthController.java
-                        BoardController.java
-                        CreditController.java
-                        HomeController.java
-                        InquiryController.java
-                        MypageController.java
-                        PaymentsController.java
-                        ProductController.java
-                        WishController.java
-                    dto 
-                        ApiResponse.java
-                        aucs_sale 
-                            AucsProductResponseDto.java
-                            SaleProductResponseDto.java
-                        auth 
-                            AuthResponseDto.java
-                            GoogleTokenRequestDto.java
-                            GoogleTokenResponseDto.java
-                            MemberAdditionalInfoRequestDto.java
-                            MemberDto.java
-                            MemberUpdateDto.java
-                        board 
-                            CommentCRUDResponseDto.java
-                            CommentListResponseDto.java
-                            CommentRegistRequestDto.java
-                            CommentUpdateRequestDto.java
-                            PostCRUDResponseDto.java
-                            PostListResponseDto.java
-                            PostRegistRequestDto.java
-                            PostUpdateRequestDto.java
-                        deliveries 
-                            DeliveriesCreateDto.java
-                            DeliveriesResponseDto.java
-                        home 
-                            HomeResponseDto.java
-                            ProductMainResponseDto.java
-                        inquiry 
-                            InquiryRequestDto.java
-                            InquiryResponseDto.java
-                        mypage 
-                            RequestAddressDto.java
-                            RequestMembersInfoDto.java
-                            RequestUpdateAddressDto.java
-                            ResponseAddressDto.java
-                            ResponseBidsHistoryDto.java
-                            ResponseMemberProfileDto.java
-                            ResponseOrderDetailsDto.java
-                            ResponseOrderHistoryDto.java
-                            ResponseSellHistoryDto.java
-                        orders 
-                            OrdersCreateDto.java
-                            OrdersResponseDto.java
-                        payments 
-                            AddrInfoResponseDto.java
-                            PaymentsRequestDto.java
-                            VirtualPaymentResponseDto.java
-                        product 
-                            ProductAllResponseDto.java
-                            ProductDetailResponseDto.java
-                            ProductRegisterFinshResponseDto.java
-                            ProductRegisterRequestDto.java
-                            UpdateOnlyCostResponseDto.java
-                        search 
-                            ProductSearchRequestDto.java
-                            ProductSearchResponseDto.java
-                        wish 
-                            ProductWishCountDto.java
-                            WishRequestDto.java
-                            WishResponseDto.java
-                            WishSimpleResponseDto.java
-                    elastic 
-                        ProductsDocument.java
-                        ProductsDocumentRepository.java
-                        ProductsIndexService.java
-                    enums 
-                        Category.java
-                        Kind.java
-                        OrderType.java
-                        OStatusEnum.java
-                        PageType.java
-                        PStatusEnum.java
-                        QStatusEnum.java
-                        Role.java
-                    exception 
-                        AppException.java
-                        ErrorCode.java
-                    jpa 
-                        member 
-                            entity 
-                                AddressesEntity.java
-                                HistoriesEntity.java
-                                HistoriesImgEntity.java
-                                InquirysEntity.java
-                                MembersEntity.java
-                                MembersImgEntity.java
-                                MembersInfoEntity.java
-                                WishesEntity.java
-                            repository 
-                                AddressesRepository.java
-                                HistoriesImgRepository.java
-                                HistoriesRepository.java
-                                InquirysRepository.java
-                                MembersImgRepository.java
-                                MembersInfoRepository.java
-                                MembersRepository.java
-                                WishesRepository.java
-                        product 
-                            entity 
-                                AucsInfosEntity.java
-                                BidCountsEntity.java
-                                CommentsEntity.java
-                                PostsEntity.java
-                                ProductImgEntity.java
-                                ProductsEntity.java
-                                SaleInfosEntity.java
-                            repository 
-                                AucsInfosRepository.java
-                                BidCountsRepository.java
-                                CommentsRepository.java
-                                PostsRepository.java
-                                ProductImgRepository.java
-                                ProductsRepository.java
-                                SaleInfosRepository.java
-                        shipping 
-                            entity 
-                                Bids.java
-                                Deliveries.java
-                                Orders.java
-                                PageAccessLogs.java
-                                Payments.java
-                                Refunds.java
-                            repository 
-                                BidsRepository.java
-                                DeliveriesRepository.java
-                                OrdersRepository.java
-                                PageAccessLogsRepository.java
-                                PaymentsRepository.java
-                                RefundsRepository.java
-                    kafka 
-                        KafkaConsumerService.java
-                        config 
-                            KafkaProducerConfig.java
-                    security 
-                        JwtAuthenticationFilter.java
-                        JwtAuthenticationProvider.java
-                        JwtTokenProvider.java
-                        SecurityConfig.java
-                    service 
-                        HomeService.java
-                        HomeServiceImpl.java
-                        address 
-                            AddressService.java
-                            AddressServiceImpl.java
-                        hidden 
-                            CreditService.java
-                            CreditServiceImpl.java
-                        member 
-                            GoogleAuthService.java
-                            InquiryService.java
-                            InquiryServiceImpl.java
-                            MemberDetails.java
-                            MemberInfoService.java
-                            MemberInfoServiceImpl.java
-                            MypageService.java
-                            MypageServiceImpl.java
-                            UserDetailsServiceImpl.java
-                            WishService.java
-                            WishServiceImpl.java
-                        product 
-                            BoardService.java
-                            BoardServiceImpl.java
-                            ProductService.java
-                            ProductServiceImpl.java
-                        s3 
-                            S3Service.java
-                        shipping 
-                            PaymentsService.java
-                            PaymentsServiceImpl.java
-                    util 
-    resources 
-        application.yml
-        application-aws.yml
-        application-google.yml
-        application-https.yml
-        application-test.yml
-        keystore.p12
+```
+main
+└── java
+└── com
+└── example
+└── aucison_service
+├── AucisonServiceApplication.java
+├── BaseTimeEntity.java
+├── admin
+│ └── AdminController.java
+├── config
+│ ├── AppConfig.java
+│ ├── CorsConfig.java
+│ ├── ElasticsearchConfig.java
+│ ├── RedisConfig.java
+│ └── S3Config.java
+├── controller
+│ ├── AddressController.java
+│ ├── AuthController.java
+│ ├── BoardController.java
+│ ├── CreditController.java
+│ ├── HomeController.java
+│ ├── InquiryController.java
+│ ├── MypageController.java
+│ ├── PaymentsController.java
+│ ├── ProductController.java
+│ └── WishController.java
+├── dto
+│ ├── ApiResponse.java
+│ ├── aucs_sale
+│ │ ├── AucsProductResponseDto.java
+│ │ └── SaleProductResponseDto.java
+│ ├── auth
+│ │ ├── AuthResponseDto.java
+│ │ ├── GoogleTokenRequestDto.java
+│ │ ├── GoogleTokenResponseDto.java
+│ │ ├── MemberAdditionalInfoRequestDto.java
+│ │ ├── MemberDto.java
+│ │ └── MemberUpdateDto.java
+│ ├── board
+│ │ ├── CommentCRUDResponseDto.java
+│ │ ├── CommentListResponseDto.java
+│ │ ├── CommentRegistRequestDto.java
+│ │ ├── CommentUpdateRequestDto.java
+│ │ ├── PostCRUDResponseDto.java
+│ │ ├── PostListResponseDto.java
+│ │ ├── PostRegistRequestDto.java
+│ │ └── PostUpdateRequestDto.java
+│ ├── deliveries
+│ │ ├── DeliveriesCreateDto.java
+│ │ └── DeliveriesResponseDto.java
+│ ├── home
+│ │ ├── HomeResponseDto.java
+│ │ └── ProductMainResponseDto.java
+│ ├── inquiry
+│ │ ├── InquiryRequestDto.java
+│ │ └── InquiryResponseDto.java
+│ ├── mypage
+│ │ ├── RequestAddressDto.java
+│ │ ├── RequestMembersInfoDto.java
+│ │ ├── RequestUpdateAddressDto.java
+│ │ ├── ResponseAddressDto.java
+│ │ ├── ResponseBidsHistoryDto.java
+│ │ ├── ResponseMemberProfileDto.java
+│ │ ├── ResponseOrderDetailsDto.java
+│ │ ├── ResponseOrderHistoryDto.java
+│ │ └── ResponseSellHistoryDto.java
+│ ├── orders
+│ │ ├── OrdersCreateDto.java
+│ │ └── OrdersResponseDto.java
+│ ├── payments
+│ │ ├── AddrInfoResponseDto.java
+│ │ ├── PaymentsRequestDto.java
+│ │ └── VirtualPaymentResponseDto.java
+│ ├── product
+│ │ ├── ProductAllResponseDto.java
+│ │ ├── ProductDetailResponseDto.java
+│ │ ├── ProductRegisterFinshResponseDto.java
+│ │ ├── ProductRegisterRequestDto.java
+│ │ └── UpdateOnlyCostResponseDto.java
+│ ├── search
+│ │ ├── ProductSearchRequestDto.java
+│ │ └── ProductSearchResponseDto.java
+│ └── wish
+│ ├── ProductWishCountDto.java
+│ ├── WishRequestDto.java
+│ ├── WishResponseDto.java
+│ └── WishSimpleResponseDto.java
+├── elastic
+│ ├── ProductsDocument.java
+│ ├── ProductsDocumentRepository.java
+│ └── ProductsIndexService.java
+├── enums
+│ ├── Category.java
+│ ├── Kind.java
+│ ├── OrderType.java
+│ ├── OStatusEnum.java
+│ ├── PageType.java
+│ ├── PStatusEnum.java
+│ ├── QStatusEnum.java
+│ └── Role.java
+├── exception
+│ ├── AppException.java
+│ └── ErrorCode.java
+├── jpa
+│ ├── member
+│ │ ├── entity
+│ │ │ ├── AddressesEntity.java
+│ │ │ ├── HistoriesEntity.java
+│ │ │ ├── HistoriesImgEntity.java
+│ │ │ ├── InquirysEntity.java
+│ │ │ ├── MembersEntity.java
+│ │ │ ├── MembersImgEntity.java
+│ │ │ ├── MembersInfoEntity.java
+│ │ │ └── WishesEntity.java
+│ │ └── repository
+│ │ ├── AddressesRepository.java
+│ │ ├── HistoriesImgRepository.java
+│ │ ├── HistoriesRepository.java
+│ │ ├── InquirysRepository.java
+│ │ ├── MembersImgRepository.java
+│ │ ├── MembersInfoRepository.java
+│ │ ├── MembersRepository.java
+│ │ └── WishesRepository.java
+│ └── product
+│ ├── entity
+│ │ ├── AucsInfosEntity.java
+│ │ ├── BidCountsEntity.java
+│ │ ├── CommentsEntity.java
+│ │ ├── PostsEntity.java
+│ │ ├── ProductImgEntity.java
+│ │ ├── ProductsEntity.java
+│ │ └── SaleInfosEntity.java
+│ └── repository
+│ ├── AucsInfosRepository.java
+│ ├── BidCountsRepository.java
+│ ├── CommentsRepository.java
+│ ├── PostsRepository.java
+│ ├── ProductImgRepository.java
+│ ├── ProductsRepository.java
+│ └── SaleInfosRepository.java
+│ └── shipping
+│ ├── entity
+│ │ ├── Bids.java
+│ │ ├── Deliveries.java
+│ │ ├── Orders.java
+│ │ ├── PageAccessLogs.java
+│ │ ├── Payments.java
+│ │ └── Refunds.java
+│ └── repository
+│ ├── BidsRepository.java
+│ ├── DeliveriesRepository.java
+│ ├── OrdersRepository.java
+│ ├── PageAccessLogsRepository.java
+│ ├── PaymentsRepository.java
+│ └── RefundsRepository.java
+├── kafka
+│ ├── KafkaConsumerService.java
+│ └── config
+│ └── KafkaProducerConfig.java
+├── security
+│ ├── JwtAuthenticationFilter.java
+│ ├── JwtAuthenticationProvider.java
+│ ├── JwtTokenProvider.java
+│ └── SecurityConfig.java
+├── service
+│ ├── HomeService.java
+│ ├── HomeServiceImpl.java
+│ ├── address
+│ │ ├── AddressService.java
+│ │ └── AddressServiceImpl.java
+│ ├── hidden
+│ │ ├── CreditService.java
+│ │ └── CreditServiceImpl.java
+│ ├── member
+│ │ ├── GoogleAuthService.java
+│ │ ├── InquiryService.java
+│ │ ├── InquiryServiceImpl.java
+│ │ ├── MemberDetails.java
+│ │ ├── MemberInfoService.java
+│ │ ├── MemberInfoServiceImpl.java
+│ │ ├── MypageService.java
+│ │ ├── MypageServiceImpl.java
+│ │ ├── UserDetailsServiceImpl.java
+│ │ ├── WishService.java
+│ │ └── WishServiceImpl.java
+│ ├── product
+│ │ ├── BoardService.java
+│ │ ├── BoardServiceImpl.java
+│ │ ├── ProductService.java
+│ │ └── ProductServiceImpl.java
+│ ├── s3
+│ │ └── S3Service.java
+│ └── shipping
+│ ├── PaymentsService.java
+│ └── PaymentsServiceImpl.java
+└── util
+└── resources
+├── application.yml
+├── application-aws.yml
+├── application-google.yml
+├── application-https.yml
+├── application-test.yml
+└── keystore.p12
+```
