@@ -16,7 +16,7 @@
 > **백엔드 서버** : 
 
 ## 🖥️ 프로젝트 소개
-중고 경매 사이트입니다. <!--추가할 내용 의논-->
+<!-- Aucison은 기존 쇼핑몰과 중고거래 시스템에서 판매자가 느낄 수 있었던 불편함을 해소하기 위해 제작한 상품을 경매로 판매할 수 있는 플랫폼을 개발하는 프로젝트입니다. -->
 <br>
 
 ## 🕰️ 개발 기간
@@ -40,9 +40,6 @@
 ## Stacks 🐈
 
 ### 개발 환경
-![Intellij IDEA](https://img.shields.io/badge/intellijidea-000000?style=for-the-badge&logo=intellijidea&logoColor=white)
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
-![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)                  
 Java 17 </br>
 IntelliJ </br>
 Ubuntu 22.04 </br>
@@ -67,9 +64,10 @@ JWT  </br>
 HTTPS </br>
 
 ### 협업 도구
-![Jira](https://img.shields.io/badge/jira-0052CC?style=for-the-badge&logo=jira&logoColor=white)
-![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white)
-![Discord](https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+Jira </br>
+Notion </br>
+Discord </br>
+Git </br>
 
 ### 문서화 도구
 Postman
@@ -135,8 +133,40 @@ Postman
 - 주요 서비스 : **인기 상품 추천, 최신 상품 조회**
 </br>
 
+---
+## API 명세서 📄
+<div align="center">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/79b7d4d4-22f0-46e5-a656-0d7f57c49a01">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/31536536-71b9-48e7-b6ec-f3d062b1f5c7">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/561c9216-0711-4a8d-963c-343e580de797">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/a02db2fc-bde9-4864-849d-16d9669fe7a8"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/a1ead8c0-d252-4a5f-88be-5b43b4cc5a81">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/96883d39-d9a4-4565-bed3-c676b7bc54ca"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/37993d26-a6bd-450c-8d19-8adb72dc483a">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/3230029e-7ce2-4edf-a2b0-5cd3416e987a"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/32e3471b-8077-44fa-8c7d-7a99ad200205">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/d470793f-95e4-49e7-a33b-deb27c5e7f12"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/c30d7c1b-8770-47d5-9cc0-7670fcadb60a">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/ec452d37-072e-42c7-91d8-11107546ae2f"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/1f03bd94-18b1-4f60-8a3f-37a875c7e63c">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/ec5b0326-9c90-4dcd-8422-2037ef121c85"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/201f14f4-a4f8-4131-b764-7080fc107eb8">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/9ac17027-6113-4b16-96b8-25ca38b5d132"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/eeb2513c-f5a9-435b-b46f-2bb23308033b">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/728c660d-2e1b-4192-b4c3-120a2c6c6650"> 
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/078e63ce-8375-4477-a95c-dbe8238aa7a2">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/c15035ff-6299-4753-aa6a-9f8e4efe51e0"> 
+</div>
 
 ---
+## 데이터베이스 ERD 🗂️
+<div align="center">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/c229dbb3-07ad-4d28-9996-7b462831d1c9">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/b6c12330-fa0f-41ae-b717-643670e1b05e">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/a01a7f14-2128-41bc-b54d-74ad89fa7ce5">
+<img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/4b99cbdc-5f62-478e-846f-06a3fd07aacd"> 
+</div>
+
 ## 아키텍쳐
 
 ### 디렉토리 구조
