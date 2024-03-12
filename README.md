@@ -16,7 +16,7 @@
 > **백엔드 서버** : 
 
 ## 🖥️ 프로젝트 소개
-<!-- Aucison은 기존 쇼핑몰과 중고거래 시스템에서 판매자가 느낄 수 있었던 불편함을 해소하기 위해 제작한 상품을 경매로 판매할 수 있는 플랫폼을 개발하는 프로젝트입니다. -->
+Aucison은 기존 쇼핑몰과 중고거래 시스템을 확장하여, 일반 상품은 물론 판매자가 자체 제작한 상품을 경매 방식으로 등록할 수 있는 것이 특징인 중고 경매 플랫폼입니다.
 <br>
 
 ## 🕰️ 개발 기간
@@ -40,37 +40,37 @@
 ## Stacks 🐈
 
 ### 개발 환경
-Java 17 </br>
-IntelliJ </br>
-Ubuntu 22.04 </br>
-Spring Boot 3.1.4 </br>
+`Java 17` </br>
+`IntelliJ` </br>
+`Ubuntu 22.04` </br>
+`Spring Boot 3.1.4` </br>
 
 ### 사용 기술
-Kafka </br>
-ElasticSearch </br>
-Docker </br>
-AWS EC2, RDS, S3 </br>
-OAuth2.0 & JWT </br>
-HTTPS </br>
-Spring Security </br>
-GitHub Actions </br>
-Amazon EC2 Auto Scaling </br>
-AWS CodeDeploy </br>
-MySQL </br>
-JPA </br>
+`Kafka` </br>
+`ElasticSearch` </br>
+`Docker` </br>
+`AWS EC2, RDS, S3` </br>
+`OAuth2.0 & JWT` </br>
+`HTTPS` </br>
+`Spring Security` </br>
+`GitHub Actions` </br>
+`Amazon EC2 Auto Scaling` </br>
+`AWS CodeDeploy` </br>
+`MySQL` </br>
+`JPA` </br>
 
 ### 보안 기술
-JWT  </br>
-HTTPS </br>
+`JWT`  </br>
+`HTTPS` </br>
 
 ### 협업 도구
-Jira </br>
-Notion </br>
-Discord </br>
-Git </br>
+`Jira` </br>
+`Notion` </br>
+`Discord` </br>
+`Git` </br>
 
 ### 문서화 도구
-Postman
+`Postman`
 
 ---
 <!--추가할 내용 의논-->
