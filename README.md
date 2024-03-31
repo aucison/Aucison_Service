@@ -73,6 +73,11 @@ Aucison은 기존 쇼핑몰과 중고거래 시스템을 확장하여, 일반 �
 `Postman`
 
 ---
+## 아키텍쳐 구조도
+![진짜진짜 옥시젼 아키텍쳐 구조도](https://github.com/aucison/Aucison_Service/assets/81072997/1a62c878-efc7-4b37-818d-ad9bd289ff14)
+
+
+---
 <!--추가할 내용 의논-->
 ## 화면 구성 📺
 | 메인 페이지  |  ?? 페이지   |
@@ -167,9 +172,8 @@ Aucison은 기존 쇼핑몰과 중고거래 시스템을 확장하여, 일반 �
 <img width="1000" alt="image" src="https://github.com/aucison/Aucison_Service/assets/68382824/4b99cbdc-5f62-478e-846f-06a3fd07aacd"> 
 </div>
 
-## 아키텍쳐
-
-### 디렉토리 구조
+---
+## 디렉토리 구조
 ```
 main
 └── java
