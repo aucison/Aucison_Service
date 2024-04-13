@@ -37,8 +37,8 @@ public class MypageServiceImpl implements MypageService {
     private  final DeliveriesRepository deliveriesRepository;
     private final BidsRepository bidsRepository;
     private final ProductsRepository productsRepository;
-    private final AddressesRepository addressesRepository;
     private final MembersImgRepository membersImgRepository;
+    private final WishesRepository wishesRepository;
     private final S3Service s3Service;
 
     @Autowired
@@ -46,8 +46,8 @@ public class MypageServiceImpl implements MypageService {
                              MembersInfoRepository membersInfoRepository, MembersRepository membersRepository,
                              OrdersRepository ordersRepository,
                              DeliveriesRepository deliveriesRepository, BidsRepository bidsRepository,
-                             ProductsRepository productsRepository, AddressesRepository addressesRepository,
-                             MembersImgRepository membersImgRepository, S3Service s3Service) {
+                             ProductsRepository productsRepository, MembersImgRepository membersImgRepository,
+                             WishesRepository wishesRepository, S3Service s3Service) {
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
         this.membersInfoRepository = membersInfoRepository;
@@ -56,8 +56,8 @@ public class MypageServiceImpl implements MypageService {
         this.deliveriesRepository = deliveriesRepository;
         this.bidsRepository = bidsRepository;
         this.productsRepository = productsRepository;
-        this.addressesRepository = addressesRepository;
         this.membersImgRepository = membersImgRepository;
+        this.wishesRepository = wishesRepository;
         this.s3Service = s3Service;
     }
 
@@ -367,11 +367,26 @@ public class MypageServiceImpl implements MypageService {
             membersImgUrl = membersImgRepository.findByMembersInfoEntity(membersInfo).getUrl();
         }
 
+        //size()를 사용할 경우 모든 데이터를 불러와서 size()를 호출하므로 내역이 많은 경우 성능 저하가 예상된다.
+        //따라서 데이터베이스에서 직접 개수를 계산하는 것이 효율적이다.
+//        int buyCount = historiesRepository.findByEmailAndOrderType(email, OrderType.BUY).size();
+//        int sellCount = historiesRepository.findByEmailAndOrderType(email, OrderType.SELL).size();
+//        int wishCount = wishesRepository.findByMembersEntity(member).size();
+
+        // 직접 개수를 계산하는 쿼리 메서드 사용
+        int buyCount = historiesRepository.countByOrderTypeAndEmail(email, OrderType.BUY);
+        int sellCount = historiesRepository.countByOrderTypeAndEmail(email, OrderType.SELL);
+        int wishCount = wishesRepository.countByMember(member);
+
         return ResponseMemberProfileDto.builder()
                 .profileUrl(membersImgUrl)
                 .nickname(member.getNickname())
                 .email(membersInfo.getSubEmail())
                 .phone(membersInfo.getPhone())
+                .credit(membersInfo.getCredit())
+                .buyCount(buyCount)
+                .sellCount(sellCount)
+                .wishCount(wishCount)
                 .build();
     }
 
