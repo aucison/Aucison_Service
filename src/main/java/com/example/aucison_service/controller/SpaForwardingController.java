@@ -23,6 +23,9 @@ public class SpaForwardingController implements WebMvcConfigurer {
         return indexHtml;
     }
 
+    //정적 자원에 대한 요청까지 index.html로 리다이렉트되는 것을 방지한다.
+    //이렇게 설정하면 정적 자원에 대한 요청은 실제 파일 경로나 클래스패스 경로로 해석되어 해당 자원을 반환하고,
+    //SPA의 라우트와 같이 파일이 아닌 경로에 대한 요청은 컨트롤러로 포워딩되어 처리된다.
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")

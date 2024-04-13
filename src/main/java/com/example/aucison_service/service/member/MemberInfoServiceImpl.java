@@ -38,7 +38,7 @@ public class MemberInfoServiceImpl implements MemberInfoService{
         MembersInfoEntity membersInfo = MembersInfoEntity.builder()
                 .phone(requestDto.getPhone())
                 .subEmail(requestDto.getSubEmail())
-                .credit(1000000.0f) // 기본 credit 설정
+                .credit(100000000.0f) // 기본 credit을 1억으로 초기화
                 .membersEntity(member)
                 .build();
 

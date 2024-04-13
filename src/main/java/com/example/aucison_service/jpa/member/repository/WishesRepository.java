@@ -5,6 +5,7 @@ import com.example.aucison_service.jpa.member.entity.MembersEntity;
 import com.example.aucison_service.jpa.member.entity.WishesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +26,8 @@ public interface WishesRepository extends JpaRepository<WishesEntity, Long> {
 
     //특정 상품에 대한 찜 집계
     Long countByProductId(Long productId);
+
+    // 개수 계산을 위한 쿼리 메서드 추가
+    @Query("SELECT COUNT(w) FROM WishesEntity w WHERE w.membersEntity = :member")
+    int countByMember(@Param("member") MembersEntity member);
 }
