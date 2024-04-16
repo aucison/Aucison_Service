@@ -1,6 +1,7 @@
 package com.example.aucison_service.service.member;
 
 
+import com.example.aucison_service.controller.AuthController;
 import com.example.aucison_service.dto.mypage.*;
 import com.example.aucison_service.enums.OrderType;
 import com.example.aucison_service.exception.AppException;
@@ -16,6 +17,8 @@ import com.example.aucison_service.jpa.shipping.repository.BidsRepository;
 import com.example.aucison_service.jpa.shipping.repository.DeliveriesRepository;
 import com.example.aucison_service.jpa.shipping.repository.OrdersRepository;
 import com.example.aucison_service.service.s3.S3Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -390,9 +393,17 @@ public class MypageServiceImpl implements MypageService {
                 .build();
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Override
     @Transactional
     public void patchMemberDetails(MemberDetails principal, RequestMembersInfoDto requestMembersInfoDto) {
+        logger.info("Received principal: {}", principal);
+        if (principal == null || principal.getMember() == null) {
+            logger.error("Principal or member details are null");
+            throw new IllegalArgumentException("The given id must not be null");
+        }
+
         String email = principal.getMember().getEmail();
 
         MembersEntity member = membersRepository.findByEmail(email);
