@@ -347,10 +347,20 @@ public class MypageServiceImpl implements MypageService {
     }
 
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);//오류 확인을 위한 로그
+
     //회원 정보 조회
     @Override
     @Transactional(readOnly = true)
     public ResponseMemberProfileDto getMemberProfile(MemberDetails principal) {
+        //오류 확인을 위한 로그
+        logger.info("Received principal: {}", principal);
+        if (principal == null || principal.getMember() == null) {
+            logger.error("Principal or member details are null");
+            throw new IllegalArgumentException("The given id must not be null");
+        }
+        //
+
         String email = principal.getMember().getEmail();
 
         MembersEntity member = membersRepository.findByEmail(email);
@@ -393,17 +403,9 @@ public class MypageServiceImpl implements MypageService {
                 .build();
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
     @Override
     @Transactional
     public void patchMemberDetails(MemberDetails principal, RequestMembersInfoDto requestMembersInfoDto) {
-        logger.info("Received principal: {}", principal);
-        if (principal == null || principal.getMember() == null) {
-            logger.error("Principal or member details are null");
-            throw new IllegalArgumentException("The given id must not be null");
-        }
-
         String email = principal.getMember().getEmail();
 
         MembersEntity member = membersRepository.findByEmail(email);
