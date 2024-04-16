@@ -357,7 +357,7 @@ public class MypageServiceImpl implements MypageService {
         logger.info("Received principal: {}", principal);
         if (principal == null || principal.getMember() == null) {
             logger.error("Principal or member details are null");
-            throw new IllegalArgumentException("The given id must not be null");
+            throw new IllegalArgumentException("아이디가 null 입니다.");
         }
         //
 
