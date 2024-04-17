@@ -28,19 +28,12 @@ public class SpaForwardingController implements WebMvcConfigurer {
     //SPA의 라우트와 같이 파일이 아닌 경로에 대한 요청은 컨트롤러로 포워딩되어 처리된다.
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/static/**")
+        registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(3600)
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver());
-
-        registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/index.html")
-                .setCachePeriod(3600)
-                .resourceChain(true)
-                .addResolver(new PathResourceResolver());
     }
-
 }
 
 
