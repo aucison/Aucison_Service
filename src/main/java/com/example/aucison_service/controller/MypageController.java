@@ -98,6 +98,11 @@ public class MypageController {
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> getMemberProfile(@AuthenticationPrincipal MemberDetails principal) {
 //        String email = principal.getAttribute("email");
+        //로그 확인용
+        if (principal == null || principal.getMember() == null) {
+            throw new IllegalArgumentException("사용자 인증 정보가 유효하지 않습니다.");
+        }
+        //
         return ApiResponse.createSuccess(mypageService.getMemberProfile(principal));
     }
 

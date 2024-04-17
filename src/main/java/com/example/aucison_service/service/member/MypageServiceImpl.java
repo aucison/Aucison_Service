@@ -353,14 +353,6 @@ public class MypageServiceImpl implements MypageService {
     @Override
     @Transactional(readOnly = true)
     public ResponseMemberProfileDto getMemberProfile(MemberDetails principal) {
-        //오류 확인을 위한 로그
-        logger.info("Received principal: {}", principal);
-        if (principal == null || principal.getMember() == null) {
-            logger.error("Principal or member details are null");
-            throw new IllegalArgumentException("아이디가 null 입니다.");
-        }
-        //
-
         String email = principal.getMember().getEmail();
 
         MembersEntity member = membersRepository.findByEmail(email);
