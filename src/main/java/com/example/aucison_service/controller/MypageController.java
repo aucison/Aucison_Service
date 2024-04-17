@@ -93,7 +93,6 @@ public class MypageController {
     // 택배 팝업
 
     // 회원 정보 조회
-    //credit 정보도 들어가야 할 것 같은데 피그마 상에서 빠져있음
     @GetMapping("/profile") // 회원 정보 조회
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> getMemberProfile(@AuthenticationPrincipal MemberDetails principal) {
