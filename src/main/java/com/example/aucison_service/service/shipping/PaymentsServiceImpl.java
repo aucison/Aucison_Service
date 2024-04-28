@@ -246,7 +246,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .addrName(addresses.getAddrName())
                 .name(addresses.getName())
                 .tel(addresses.getTel())
-                .zipCode(addresses.getZipCode())
+                .zipNum(addresses.getZipCode())
                 .addr(addresses.getAddr())
                 .addrDetail(addresses.getAddrDetail())
                 .credit(currentCredit)
