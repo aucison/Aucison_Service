@@ -54,8 +54,7 @@ server:
   port: 9876
   ssl:
     key-store: /etc/letsencrypt/live/aucison.shop/keystore.p12
-#    key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
-    key-store-password: ${SSL_PASSWORD_TEST} # 환경 변수 사용
+    key-store-password: ${SSL_PASSWORD} # 환경 변수 사용
     key-store-type: PKCS12
 
 cloud:
