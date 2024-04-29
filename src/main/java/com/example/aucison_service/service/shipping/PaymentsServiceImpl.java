@@ -183,8 +183,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         // 최소 입찰 금액 및 최대 입찰 금액 계산
-        float minBidAmount = nowPrice * 1.029f; // 현재 가격의 3% 증가
-        float maxBidAmount = nowPrice * 1.251f; // 현재 가격의 25% 증가
+        float minBidAmount = nowPrice * 1.079f; // 현재 가격의 3% 증가 + 안전수수료 5퍼
+        float maxBidAmount = nowPrice * 1.301f; // 현재 가격의 25% 증가 + 안전수수료 5퍼
 
         // bidAmount 검증
         if (bidAmount < minBidAmount || bidAmount > maxBidAmount) {
