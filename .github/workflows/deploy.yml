@@ -62,7 +62,8 @@ jobs:
           spring.security.oauth2.client.registration.google.redirect-uri: ${{ secrets.GOOGLE_REDIRECTURI }}
           cloud.aws.credentials.accessKey: ${{ secrets.IMG_AWS_ACCESSKEY }}
           cloud.aws.credentials.secretKey: ${{ secrets.IMG_AWS_SECRETKEY }}
-          server.ssl.key-store-password: ${{secrets.SSL_PASSWORD}}
+#          server.ssl.key-store-password: ${{secrets.SSL_PASSWORD}}
+          server.ssl.key-store-password: ${{secrets.SSL_PASSWORD_TEST}}
 
 
       # (5) Maven build (Test 제외)
