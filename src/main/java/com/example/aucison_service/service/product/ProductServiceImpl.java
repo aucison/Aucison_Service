@@ -273,8 +273,7 @@ public class ProductServiceImpl implements ProductService{
         kafkaTemplate.send("productRegisteredTopic", message);
     }
 
-    @Override
-    @Transactional
+    @Override    @Transactional
     public void registerProduct(ProductRegisterRequestDto dto,@AuthenticationPrincipal MemberDetails principal) {
         //상품 등록 서비스 로직
 
