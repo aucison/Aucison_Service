@@ -16,4 +16,7 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
 
     List<ProductsEntity> findTop10ByOrderByCreatedDateDesc();
+
+    void deleteByProductId(Long productId);
+
 }

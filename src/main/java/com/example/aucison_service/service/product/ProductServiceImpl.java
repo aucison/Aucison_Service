@@ -8,8 +8,6 @@ import com.example.aucison_service.dto.aucs_sale.SaleProductResponseDto;
 import com.example.aucison_service.dto.product.*;
 import com.example.aucison_service.dto.search.ProductSearchResponseDto;
 import com.example.aucison_service.elastic.ProductsDocument;
-import com.example.aucison_service.enums.Category;
-import com.example.aucison_service.enums.Kind;
 import com.example.aucison_service.enums.OrderType;
 import com.example.aucison_service.enums.PStatusEnum;
 import com.example.aucison_service.exception.AppException;
@@ -19,10 +17,7 @@ import com.example.aucison_service.jpa.member.entity.HistoriesImgEntity;
 import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
 import com.example.aucison_service.jpa.member.repository.*;
 import com.example.aucison_service.jpa.product.entity.*;
-import com.example.aucison_service.jpa.product.repository.AucsInfosRepository;
-import com.example.aucison_service.jpa.product.repository.BidCountsRepository;
-import com.example.aucison_service.jpa.product.repository.ProductsRepository;
-import com.example.aucison_service.jpa.product.repository.SaleInfosRepository;
+import com.example.aucison_service.jpa.product.repository.*;
 import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.s3.S3Service;
 import jakarta.persistence.EntityManager;
@@ -63,6 +58,7 @@ public class ProductServiceImpl implements ProductService{
 
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     ProductsRepository productsRepository;
+    ProductImgRepository productImgRepository;
     SaleInfosRepository sale_infosRepository;
     AucsInfosRepository aucs_infosRepository;
     MembersRepository membersRepository;
@@ -86,8 +82,10 @@ public class ProductServiceImpl implements ProductService{
                               HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository,
                               MembersInfoRepository membersInfoRepository,
                               S3Service s3Service,
-                              ElasticsearchOperations elasticsearchOperations, KafkaTemplate<String, Object> kafkaTemplate){
+                              ElasticsearchOperations elasticsearchOperations, KafkaTemplate<String, Object> kafkaTemplate,
+                              ProductImgRepository productImgRepository){
         this.productsRepository=productsRepository;
+        this.productsRepository = productsRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
         this.membersRepository=membersRepository;
@@ -591,4 +589,22 @@ public class ProductServiceImpl implements ProductService{
             return builder.build();
         });
     }
+
+    @Override
+    @Transactional
+    public void deleteSaleProduct(Long productId) {
+        // 제품 이미지 삭제
+        productImgRepository.deleteByProductId(productId);
+
+        // 판매 정보 삭제 - 1
+        sale_infosRepository.deleteByProductId(productId);
+
+        // 판매 정보 삭제 - 2
+        productsRepository.deleteByProductId(productId);
+
+        //입찰 카운팅 삭제 -> 입찰이 일반이든 경매든 생성됨 / bid는 아님
+        bidCountsRepository.deleteByProductId(productId);
+    }
+
+
 }
