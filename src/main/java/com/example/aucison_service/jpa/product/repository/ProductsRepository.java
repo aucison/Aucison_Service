@@ -4,6 +4,7 @@ import com.example.aucison_service.jpa.product.entity.ProductsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,4 +20,5 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
     void deleteByProductId(Long productId);
 
+    List<ProductsEntity> findExpiredAuctions(LocalDateTime now);
 }

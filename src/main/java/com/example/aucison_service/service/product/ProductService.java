@@ -40,5 +40,6 @@ public interface ProductService {
     void deleteSaleProduct(Long productId);
 
     //경매상품 구매 완료시 삭제
+    void deleteAucsProduct();
 
 }

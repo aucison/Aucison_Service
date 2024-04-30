@@ -18,6 +18,7 @@ import com.example.aucison_service.jpa.member.entity.MembersInfoEntity;
 import com.example.aucison_service.jpa.member.repository.*;
 import com.example.aucison_service.jpa.product.entity.*;
 import com.example.aucison_service.jpa.product.repository.*;
+import com.example.aucison_service.jpa.shipping.repository.BidsRepository;
 import com.example.aucison_service.service.member.MemberDetails;
 import com.example.aucison_service.service.s3.S3Service;
 import jakarta.persistence.EntityManager;
@@ -38,6 +39,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +71,7 @@ public class ProductServiceImpl implements ProductService{
     MembersInfoRepository membersInfoRepository;
 
     BidCountsRepository bidCountsRepository;
+    BidsRepository bidsRepository;
     S3Service s3Service;
 
     ElasticsearchOperations elasticsearchOperations;
@@ -83,9 +87,10 @@ public class ProductServiceImpl implements ProductService{
                               MembersInfoRepository membersInfoRepository,
                               S3Service s3Service,
                               ElasticsearchOperations elasticsearchOperations, KafkaTemplate<String, Object> kafkaTemplate,
-                              ProductImgRepository productImgRepository){
+                              ProductImgRepository productImgRepository, BidsRepository bidsRepository){
+
         this.productsRepository=productsRepository;
-        this.productsRepository = productsRepository;
+        this.productImgRepository = productImgRepository;
         this.aucs_infosRepository=aucs_infosRepository;
         this.sale_infosRepository=sale_infosRepository;
         this.membersRepository=membersRepository;
@@ -590,20 +595,57 @@ public class ProductServiceImpl implements ProductService{
         });
     }
 
+
+    //일반상품 구매 완료시 삭제
     @Override
     @Transactional
-    public void deleteSaleProduct(Long productId) {
+    public void deleteSaleProduct(Long productsId) {
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductId(productId);
+        productImgRepository.deleteByProductId(productsId);
 
         // 판매 정보 삭제 - 1
-        sale_infosRepository.deleteByProductId(productId);
+        sale_infosRepository.deleteByProductId(productsId);
 
         // 판매 정보 삭제 - 2
-        productsRepository.deleteByProductId(productId);
+        productsRepository.deleteByProductId(productsId);
 
         //입찰 카운팅 삭제 -> 입찰이 일반이든 경매든 생성됨 / bid는 아님
-        bidCountsRepository.deleteByProductId(productId);
+        bidCountsRepository.deleteByProductId(productsId);
+    }
+
+
+    //경매상품 낙찰완료(시간 초과)시 삭제
+    //서버의 성능을 고려하여 30분마다 스케줄링
+    @Scheduled(cron = "0 0/30 * * * ?")  // 매시간 0분과 30분에 실행
+    @Transactional
+    @Override
+    public void deleteAucsProduct(){
+        List<ProductsEntity> expiredProducts = productsRepository.findExpiredAuctions(LocalDateTime.now());
+        if (expiredProducts.isEmpty()) {
+            logger.info("낙찰 완료된 상품 없음 (현재시간: {})", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        } else {
+            for (ProductsEntity product : expiredProducts) {
+                deleteExpiredAuctionProduct(product.getProductsId());
+                logger.info("낙찰완료 혹은 기간만료된 상품 : {}", product.getProductsId());
+            }
+        }
+    }
+
+    private void deleteExpiredAuctionProduct(Long productsId) {
+        // 제품 이미지 삭제
+        productImgRepository.deleteByProductId(productsId);
+
+        // 판매 정보 삭제 - 1
+        aucs_infosRepository.deleteByProductId(productsId);
+
+        // 판매 정보 삭제 - 2
+        productsRepository.deleteByProductId(productsId);
+
+        //입찰 카운팅 삭제
+        bidCountsRepository.deleteByProductId(productsId);
+
+        //입찰 내역 삭제
+        bidsRepository.deletdByProductId(productsId);
     }
 
 
