@@ -72,7 +72,6 @@ public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 
         this.salePrice = salePrice;
         this.pStatus = pStatus;
         this.oStatus = oStatus;
-
         this.ordersId = ordersId;
         this.membersInfoEntity = membersInfoEntity;
     }

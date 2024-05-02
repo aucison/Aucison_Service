@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class MypageServiceImpl implements MypageService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MypageServiceImpl.class);//오류 확인을 위한 로그
     private final HistoriesRepository historiesRepository;
     private final HistoriesImgRepository historiesImgRepository;
     private final MembersInfoRepository membersInfoRepository;
@@ -65,9 +66,12 @@ public class MypageServiceImpl implements MypageService {
     }
 
     //orElseThrow는 entity에 직접 적용할 수 없고, Optional 객체에 사용되어야 한다.
+    // 구매내역 조회
     @Override
     @Transactional(readOnly = true)
     public List<ResponseOrderHistoryDto> getOrderInfo(MemberDetails principal) {
+
+
         String email = principal.getMember().getEmail();
 
         MembersEntity member = membersRepository.findByEmail(email);
@@ -87,9 +91,6 @@ public class MypageServiceImpl implements MypageService {
                             .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND)); // ordersId로 해당 Orders 조회, 없으면 예외 발생
 
                     if (historiesEntity.getOrderType() == OrderType.BUY) {  //'구매' 인 경우
-//
-//                        HistoriesImgEntity historiesImg = Optional.ofNullable(historiesImgRepository.findByHistoriesEntity(historiesEntity))
-////                                .orElseThrow(() -> new AppException(ErrorCode.IMG_NOT_FOUND)); // 이미지 조회, 없으면 예외 발생
                         String url = null;
                         HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(historiesEntity);
                         if (historiesImg == null) {
@@ -289,27 +290,21 @@ public class MypageServiceImpl implements MypageService {
     @Override
     @Transactional(readOnly = true)
     public List<ResponseSellHistoryDto> getSellInfo(MemberDetails principal) {
-//        MembersEntity members = membersRepository.findByEmail(email)
-//                .orElseThrow(() -> new AppException(ErrorCode.MEMBER_NOT_FOUND)); // 사용자 조회, 없으면 예외 발생
+
         String email = principal.getMember().getEmail();
 
         //'판매' 에 해당하는 histories 조회
         List<HistoriesEntity> sellHistories = historiesRepository.findByEmailAndOrderType(email, OrderType.SELL);
-        System.out.println(sellHistories.size());
 
         return sellHistories.stream()
                 .map(this::buildResponseSellHistoryDto)
-                .filter(Objects::nonNull) // Filter out nulls if any
+                .filter(Objects::nonNull) //  null이 아닌 경우만 필터링
                 .collect(Collectors.toList());
     }
 
+    //판매내역 조회 dto생성
     private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity history) {
 
-//        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
-//        HistoriesImgEntity historyImg = historiesImgRepository.findByHistoriesEntity(history);
-//        if (historyImg == null) {
-//            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
-//        }
         String url = null;
         HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(history);
         if (historiesImg == null) {
@@ -318,36 +313,25 @@ public class MypageServiceImpl implements MypageService {
             url = historiesImg.getUrl();
         }
 
-        ProductsEntity product = productsRepository.findByProductsId(history.getProductsId());
-
-        String soldDate = null;
-        if (history.getSoldDate() == null) {
-            soldDate = "";
-        } else {
-            soldDate = history.getSoldDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        }
-
         Float price = null;
-        if (product.getCategory().equals("AUCS")) {
-            price = product.getAucsInfosEntity().getStartPrice();   //현재 최고가 or 시작가??
-        } else {
-            price = product.getSaleInfosEntity().getPrice();
+        if (history.getCategory().equals("AUCS")) {
+            price = history.getHighestPrice();  //등록가 기준으로 보임, 최고가 아님
+        } else if(history.getCategory().equals("SALE")){
+            price = history.getSalePrice();     //일반상품
         }
 
         return ResponseSellHistoryDto.builder()
-                .productName(product.getName())
+                .productName(history.getName())
                 .productImgUrl(url)
-                .category(product.getCategory())
-                .kind(product.getKind())
-                .createdDate(product.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .soldDate(soldDate)
-                .pStatus(product.getPStatus())
+                .category(history.getCategory())
+                .kind(history.getKind())
+                .createdDate(history.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .pStatus(history.getPStatus())
                 .price(price)
                 .build();
     }
 
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);//오류 확인을 위한 로그
 
     //회원 정보 조회
     @Override
