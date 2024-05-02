@@ -112,6 +112,7 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
+        //member 정보 가져오기
         MembersEntity member = membersRepository.findByEmail(email);
         if (member == null) {
             throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
@@ -132,8 +133,10 @@ public class PaymentsServiceImpl implements PaymentsService {
         SaleInfosEntity saleInfosEntity = saleInfosRepository.findByProductsEntity(product);
         float newCredit = currentCredit - saleInfosEntity.getPrice();        //현재 credit에서 등록 가격을 차감
 
+        //사용자의 credit이 결제하려는 금액보다 적은지 검사
         validateCredit(newCredit);
 
+        //product 이미지 중 대표(첫 번째 url 반환)
         String image = fetchProductImage(productsId);
 
         logPageExit(logId);
@@ -159,6 +162,7 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
+        //사용자 정보 가져오기
         MembersEntity member = membersRepository.findByEmail(email);
         if (member == null) {
             throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
@@ -174,6 +178,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 //        // BidsCode를 사용하여 현재 응찰 정보를 조회합니다.
 //        Bids currentBid = bidsRepository.findByBidsCode(aucsInfo.getBidsCode());
 
+        //aucs_info에서 실시간 가격 정보를 받아옴
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
         Float nowPrice = null;
         if (aucsInfo == null) {
@@ -314,6 +319,114 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
     }
 
+    @Override
+    public void saveAucsPaymentInfo(String email, PaymentsRequestDto paymentsRequestDto) {  //스케줄링에 의해 호출될 낙찰(결제완료)메소드
+        Long productId = paymentsRequestDto.getProductsId();
+
+        //결제 페이지 접근 로그 생성 전에 체크
+        LocalDateTime accessTime = LocalDateTime.now();
+        if (!isBeforeAuctionEndDate(productId, accessTime)) {
+            throw new AppException(ErrorCode.AUCTION_ENDED);
+        }
+
+        //결제 페이지 접근 로그 생성
+        Long logId = logPageAccess(productId, email, PageType.PAYMENT_COMPLETED);
+
+        PageAccessLogs accessLog = pageAccessLogsRepository.findById(logId)
+                .orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
+
+        //order/payments/deliveries 저장(o_status의 C001 "낙찰")
+        Orders order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
+
+        //TODO: 판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+
+        //구매자 credit 감소, 판매자 credit 증가
+        ProductsEntity product = productsRepository.findByProductsId(productId);
+
+        String buyerEmail = email;
+        String sellerEmail = product.getEmail();
+
+        updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
+        updateSellerCredit(sellerEmail, paymentsRequestDto.getPrice());
+
+        // Bids 정보 저장
+        saveBidAndBidCount(paymentsRequestDto, email, order);
+
+        //경매 미낙찰에 따른 환불
+        List<Orders> existingOrders = ordersRepository.findAllByProductsId(productId);
+
+        Orders lastlyOrder = order;    //방금 경매상품을 응찰한 사용자의 주문
+        OStatusEnum failedBidStatus = OStatusEnum.C002;  //패찰
+
+        if (!existingOrders.isEmpty()) {    //최초 응찰이 아님을 판단
+
+            for (Orders ord : existingOrders) {
+                //새로운 응찰이 아니고 "최고가 입찰" 상태였던 이전 주문이라면
+                if (ord != lastlyOrder && ord.getOStatus().equals(OStatusEnum.B001)) {
+
+                    //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
+                    //TODO: histories의 o_status 업데이트
+                    ord.updateStatus(failedBidStatus);
+
+                    float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
+
+                    //credit 정보 가져오기
+                    //"최고가 입찰" 직전의 "최고가 입찰" 사용자의 credit 증가(환불)
+                    MembersEntity member = membersRepository.findByEmail(order.getEmail());
+                    if (member == null) {
+                        throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+                    }
+
+                    MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
+                    if (membersInfo == null) {
+                        throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+                    }
+
+                    float currentCredit = membersInfo.getCredit();
+                    float updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
+
+                    membersInfo.updateCredit(updatedCredit);    // credit 업데이트 요청
+
+                    // 환불 정보 저장
+                    Refunds refund = Refunds.builder()
+                            .cost(refundedAmount)
+                            .orders(ord)
+                            .build();
+                    refundsRepository.save(refund);
+
+                    // 실시간 응찰 내역에 패찰 정보 저장
+                    Bids failedBid = Bids.builder()
+                            .productsId(productId)
+                            .email(ord.getEmail())
+                            .nowPrice(ord.getPayments().getCost())
+                            .oStatus(failedBidStatus)
+                            .bidsCode(UUID.randomUUID().toString())
+                            .build();
+                    bidsRepository.save(failedBid);
+
+                }
+            }
+        }
+
+        //구매자 histories/historiesImgEntity정보 저장
+        //TODO: o_status 정보 저장
+        saveSaleHistory(order, email, product, paymentsRequestDto);
+
+
+        //결제 페이지 탈출 로그 생성 전에 체크
+        LocalDateTime exitTime = LocalDateTime.now();
+        if(!isBeforeAuctionEndDate(paymentsRequestDto.getProductsId(), exitTime)) {
+            throw new AppException(ErrorCode.AUCTION_ENDED);
+        }
+
+//        TODO: 낙찰일 경우 상품 삭제
+//        if (timeDifference < 3 * 60 * 1000) {
+//            deleteProduct(product.getProductsId());
+//        }
+
+        logPageExit(logId);
+    }
+
     private void validatePaymentsRequestDto(PaymentsRequestDto dto) {
         // StringUtils.isBlank 체크는 null, 빈 문자열, 공백만 있는 경우를 모두 체크합니다.
         //내부적 검증이므로(가상결제 조회와 정보가 연동되어야 하기 때문) IllegalArgumentException 표준 예외 사용
@@ -359,19 +472,23 @@ public class PaymentsServiceImpl implements PaymentsService {
         // Orders, Payments, Deliveries 정보 저장
         Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.COOO);
 
-        // credit 정보 가져오기
+        //구매자 credit 감소, 판매자 credit 증가
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
 
         String buyerEmail = email;
         String sellerEmail = product.getEmail();
 
-        updateMemberCredit(buyerEmail, sellerEmail, paymentsRequestDto.getPrice());
+        updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
+        updateSellerCredit(sellerEmail, paymentsRequestDto.getPrice());
 
+        //histories/historiesImgEntity정보 저장(구매자)
         saveSaleHistory(orders, email, product, paymentsRequestDto);
 
-        updateSoldDate(product);
+        //TODO: 판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
 
+        updateSoldDate(product);    //TODO: 삭제될 로직
 
+        //TODO: product_delete 호출하여 상품 삭제
         //상품 삭제
 //        deleteProduct(paymentsRequestDto.getProductsId());
 //        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
@@ -399,7 +516,6 @@ public class PaymentsServiceImpl implements PaymentsService {
 
 
         //3분 연장 판단
-        //TODO: AuctionEndDatesEntity 활용
         ProductsEntity product = productsRepository.findByProductsId(productId);
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
 
@@ -409,18 +525,49 @@ public class PaymentsServiceImpl implements PaymentsService {
         long timeDifference = Duration.between(auctionAccessTime, auctionEndTime).toMillis();; // 시간 차이를 밀리초 단위로 계산
 
         Orders order = null;
-        if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {
-            aucsInfo.extendAuctionEndTimeByMinutes(3); // 경매 종료 시간을 3분 연장하는 메소드 호출(응찰)
+
+        String buyerEmail = email;
+        String sellerEmail = product.getEmail();
+
+        if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {  //응찰(3분 연장)
+            // aucs_info의 end 업데이트(3분 연장 시)
+            aucsInfo.extendAuctionEndTimeByMinutes(3);
             aucsInfosRepository.save(aucsInfo);
+
+            //order(o_status의 B001 "최고가 입찰")/payments/deliveries 저장
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
+
+            //product의 p_status 업데이트(p_status의 B000 "응찰중")
             updateProductStatus(productId, PStatusEnum.B000);
+
+            //TODO: 판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중")
+
+            //구매자 credit 감소
+            updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
         } else if (timeDifference < 3 * 60 * 1000) {    //낙찰
+            //order/payments/deliveries 저장(o_status의 C001 "낙찰")
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
+
+            //TODO:  product는 삭제될 예정이라 필요없음
             updateProductStatus(productId, PStatusEnum.C000);
             updateSoldDate(product);
+
+            //TODO: 판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+
+            //구매자 credit 감소, 판매자 credit 증가
+            updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
+            updateSellerCredit(sellerEmail, paymentsRequestDto.getPrice());
         } else {    //응찰
+            //order(o_status의 B001 "최고가 입찰")/payments/deliveries 저장
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.B001);
+
+            //product의 p_status 업데이트(p_status의 B000 "응찰중")
             updateProductStatus(productId, PStatusEnum.B000);
+
+            //TODO: 판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중")
+
+            //구매자 credit 감소
+            updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
         }
 
         // Bids 정보 저장
@@ -429,15 +576,12 @@ public class PaymentsServiceImpl implements PaymentsService {
         //경매상품 최고가 현재 응찰가로 업데이트
         aucsInfo.updateHighestPrice(paymentsRequestDto.getPrice());
 
-        // 구매자, 판매자 credit update
-        String buyerEmail = email;
-        String sellerEmail = product.getEmail();
-        updateMemberCredit(buyerEmail, sellerEmail, paymentsRequestDto.getPrice());
-
         //경매 미낙찰에 따른 환불
         //상품 id로 해당 상품 주문 정보를 모두 찾음
         processRefundsForAuction(productId, order, timeDifference);
 
+        //구매자 histories/historiesImgEntity정보 저장
+        //TODO: o_status 정보 저장
         saveSaleHistory(order, email, product, paymentsRequestDto);
 
         //결제 페이지 탈출 로그 생성 전에 체크
@@ -446,7 +590,7 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.AUCTION_ENDED);
         }
 
-//        //낙찰일 경우 상품 삭제
+//        TODO: 낙찰일 경우 상품 삭제
 //        if (timeDifference < 3 * 60 * 1000) {
 //            deleteProduct(product.getProductsId());
 //        }
@@ -507,6 +651,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
     }
 
+    //TODO: updateHistoryStatus로 바꾸고 판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중") 으로 바꿔야 함
     private void updateProductStatus(Long productId, PStatusEnum pStatusEnum) {
         ProductsEntity product = productsRepository.findByProductsId(productId);
 
@@ -523,19 +668,20 @@ public class PaymentsServiceImpl implements PaymentsService {
         Orders lastlyOrder = order;    //방금 경매상품을 응찰한 사용자의 주문
         OStatusEnum failedBidStatus = timeDifference < 3 * 60 * 1000 ? OStatusEnum.C002 : OStatusEnum.B002;  //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
 
-        if (!existingOrders.isEmpty()) {
+        if (!existingOrders.isEmpty()) {    //최초 응찰이 아님을 판단
 
             for (Orders ord : existingOrders) {
                 //새로운 응찰이 아니고 "최고가 입찰" 상태였던 이전 주문이라면
-                if (lastlyOrder != ord && ord.getOStatus().equals(OStatusEnum.B001)) {
+                if (ord != lastlyOrder && ord.getOStatus().equals(OStatusEnum.B001)) {
 
                     //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
+                    //TODO: histories의 o_status 업데이트
                     ord.updateStatus(failedBidStatus);
 
                     float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
                     //credit 정보 가져오기
-                    //TODO: 판매자 credit update
+                    //"최고가 입찰" 직전의 "최고가 입찰" 사용자의 credit 증가(환불)
                     MembersEntity member = membersRepository.findByEmail(order.getEmail());
                     if (member == null) {
                         throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
@@ -549,8 +695,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                     float currentCredit = membersInfo.getCredit();
                     float updatedCredit = currentCredit + refundedAmount; // 현재 credit에서 환불해 줄 금액을 더한 뒤 credit에 반영
 
-                    // credit 업데이트 요청
-                    membersInfo.updateCredit(updatedCredit);
+                    membersInfo.updateCredit(updatedCredit);    // credit 업데이트 요청
 
                     // 환불 정보 저장
                     Refunds refund = Refunds.builder()
@@ -604,6 +749,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         return log.getPageAccessLogsId();
     }
 
+
     private Orders createOrderAndPaymentAndDelivery(PaymentsRequestDto paymentsRequestDto, String email, OStatusEnum status) {
         Orders order = Orders.builder()
                 .productsId(paymentsRequestDto.getProductsId())
@@ -612,7 +758,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
         ordersRepository.save(order);
 
-        logger.info(order.getProductsId().toString());
+//        logger.info(order.getProductsId().toString());
 
         Payments payment = Payments.builder()
                 .cost(paymentsRequestDto.getPrice())
@@ -620,7 +766,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
         paymentsRepository.save(payment);
 
-        logger.info(payment.getPaymentsId().toString());
+//        logger.info(payment.getPaymentsId().toString());
 
         Deliveries delivery = Deliveries.builder()
                 .addr(paymentsRequestDto.getAddr())
@@ -635,12 +781,12 @@ public class PaymentsServiceImpl implements PaymentsService {
                 .build();
         deliveriesRepository.save(delivery);
 
-        logger.info(delivery.getDeliveriesId().toString());
+//        logger.info(delivery.getDeliveriesId().toString());
 
         return order;
     }
 
-    private void updateMemberCredit(String buyerEmail, String sellerEmail, float amount) {
+    private void updateBuyerCredit(String buyerEmail, float amount) {
         // 구매자 크레딧 차감
         MembersEntity buyer = membersRepository.findByEmail(buyerEmail);
         if (buyer == null) {
@@ -657,6 +803,24 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
         }
         buyerInfo.updateCredit(buyerNewCredit);
+    }
+    private void updateSellerCredit(String sellerEmail, float amount) {
+//        // 구매자 크레딧 차감
+//        MembersEntity buyer = membersRepository.findByEmail(buyerEmail);
+//        if (buyer == null) {
+//            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+//        }
+//
+//        MembersInfoEntity buyerInfo = membersInfoRepository.findByMembersEntity(buyer);
+//        if (buyerInfo == null) {
+//            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
+//        }
+//
+//        float buyerNewCredit = buyerInfo.getCredit() - amount;
+//        if (buyerNewCredit < 0) {
+//            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
+//        }
+//        buyerInfo.updateCredit(buyerNewCredit);
 
         // 판매자 크레딧 증가
         MembersEntity seller = membersRepository.findByEmail(sellerEmail);
