@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableCaching
 @EnableJpaAuditing  //이거 활성화 해야 시간 자동...
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableJpaRepositories(basePackages = {"com.example.aucison_service.jpa.member.repository","com.example.aucison_service.jpa.product.repository","com.example.aucison_service.jpa.shipping.repository"})
 @EnableElasticsearchRepositories("com.example.aucison_service.elastic")
 @EnableAsync
+@EnableScheduling   //스케줄링
 public class AucisonServiceApplication {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 

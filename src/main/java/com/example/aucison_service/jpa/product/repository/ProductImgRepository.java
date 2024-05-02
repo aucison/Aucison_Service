@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface ProductImgRepository extends JpaRepository<ProductImgEntity, Long> {
     List<ProductImgEntity> findByProductProductsIdOrderByProductImgIdAsc(Long productsId);;
+
+    void deleteByProductId(Long productId);
 }
