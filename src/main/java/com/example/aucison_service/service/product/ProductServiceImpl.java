@@ -356,13 +356,17 @@ public class ProductServiceImpl implements ProductService{
             sale_infosRepository.save(norInfo);
         }
 
-         // HistoriesEntity 생성 및 저장 ->
+         // HistoriesEntity 생성 및 저장 -> 240502 수정
         MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(principal.getMember());
 
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.SELL)
-                .productsId(product.getProductsId())
-                .email(email)
+                .name(product.getName())
+                .category(product.getCategory())
+                .kind(product.getKind())
+                .highestPrice(dto.getStartPrice())
+                .salePrice(dto.getPrice())
+                .pStatus(PStatusEnum.S000)  //"판매중"
                 .membersInfoEntity(membersInfo)
                 .build();
         historiesRepository.save(history);

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "histories")
-public class HistoriesEntity { // 사용자 구매/판매 내역
+public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 내역
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,8 +42,6 @@ public class HistoriesEntity { // 사용자 구매/판매 내역
     @Column(name = "salePrice")
     private float salePrice;     //최고가 (구매-경매를 위함)
 
-    @Column(name = "sold_date", nullable = true)
-    private LocalDateTime soldDate;
 
     @Column(name = "p_status")
     @Enumerated(EnumType.STRING)
@@ -65,7 +63,7 @@ public class HistoriesEntity { // 사용자 구매/판매 내역
     @Builder
     public HistoriesEntity(OrderType orderType, String name, String category, String kind,
                            float highestPrice, float salePrice, PStatusEnum pStatus, OStatusEnum oStatus,
-                           LocalDateTime soldDate, Long ordersId, MembersInfoEntity membersInfoEntity) {
+                           Long ordersId, MembersInfoEntity membersInfoEntity) {
         this.orderType = orderType;
         this.name = name;
         this.category = category;
@@ -74,12 +72,12 @@ public class HistoriesEntity { // 사용자 구매/판매 내역
         this.salePrice = salePrice;
         this.pStatus = pStatus;
         this.oStatus = oStatus;
-        this.soldDate = soldDate;
+
         this.ordersId = ordersId;
         this.membersInfoEntity = membersInfoEntity;
     }
 
-    public void updateSoldDate(LocalDateTime soldDate) {
-        this.soldDate = soldDate;
-    }
+//    public void updateSoldDate(LocalDateTime soldDate) {
+//        this.soldDate = soldDate;
+//    }
 }
