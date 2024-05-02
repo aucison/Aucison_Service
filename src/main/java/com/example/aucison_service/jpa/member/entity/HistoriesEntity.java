@@ -51,7 +51,10 @@ public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 
     @Enumerated(EnumType.STRING)
     private OStatusEnum oStatus;
     @Column(name = "orders_id", nullable = true)
-    private Long ordersId;    //주문번호
+    private Long ordersId;      //주문번호
+
+    @Column(name = "products_id", nullable = true)
+    private Long productsId;    //상품번호
 
     @ManyToOne
     @JoinColumn(name = "members_info_id") // 연관관계 주인
@@ -63,7 +66,7 @@ public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 
     @Builder
     public HistoriesEntity(OrderType orderType, String name, String category, String kind,
                            float highestPrice, float salePrice, PStatusEnum pStatus, OStatusEnum oStatus,
-                           Long ordersId, MembersInfoEntity membersInfoEntity) {
+                           Long ordersId, Long productsId, MembersInfoEntity membersInfoEntity) {
         this.orderType = orderType;
         this.name = name;
         this.category = category;
@@ -73,6 +76,7 @@ public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 
         this.pStatus = pStatus;
         this.oStatus = oStatus;
         this.ordersId = ordersId;
+        this.productsId = productsId;
         this.membersInfoEntity = membersInfoEntity;
     }
 

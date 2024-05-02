@@ -368,6 +368,7 @@ public class ProductServiceImpl implements ProductService{
                 .highestPrice(dto.getStartPrice())
                 .salePrice(dto.getPrice())
                 .pStatus(PStatusEnum.S000)  //"판매중"
+                .productsId(product.getProductsId())
                 .membersInfoEntity(membersInfo)
                 .build();
         historiesRepository.save(history);

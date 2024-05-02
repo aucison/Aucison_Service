@@ -28,20 +28,18 @@ public class MypageController {
         return ApiResponse.createSuccess(mypageService.getOrderInfo(principal));
     }
 
-    //5월 초 작업 예정
-//    @GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
-//    @PreAuthorize("isAuthenticated()")
-//    public ApiResponse<?> getOrderDetail(@PathVariable("historiesId") Long historiesId,
-//                                         @RequestParam Long ordersId,
-//                                         @AuthenticationPrincipal MemberDetails principal) {
-////        RequestOrderDetailsDto requestDto = RequestOrderDetailsDto.builder()
-////                .email(email)
-////                .ordersId(ordersId)
-////                .historiesId(historiesId)
-////                .build();
-//
-//        return ApiResponse.createSuccess(mypageService.getOrderDetail(principal, ordersId, historiesId));
-//    }
+    @GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<?> getOrderDetail(@PathVariable("historiesId") Long historiesId,
+                                         @AuthenticationPrincipal MemberDetails principal) {
+//        RequestOrderDetailsDto requestDto = RequestOrderDetailsDto.builder()
+//                .email(email)
+//                .ordersId(ordersId)
+//                .historiesId(historiesId)
+//                .build();
+
+        return ApiResponse.createSuccess(mypageService.getOrderDetail(principal, historiesId));
+    }
 
     @GetMapping("/sell")    //판매 내역 조회
     @PreAuthorize("isAuthenticated()")
