@@ -356,7 +356,7 @@ public class ProductServiceImpl implements ProductService{
             sale_infosRepository.save(norInfo);
         }
 
-         // HistoriesEntity 생성 및 저장
+         // HistoriesEntity 생성 및 저장 ->
         MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(principal.getMember());
 
         HistoriesEntity history = HistoriesEntity.builder()
@@ -647,6 +647,5 @@ public class ProductServiceImpl implements ProductService{
         //입찰 내역 삭제
         bidsRepository.deletdByProductId(productsId);
     }
-
 
 }
