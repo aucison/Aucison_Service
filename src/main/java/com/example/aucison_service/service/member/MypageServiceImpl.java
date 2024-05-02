@@ -71,53 +71,46 @@ public class MypageServiceImpl implements MypageService {
     @Transactional(readOnly = true)
     public List<ResponseOrderHistoryDto> getOrderInfo(MemberDetails principal) {
 
-
         String email = principal.getMember().getEmail();
 
-        MembersEntity member = membersRepository.findByEmail(email);
-        if (member == null) {
-            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        // '구매'에 해당하는 histories 조회
+        List<HistoriesEntity> buyHistories = historiesRepository.findByEmailAndOrderType(email, OrderType.BUY);
 
-        MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(member);
-        if (membersInfo == null) {
-            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
-        }
-
-        return historiesRepository.findByMembersInfoEntity(membersInfo)
-                .stream()
-                .map(historiesEntity -> {   //각 Histories entity에 다음을 수행
-                    Orders ordersEntity = ordersRepository.findById(historiesEntity.getOrdersId())
-                            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND)); // ordersId로 해당 Orders 조회, 없으면 예외 발생
-
-                    if (historiesEntity.getOrderType() == OrderType.BUY) {  //'구매' 인 경우
-                        String url = null;
-                        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(historiesEntity);
-                        if (historiesImg == null) {
-                            url = null;
-                        } else {
-                            url = historiesImg.getUrl();
-                        }
-
-                        ProductsEntity product = Optional.ofNullable(productsRepository.findByProductsId(historiesEntity.getProductsId()))
-                                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-                        return ResponseOrderHistoryDto.builder()
-                                .historiesId(historiesEntity.getId())
-                                .productName(product.getName())
-                                .productImgUrl(url)
-                                .category(product.getCategory())
-                                .kind(product.getKind())
-                                .ordersId(ordersEntity.getOrdersId())
-                                .createdTime(ordersEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                                .oStatus(ordersEntity.getOStatus())
-                                .price(ordersEntity.getPayments().getCost())
-                                .build();
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
+        return buyHistories.stream()
+                .map(this::buildResponseOrderHistoryDto)
+                .filter(Objects::nonNull) // null이 아닌 경우만 필터링
                 .collect(Collectors.toList());
+    }
+
+    // 구매내역 dto 생성
+    private ResponseOrderHistoryDto buildResponseOrderHistoryDto(HistoriesEntity history) {
+
+        String url = null;
+        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(history);
+        if (historiesImg == null) {
+            url = null;
+        } else {
+            url = historiesImg.getUrl();
+        }
+
+        Float price = null;
+        if (history.getCategory().equals("AUCS")) {
+            price = history.getHighestPrice();  //본인 입찰가 기준으로 보임
+        } else if(history.getCategory().equals("SALE")){
+            price = history.getSalePrice();     //일반상품
+        }
+
+        return ResponseOrderHistoryDto.builder()
+                .historiesId(history.getId())
+                .productName(history.getName())
+                .productImgUrl(url)
+                .category(history.getCategory())
+                .kind(history.getKind())
+                .ordersId(history.getOrdersId())
+                .createdTime(history.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .oStatus(history.getOStatus())
+                .price(price)
+                .build();
     }
 
 //
@@ -302,7 +295,7 @@ public class MypageServiceImpl implements MypageService {
                 .collect(Collectors.toList());
     }
 
-    //판매내역 조회 dto생성
+    //판매내역 dto생성
     private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity history) {
 
         String url = null;
@@ -321,12 +314,14 @@ public class MypageServiceImpl implements MypageService {
         }
 
         return ResponseSellHistoryDto.builder()
+                .historiesId(history.getId())
                 .productName(history.getName())
                 .productImgUrl(url)
                 .category(history.getCategory())
                 .kind(history.getKind())
                 .createdDate(history.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .pStatus(history.getPStatus())
+                .ordersId(history.getOrdersId())
                 .price(price)
                 .build();
     }

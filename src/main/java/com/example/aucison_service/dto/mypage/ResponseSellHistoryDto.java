@@ -12,6 +12,7 @@ import lombok.Data;
 @Builder
 //마이페이지 메인에 보이는 판매목록 조회 용
 public class ResponseSellHistoryDto {
+    private Long historiesId;
     private String productName; // 상품명
     private String productImgUrl; // 상품 이미지
 
@@ -20,5 +21,6 @@ public class ResponseSellHistoryDto {
 
     private String createdDate; //등록 날짜
     private PStatusEnum pStatus;  //주문상태
+    private Long ordersId;  //주문 번호
     private float price; //판매 가격
 }
