@@ -338,10 +338,13 @@ public class PaymentsServiceImpl implements PaymentsService {
         //order/payments/deliveries 저장(o_status의 C001 "낙찰")
         Orders order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
 
-        //TODO: 판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+        ProductsEntity product = productsRepository.findByProductsId(productId);
+
+        //판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+        HistoriesEntity history = historiesRepository.findByNameAndOrderType(product.getName(), OrderType.SELL);
+        history.updatePstatus(PStatusEnum.C000);
 
         //구매자 credit 감소, 판매자 credit 증가
-        ProductsEntity product = productsRepository.findByProductsId(productId);
 
         String buyerEmail = email;
         String sellerEmail = product.getEmail();
@@ -365,8 +368,11 @@ public class PaymentsServiceImpl implements PaymentsService {
                 if (ord != lastlyOrder && ord.getOStatus().equals(OStatusEnum.B001)) {
 
                     //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
-                    //TODO: histories의 o_status 업데이트
+                    //"최고가 입찰" 직전의 "최고가 입찰" 사용자의 orders, histories의 o_status 업데이트(B002 "응찰취소")
                     ord.updateStatus(failedBidStatus);
+
+                     history = historiesRepository.findByOrdersId(ord.getOrdersId());
+                     history.updateOstatus(failedBidStatus);
 
                     float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
@@ -409,7 +415,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
 
         //구매자 histories/historiesImgEntity정보 저장
-        //TODO: o_status 정보 저장
         saveSaleHistory(order, email, product, paymentsRequestDto);
 
 
@@ -484,9 +489,12 @@ public class PaymentsServiceImpl implements PaymentsService {
         //histories/historiesImgEntity정보 저장(구매자)
         saveSaleHistory(orders, email, product, paymentsRequestDto);
 
-        //TODO: 판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+        //판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+        HistoriesEntity history = historiesRepository.findByNameAndOrderType(product.getName(), OrderType.SELL);
+        history.updatePstatus(PStatusEnum.C000);
 
-        updateSoldDate(product);    //TODO: 삭제될 로직
+
+//        updateSoldDate(product);    //TODO: 삭제될 로직
 
         //TODO: product_delete 호출하여 상품 삭제
         //상품 삭제
@@ -529,6 +537,8 @@ public class PaymentsServiceImpl implements PaymentsService {
         String buyerEmail = email;
         String sellerEmail = product.getEmail();
 
+        HistoriesEntity history = historiesRepository.findByNameAndOrderType(product.getName(), OrderType.SELL);
+
         if (timeDifference >= 3 * 60 * 1000 && timeDifference <= 10 * 60 * 1000) {  //응찰(3분 연장)
             // aucs_info의 end 업데이트(3분 연장 시)
             aucsInfo.extendAuctionEndTimeByMinutes(3);
@@ -540,7 +550,8 @@ public class PaymentsServiceImpl implements PaymentsService {
             //product의 p_status 업데이트(p_status의 B000 "응찰중")
             updateProductStatus(productId, PStatusEnum.B000);
 
-            //TODO: 판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중")
+            //판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중")
+            history.updatePstatus(PStatusEnum.B000);
 
             //구매자 credit 감소
             updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
@@ -549,10 +560,11 @@ public class PaymentsServiceImpl implements PaymentsService {
             order = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C001);
 
             //TODO:  product는 삭제될 예정이라 필요없음
-            updateProductStatus(productId, PStatusEnum.C000);
-            updateSoldDate(product);
+//            updateProductStatus(productId, PStatusEnum.C000);
+//            updateSoldDate(product);
 
-            //TODO: 판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+            //판매자 histories p_status 업데이트(p_status의 C000 "판매완료")
+            history.updatePstatus(PStatusEnum.C000);
 
             //구매자 credit 감소, 판매자 credit 증가
             updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
@@ -564,7 +576,8 @@ public class PaymentsServiceImpl implements PaymentsService {
             //product의 p_status 업데이트(p_status의 B000 "응찰중")
             updateProductStatus(productId, PStatusEnum.B000);
 
-            //TODO: 판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중")
+            //판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중")
+            history.updatePstatus(PStatusEnum.B000);
 
             //구매자 credit 감소
             updateBuyerCredit(buyerEmail, paymentsRequestDto.getPrice());
@@ -581,7 +594,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         processRefundsForAuction(productId, order, timeDifference);
 
         //구매자 histories/historiesImgEntity정보 저장
-        //TODO: o_status 정보 저장
         saveSaleHistory(order, email, product, paymentsRequestDto);
 
         //결제 페이지 탈출 로그 생성 전에 체크
@@ -600,14 +612,14 @@ public class PaymentsServiceImpl implements PaymentsService {
         return order.getOrdersId();
     }
 
-    private void updateSoldDate(ProductsEntity product) {
-        HistoriesEntity history = historiesRepository.findByProductsIdAndEmail(product.getProductsId(), product.getEmail());
-        if (history == null) {
-            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
-        } else {
-            history.updateSoldDate(LocalDateTime.now());
-        }
-    }
+//    private void updateSoldDate(ProductsEntity product) {
+//        HistoriesEntity history = historiesRepository.findByProductsIdAndEmail(product.getProductsId(), product.getEmail());
+//        if (history == null) {
+//            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
+//        } else {
+//            history.updateSoldDate(LocalDateTime.now());
+//        }
+//    }
 
     private void saveSaleHistory(Orders orders, String email, ProductsEntity product, PaymentsRequestDto paymentsRequestDto) {
         MembersEntity buyer = membersRepository.findByEmail(email);
@@ -620,17 +632,38 @@ public class PaymentsServiceImpl implements PaymentsService {
             throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
         }
 
-        // HistoriesEntity 생성 및 저장
-        HistoriesEntity history = HistoriesEntity.builder()
-                .orderType(OrderType.BUY) // 판매로 설정
-                .productsId(paymentsRequestDto.getProductsId())
-                .email(email)
-                .soldDate(LocalDateTime.now())
-                .ordersId(orders.getOrdersId()) // 주문번호 설정
-                .membersInfoEntity(membersInfo)
-                .build();
+        HistoriesEntity history = null;
+        if (product.getCategory().equals("AUCS")) {
+            // HistoriesEntity 생성 및 저장
+             history = HistoriesEntity.builder()
+                    .orderType(OrderType.BUY) // 구매로 설정
+                    .name(product.getName())
+                    .category(product.getCategory())
+                    .kind(product.getKind())
+                    .highestPrice(paymentsRequestDto.getPrice())
+                    .oStatus(orders.getOStatus())
+                    .ordersId(orders.getOrdersId()) // 주문번호 설정
+                    .membersInfoEntity(membersInfo)
+                    .build();
 
-        history = historiesRepository.save(history);
+            history = historiesRepository.save(history);
+        }
+
+        if (product.getCategory().equals("SALE")) {
+            // HistoriesEntity 생성 및 저장
+            history = HistoriesEntity.builder()
+                    .orderType(OrderType.BUY) // 구매로 설정
+                    .name(product.getName())
+                    .category(product.getCategory())
+                    .kind(product.getKind())
+                    .salePrice(paymentsRequestDto.getPrice())
+                    .oStatus(orders.getOStatus())
+                    .ordersId(orders.getOrdersId()) // 주문번호 설정
+                    .membersInfoEntity(membersInfo)
+                    .build();
+
+            history = historiesRepository.save(history);
+        }
 
         // HistoriesImgEntity 생성 및 저장
         // 상품의 첫 번째 이미지 URL을 가져옴
@@ -651,7 +684,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         }
     }
 
-    //TODO: updateHistoryStatus로 바꾸고 판매자 histories의 p_status 업데이트(p_status의 B000 "응찰중") 으로 바꿔야 함
     private void updateProductStatus(Long productId, PStatusEnum pStatusEnum) {
         ProductsEntity product = productsRepository.findByProductsId(productId);
 

@@ -79,4 +79,11 @@ public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 
 //    public void updateSoldDate(LocalDateTime soldDate) {
 //        this.soldDate = soldDate;
 //    }
+
+    public void updatePstatus(PStatusEnum pStatus) {
+        this.pStatus = pStatus;
+    }
+    public void updateOstatus(OStatusEnum oStatus) {
+        this.oStatus = oStatus;
+    }
 }
