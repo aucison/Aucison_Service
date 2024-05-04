@@ -626,7 +626,7 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public void deleteAucsProduct(){
-        List<ProductsEntity> expiredProducts = productsRepository.findExpiredAuctions(LocalDateTime.now());
+        List<ProductsEntity> expiredProducts = productsRepository.findByExpiryDateBefore(LocalDateTime.now());
         if (expiredProducts.isEmpty()) {
             logger.info("낙찰 완료된 상품 없음 (현재시간: {})", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         } else {

@@ -20,5 +20,5 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
     void deleteByProductId(Long productId);
 
-    List<ProductsEntity> findExpiredAuctions(LocalDateTime now);
+    List<ProductsEntity> findByExpiryDateBefore(LocalDateTime now); // 변경된 메서드 이름
 }
