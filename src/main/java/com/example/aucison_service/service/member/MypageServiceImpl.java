@@ -100,7 +100,7 @@ public class MypageServiceImpl implements MypageService {
         }
 
         return ResponseOrderHistoryDto.builder()
-                .historiesId(history.getId())
+                .historiesId(history.getHistoriesId())
                 .productName(history.getName())
                 .productImgUrl(url)
                 .category(history.getCategory())
@@ -268,7 +268,7 @@ public class MypageServiceImpl implements MypageService {
         }
 
         return ResponseSellHistoryDto.builder()
-                .historiesId(historyEntity.getId())
+                .historiesId(historyEntity.getHistoriesId())
                 .productName(historyEntity.getName())
                 .productImgUrl(url)
                 .category(historyEntity.getCategory())
