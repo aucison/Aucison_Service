@@ -45,8 +45,8 @@ public class AdminController {
     public ResponseEntity<AuthResponseDto> generateTestToken() {
         // 테스트용 사용자 정보 설정
 
-        String testEmail = "seller0504_111@example.com";
-        String testName = "seller0504_111";
+        String testEmail = "buyer0504_111@example.com";
+        String testName = "buyer0504_111";
 
         String testNickname = testName + "_nickname";
         Role testRole = Role.ROLE_CUSTOMER;
