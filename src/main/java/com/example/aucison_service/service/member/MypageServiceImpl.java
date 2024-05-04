@@ -73,7 +73,7 @@ public class MypageServiceImpl implements MypageService {
 
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(principal.getMember());
         // '구매'에 해당하는 histories 조회
-        List<HistoriesEntity> buyHistories = historiesRepository.findByMembersInfoEntityAndOrderType(membersInfoEntity.getId(), OrderType.BUY);
+        List<HistoriesEntity> buyHistories = historiesRepository.findByMembersInfoEntity_IdAndOrderType(membersInfoEntity.getId(), OrderType.BUY);
 
         return buyHistories.stream()
                 .map(this::buildResponseOrderHistoryDto)
@@ -241,7 +241,7 @@ public class MypageServiceImpl implements MypageService {
 
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(principal.getMember());
         //'판매' 에 해당하는 histories 조회
-        List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntityAndOrderType(membersInfoEntity.getId(), OrderType.SELL);
+        List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntity_IdAndOrderType(membersInfoEntity.getId(), OrderType.SELL);
 
         return sellHistories.stream()
                 .map(this::buildResponseSellHistoryDto)

@@ -13,7 +13,7 @@ import java.util.List;
 
 @Repository
 public interface HistoriesRepository extends JpaRepository<HistoriesEntity, Long> {
-    List<HistoriesEntity> findByMembersInfoEntityAndOrderType(Long membersInfoId, OrderType orderType);
+    List<HistoriesEntity> findByMembersInfoEntity_IdAndOrderType(Long membersInfoId, OrderType orderType);
     HistoriesEntity findByHistoriesId(Long historiesId);
     HistoriesEntity findByOrdersId(Long ordersId);
 
