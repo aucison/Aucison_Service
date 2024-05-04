@@ -1,11 +1,9 @@
 package com.example.aucison_service.service.shipping;
 
 
-import com.example.aucison_service.dto.payments.AddrInfoResponseDto;
 import com.example.aucison_service.dto.payments.PaymentsRequestDto;
 import com.example.aucison_service.dto.payments.VirtualPaymentResponseDto;
 import com.example.aucison_service.service.member.MemberDetails;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.Optional;
 
@@ -36,5 +34,5 @@ public interface PaymentsService {
      */
     Long savePayment(MemberDetails principal, PaymentsRequestDto paymentsRequestDto);
 
-
+    void saveAucsPaymentInfo(String email, PaymentsRequestDto paymentsRequestDto);
 }

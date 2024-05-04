@@ -28,10 +28,9 @@ public class MypageController {
         return ApiResponse.createSuccess(mypageService.getOrderInfo(principal));
     }
 
-    @GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
+@GetMapping("/buy/{historiesId}")   //구매 내역 상세 조회
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> getOrderDetail(@PathVariable("historiesId") Long historiesId,
-                                         @RequestParam Long ordersId,
                                          @AuthenticationPrincipal MemberDetails principal) {
 //        RequestOrderDetailsDto requestDto = RequestOrderDetailsDto.builder()
 //                .email(email)
@@ -39,15 +38,22 @@ public class MypageController {
 //                .historiesId(historiesId)
 //                .build();
 
-        return ApiResponse.createSuccess(mypageService.getOrderDetail(principal, ordersId, historiesId));
+        return ApiResponse.createSuccess(mypageService.getOrderDetail(principal, historiesId));
     }
 
-    @GetMapping("/sell")    //판매 내역 조회
+@GetMapping("/sell")    //판매 내역 조회
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<?> getSellInfo(@AuthenticationPrincipal MemberDetails principal) {
 //        String email = principal.getAttribute("email");
         return ApiResponse.createSuccess(mypageService.getSellInfo(principal));
     }
+
+//    @GetMapping("/address") // 회원 정보 조회(배송지 조회)
+//    @PreAuthorize("isAuthenticated()")
+//    public ApiResponse<?> getAddressInfo(@AuthenticationPrincipal MemberDetails principal) {
+////        String email = principal.getAttribute("email");
+//        return ApiResponse.createSuccess(mypageService.getAddressInfo(principal));
+//    }
 
 //    @GetMapping("/address") // 회원 정보 조회(배송지 조회)
 //    @PreAuthorize("isAuthenticated()")

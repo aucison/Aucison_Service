@@ -11,8 +11,8 @@ import java.util.List;
 public interface MypageService {
     // 기본 구매 내역 조회
     List<ResponseOrderHistoryDto> getOrderInfo(MemberDetails principal);
-    // 기본 구매 내역 조회 -> 상세 조회
-    ResponseOrderDetailsDto getOrderDetail(MemberDetails principal, Long ordersId, Long historiesId);
+    // 기본 구매 내역 조회
+    ResponseOrderDetailsDto getOrderDetail(MemberDetails principal, Long historiesId);
     // 판매 내역 조회
     List<ResponseSellHistoryDto> getSellInfo(MemberDetails principal);
     // 배송지 조회
