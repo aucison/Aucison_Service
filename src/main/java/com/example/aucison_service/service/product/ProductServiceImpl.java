@@ -651,7 +651,7 @@ public class ProductServiceImpl implements ProductService{
         bidCountsRepository.deleteByProductsId(productsId);
 
         //입찰 내역 삭제
-        bidsRepository.deletdByProductsId(productsId);
+        bidsRepository.deleteByProductsId(productsId);
     }
 
 }
