@@ -607,7 +607,7 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public void deleteSaleProduct(Long productsId) {
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductsId(productsId);
+        productImgRepository.deleteByProductsEntity_ProductsId(productsId);
 
         // 판매 정보 삭제 - 1
         sale_infosRepository.deleteByProductsEntity_ProductsId(productsId);
@@ -639,10 +639,10 @@ public class ProductServiceImpl implements ProductService{
 
     private void deleteExpiredAuctionProduct(Long productsId) {
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductsId(productsId);
+        productImgRepository.deleteByProductsEntity_ProductsId(productsId);
 
         // 판매 정보 삭제 - 1
-        aucs_infosRepository.deleteByProductsId(productsId);
+        aucs_infosRepository.deleteByProductsEntity_ProductsId(productsId);
 
         // 판매 정보 삭제 - 2
         productsRepository.deleteByProductsId(productsId);
