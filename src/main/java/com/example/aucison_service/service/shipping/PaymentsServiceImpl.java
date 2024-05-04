@@ -621,14 +621,15 @@ public class PaymentsServiceImpl implements PaymentsService {
         HistoriesEntity history = null;
         if (product.getCategory().equals("AUCS")) {
             // HistoriesEntity 생성 및 저장
-             history = HistoriesEntity.builder()
+            history = HistoriesEntity.builder()
                     .orderType(OrderType.BUY) // 구매로 설정
                     .name(product.getName())
                     .category(product.getCategory())
                     .kind(product.getKind())
                     .highestPrice(paymentsRequestDto.getPrice())
                     .oStatus(orders.getOStatus())
-                    .ordersId(orders.getOrdersId()) // 주문번호 설정
+                    .ordersId(orders.getOrdersId())
+                    .productsId(product.getProductsId())
                     .membersInfoEntity(membersInfo)
                     .build();
 
@@ -645,6 +646,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                     .salePrice(paymentsRequestDto.getPrice())
                     .oStatus(orders.getOStatus())
                     .ordersId(orders.getOrdersId()) // 주문번호 설정
+                    .productsId(product.getProductsId())
                     .membersInfoEntity(membersInfo)
                     .build();
 
