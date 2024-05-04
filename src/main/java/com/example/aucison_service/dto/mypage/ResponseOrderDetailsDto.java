@@ -15,14 +15,13 @@ import java.util.List;
 @Builder
 public class ResponseOrderDetailsDto {
     private String productName; // 상품명
-    private String productDescription; // 상품 한줄 설명
     private String productImgUrl; // 상품 이미지
     private String category; // 경매 여부
     private String kind;
 
     private Long ordersId; // 주문번호
     private String orderDate; // 주문일자
-    private String endDate; //마감일자
+//    private String endDate; //마감일자
     private OStatusEnum oStatus; // 주문상태
     private float price; // 구매 가격
 

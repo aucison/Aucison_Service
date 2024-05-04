@@ -8,4 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MembersInfoRepository extends JpaRepository<MembersInfoEntity, Long> {
     MembersInfoEntity findByMembersEntity(MembersEntity membersEntity);
+
+
+
 }

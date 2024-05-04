@@ -19,6 +19,7 @@ public class ResponseOrderHistoryDto {
 
 
     private Long ordersId;  //주문번호
+    private Long productsId;
     private String createdTime;  //주문일자(formatter로 인한 string 형 변환)
     private OStatusEnum oStatus;  //주문상태
     private float price; //구매 가격
