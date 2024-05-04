@@ -20,7 +20,7 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
     List<ProductsEntity> findTop10ByOrderByCreatedDateDesc();
 
-    void deleteByProductId(Long productId);
+    void deleteByProductId(Long productsId);
 
     @Query("SELECT p FROM ProductsEntity p WHERE p.aucsInfosEntity.end < :now")
     List<ProductsEntity> findByAuctionExpiryDateBefore(@Param("now") LocalDateTime now);
