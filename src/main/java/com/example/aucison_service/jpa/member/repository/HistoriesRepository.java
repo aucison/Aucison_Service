@@ -17,7 +17,11 @@ public interface HistoriesRepository extends JpaRepository<HistoriesEntity, Long
     List<HistoriesEntity> findByEmailAndOrderType(String email, OrderType orderType);
     HistoriesEntity findByProductsIdAndEmail(Long productsId, String email);
 
+    //특정 상품(판매명으로 식별)의 판매자(상태 분류로 식별) 반환
+    HistoriesEntity findByNameAndOrderType(String name, OrderType orderType);
+
     // 개수 계산을 위한 쿼리 메서드 추가
-    @Query("SELECT COUNT(h) FROM HistoriesEntity h WHERE h.email = :email AND h.orderType = :orderType")
-    int countByOrderTypeAndEmail(@Param("email") String email, @Param("orderType") OrderType orderType);
+    @Query("SELECT COUNT(h) FROM HistoriesEntity h WHERE h.membersInfoEntity.id = :membersInfoId AND h.orderType = :orderType")
+    int countByOrderTypeAndMembersInfoId(@Param("membersInfoId") Long membersInfoId, @Param("orderType") OrderType orderType);
+
 }

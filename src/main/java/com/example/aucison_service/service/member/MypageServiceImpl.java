@@ -358,8 +358,8 @@ public class MypageServiceImpl implements MypageService {
 //        int wishCount = wishesRepository.findByMembersEntity(member).size();
 
         // 직접 개수를 계산하는 쿼리 메서드 사용
-        int buyCount = historiesRepository.countByOrderTypeAndEmail(email, OrderType.BUY);
-        int sellCount = historiesRepository.countByOrderTypeAndEmail(email, OrderType.SELL);
+        int buyCount = historiesRepository.countByOrderTypeAndMembersInfoId(membersInfo.getId(), OrderType.BUY);
+        int sellCount = historiesRepository.countByOrderTypeAndMembersInfoId(membersInfo.getId(), OrderType.SELL);
         int wishCount = wishesRepository.countByMember(member);
 
         return ResponseMemberProfileDto.builder()
