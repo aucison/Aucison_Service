@@ -702,7 +702,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
                     //credit 정보 가져오기
                     //"최고가 입찰" 직전의 "최고가 입찰" 사용자의 credit 증가(환불)
-                    MembersEntity member = membersRepository.findByEmail(order.getEmail());
+                    MembersEntity member = membersRepository.findByEmail(ord.getEmail());
                     if (member == null) {
                         throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
                     }
