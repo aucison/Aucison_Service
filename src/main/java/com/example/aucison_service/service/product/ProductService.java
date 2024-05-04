@@ -37,7 +37,7 @@ public interface ProductService {
     Page<ProductAllResponseDto> getAllProducts(Pageable pageable);
 
     //일반상품 구매 완료시 삭제
-    void deleteSaleProduct(Long productId);
+    void deleteSaleProduct(Long productsId);
 
     //경매상품 구매 완료시 삭제
     void deleteAucsProduct();

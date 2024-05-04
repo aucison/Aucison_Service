@@ -9,5 +9,5 @@ public interface BidsRepository extends JpaRepository<Bids, Long> {
     Bids findByBidsCode(String bidsCode);
     List<Bids> findByProductsIdAndAndEmail(Long productsId, String email);
 
-    void deletdByProductId(Long productId);
+    void deletdByProductsId(Long productsId);
 }
