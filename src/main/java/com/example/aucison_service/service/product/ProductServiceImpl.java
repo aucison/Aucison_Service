@@ -610,7 +610,7 @@ public class ProductServiceImpl implements ProductService{
         productImgRepository.deleteByProductsId(productsId);
 
         // 판매 정보 삭제 - 1
-        sale_infosRepository.deleteByProductsId(productsId);
+        sale_infosRepository.deleteByProductsEntity_Id(productsId);
 
         // 판매 정보 삭제 - 2
         productsRepository.deleteByProductsId(productsId);

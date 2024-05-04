@@ -9,5 +9,7 @@ import org.springframework.stereotype.Repository;
 public interface SaleInfosRepository extends JpaRepository<SaleInfosEntity, Long> {
     SaleInfosEntity findByProductsEntity(ProductsEntity products);
 
-    void deleteByProductsId(Long productsId);
+//    void deleteByProductsId(Long productsId);
+    void deleteByProductsEntity_Id(Long productsId);
+
 }
