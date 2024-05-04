@@ -366,10 +366,10 @@ public class ProductServiceImpl implements ProductService{
         // 카테고리에 따른 가격 설정
         if ("AUCS".equals(dto.getCategory())) {
             // 경매인 경우:
-            highestPrice = dto.getStartPrice();
+            highestPrice = dto.getStartPrice() != null ? dto.getStartPrice() : 0.0f;
         } else if ("SALE".equals(dto.getCategory())) {
             // 비경매인 경우
-            salePrice = dto.getPrice();
+            salePrice = dto.getPrice() != null ? dto.getPrice() : 0.0f;
         }
 
         HistoriesEntity history = HistoriesEntity.builder()
