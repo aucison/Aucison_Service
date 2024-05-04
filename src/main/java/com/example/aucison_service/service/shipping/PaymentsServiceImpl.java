@@ -14,6 +14,7 @@ import com.example.aucison_service.jpa.product.repository.*;
 import com.example.aucison_service.jpa.shipping.entity.*;
 import com.example.aucison_service.jpa.shipping.repository.*;
 import com.example.aucison_service.service.member.MemberDetails;
+import com.example.aucison_service.service.product.ProductService;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ public class PaymentsServiceImpl implements PaymentsService {
    private final BidCountsRepository bidCountsRepository;
    private final HistoriesRepository historiesRepository;
    private final HistoriesImgRepository historiesImgRepository;
+   private final ProductService productService;
 
     @Autowired
     public PaymentsServiceImpl(BidsRepository bidsRepository, PageAccessLogsRepository pageAccessLogsRepository,
@@ -55,7 +57,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                                MembersInfoRepository membersInfoRepository, AddressesRepository addressesRepository,
                                SaleInfosRepository saleInfosRepository, AucsInfosRepository aucsInfosRepository
                                , ProductImgRepository productImgRepository, BidCountsRepository bidCountsRepository,
-                               HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository) {
+                               HistoriesRepository historiesRepository, HistoriesImgRepository historiesImgRepository, ProductService productService) {
         this.bidsRepository = bidsRepository;
         this.pageAccessLogsRepository = pageAccessLogsRepository;
         this.ordersRepository = ordersRepository;
@@ -72,6 +74,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         this.bidCountsRepository = bidCountsRepository;
         this.historiesRepository = historiesRepository;
         this.historiesImgRepository = historiesImgRepository;
+        this.productService = productService;
     }
 
     @Override
@@ -93,24 +96,19 @@ public class PaymentsServiceImpl implements PaymentsService {
             case "AUCS":
                 // bidAmount의 값을 추출하고, 값이 없으면 예외를 발생
                 Float actualBidAmount = bidAmount.orElseThrow(() -> new AppException(ErrorCode.INVALID_BIDCOUNT));
-                return getAucsVirtualPaymentInfo(productsId, email, actualBidAmount);
+                return getAucsVirtualPaymentInfo(product, email, actualBidAmount);
             case "SALE":
-                return getSaleVirtualPaymentInfo(productsId, email);
+                return getSaleVirtualPaymentInfo(product, email);
             default:
                 throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
     }
 
-    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(Long productsId, String email) {  //가상 결제(비경매)
+    private VirtualPaymentResponseDto getSaleVirtualPaymentInfo(ProductsEntity product, String email) {  //가상 결제(비경매)
+        Long productsId = product.getProductsId();
 
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
-
-        //product 정보 가져오기
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
-        if (product == null) {
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
 
         //member 정보 가져오기
         MembersEntity member = membersRepository.findByEmail(email);
@@ -146,7 +144,9 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     }
 
-    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(Long productsId, String email, Float bidAmount) {  //가상 결제(경매)
+    private VirtualPaymentResponseDto getAucsVirtualPaymentInfo(ProductsEntity product, String email, Float bidAmount) {  //가상 결제(경매)
+        Long productsId = product.getProductsId();
+
         //가상 결제 페이지 접근 로그 생성 전에 체크
         LocalDateTime accessTime = LocalDateTime.now();
         if(!isBeforeAuctionEndDate(productsId, accessTime)) {
@@ -155,12 +155,6 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         //가상 결제 페이지 접근 로그 생성
         Long logId = logPageAccess(productsId, email, PageType.VIRTUAL_PAYMENT);
-
-        //product 정보 가져오기
-        ProductsEntity product = productsRepository.findByProductsId(productsId);
-        if (product == null) {
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
 
         //사용자 정보 가져오기
         MembersEntity member = membersRepository.findByEmail(email);
@@ -172,11 +166,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         if (membersInfo == null) {
             throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
         }
-
-//        //bids에서 실시간 가격 정보를 받아옴
-//        AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
-//        // BidsCode를 사용하여 현재 응찰 정보를 조회합니다.
-//        Bids currentBid = bidsRepository.findByBidsCode(aucsInfo.getBidsCode());
 
         //aucs_info에서 실시간 가격 정보를 받아옴
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
@@ -496,10 +485,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
 //        updateSoldDate(product);    //TODO: 삭제될 로직
 
-        //TODO: product_delete 호출하여 상품 삭제
-        //상품 삭제
-//        deleteProduct(paymentsRequestDto.getProductsId());
-//        updateProductStatus(paymentsRequestDto.getProductsId(), PStatusEnum.C000);
+        //product_delete 호출하여 상품 삭제
+        productService.deleteSaleProduct(product.getProductsId());
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
         logPageExit(logId);
@@ -522,8 +509,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         PageAccessLogs accessLog = pageAccessLogsRepository.findById(logId)
                 .orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
 
-
-        //3분 연장 판단
+        //상품 정보 가져오기
         ProductsEntity product = productsRepository.findByProductsId(productId);
         AucsInfosEntity aucsInfo = aucsInfosRepository.findByProductsEntity(product);
 
@@ -604,7 +590,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
 //        TODO: 낙찰일 경우 상품 삭제
 //        if (timeDifference < 3 * 60 * 1000) {
-//            deleteProduct(product.getProductsId());
+//            productService.deleteAucsProduct();
 //        }
 
         logPageExit(logId);
@@ -837,23 +823,6 @@ public class PaymentsServiceImpl implements PaymentsService {
         buyerInfo.updateCredit(buyerNewCredit);
     }
     private void updateSellerCredit(String sellerEmail, float amount) {
-//        // 구매자 크레딧 차감
-//        MembersEntity buyer = membersRepository.findByEmail(buyerEmail);
-//        if (buyer == null) {
-//            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
-//        }
-//
-//        MembersInfoEntity buyerInfo = membersInfoRepository.findByMembersEntity(buyer);
-//        if (buyerInfo == null) {
-//            throw new AppException(ErrorCode.MEMBERS_INFO_NOT_FOUND);
-//        }
-//
-//        float buyerNewCredit = buyerInfo.getCredit() - amount;
-//        if (buyerNewCredit < 0) {
-//            throw new AppException(ErrorCode.INSUFFICIENT_CREDIT);
-//        }
-//        buyerInfo.updateCredit(buyerNewCredit);
-
         // 판매자 크레딧 증가
         MembersEntity seller = membersRepository.findByEmail(sellerEmail);
         if (seller == null) {
@@ -869,10 +838,10 @@ public class PaymentsServiceImpl implements PaymentsService {
         sellerInfo.updateCredit(sellerNewCredit);
     }
 
-    private void deleteProduct(Long productId) {
-        ProductsEntity product = productsRepository.findByProductsId(productId);
-        productsRepository.delete(product);
-    }
+//    private void deleteProduct(Long productId) {
+//        ProductsEntity product = productsRepository.findByProductsId(productId);
+//        productsRepository.delete(product);
+//    }
 
 
     // 페이지에서 나갔을 때의 로그 갱신
