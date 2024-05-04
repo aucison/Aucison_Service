@@ -464,7 +464,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         pageAccessLogsRepository.findById(logId).orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
 
         // Orders, Payments, Deliveries 정보 저장
-        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.COOO);
+        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C000);
 
         //구매자 credit 감소, 판매자 credit 증가
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
