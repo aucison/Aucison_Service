@@ -10,6 +10,6 @@ public interface SaleInfosRepository extends JpaRepository<SaleInfosEntity, Long
     SaleInfosEntity findByProductsEntity(ProductsEntity products);
 
 //    void deleteByProductsId(Long productsId);
-    void deleteByProductsEntity_Id(Long productsId);
+    void deleteByProductsEntity_ProductsId(Long productsId);
 
 }
