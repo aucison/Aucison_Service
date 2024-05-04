@@ -131,7 +131,7 @@ public class MypageServiceImpl implements MypageService {
         }
     }
 
-
+    //구매 상품 상세 조회 - 경매상품
     public ResponseOrderDetailsDto getAucsOrderDetail(MemberDetails principal, HistoriesEntity historiesEntity) {
 
         String url = null;
@@ -144,7 +144,7 @@ public class MypageServiceImpl implements MypageService {
 
         Long ordersId = historiesEntity.getOrdersId();
 
-        //Deliveries에서 배송지 정보를 가져옵니다.(배송지명, 받는사람, 주소(우편번호, 상세주소), 연락처)
+        //Deliveries에서 배송지 정보를 가져옴(배송지명, 받는사람, 주소(우편번호, 상세주소), 연락처)
         Deliveries deliveries = deliveriesRepository.findByOrdersOrdersId(ordersId);
         if (deliveries == null) {
             throw new AppException(ErrorCode.DELIVERY_NOT_FOUND);
@@ -184,40 +184,25 @@ public class MypageServiceImpl implements MypageService {
                 .addressInfo(addressInfo)
                 .bidDetails(bidDetails)
                 .build();
+
+
     }
 
+    //구매 상품 상세 조회 - 비경매상품
     public ResponseOrderDetailsDto getSaleOrderDetail(MemberDetails principal, HistoriesEntity historiesEntity) {
-        // 구현 로직 ...
-        // 비경매 관련 정보만 포함한 ResponseOrderDetailsDto를 반환합니다.
-        //OrdersEntity에서 주문 상세 정보를 가져옵니다. (주문일자, 주문번호(ordersId), 주문상태)
-        Orders orders = ordersRepository.findById(ordersId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        //HistoriesEntity에서 주문 기본 정보를 가져옵니다. (상품 이름, 상품 간단설명, 분류, 주문금액)
-        HistoriesEntity histories = historiesRepository.findByOrdersId(ordersId);
-        if (histories == null) {
-            throw new AppException(ErrorCode.HISTORY_NOT_FOUND);
-        }
 
-//        //HistoriesImgEntity에서 상품 이미지 URL을 가져옵니다. (상품 사진)
-//        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(histories);
-//        if (historiesImg == null) {
-//            throw new AppException(ErrorCode.HISTORY_IMG_NOT_FOUND);
-//        }
         String url = null;
-        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(histories);
+        HistoriesImgEntity historiesImg = historiesEntity.getHistoriesImg();
         if (historiesImg == null) {
             url = null;
         } else {
             url = historiesImg.getUrl();
         }
 
-        ProductsEntity product = productsRepository.findByProductsId(histories.getProductsId());
-        if (product == null) {
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
+        Long ordersId = historiesEntity.getOrdersId();
 
-        //Deliveries에서 배송지 정보를 가져옵니다.(배송지명, 받는사람, 주소(우편번호, 상세주소), 연락처)
+        //Deliveries에서 배송지 정보를 가져옴(배송지명, 받는사람, 주소(우편번호, 상세주소), 연락처)
         Deliveries deliveries = deliveriesRepository.findByOrdersOrdersId(ordersId);
         if (deliveries == null) {
             throw new AppException(ErrorCode.DELIVERY_NOT_FOUND);
@@ -235,16 +220,17 @@ public class MypageServiceImpl implements MypageService {
 
         // Build and return the ResponseOrderDetailsDto without bid details
         return ResponseOrderDetailsDto.builder()
-                .productName(product.getName())
+                .productName(historiesEntity.getName())
                 .productImgUrl(url)
-                .category(product.getCategory())
-                .kind(product.getKind())
-                .ordersId(ordersId)
-                .orderDate(orders.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .oStatus(orders.getOStatus())
-                .price(product.getSaleInfosEntity().getPrice())
+                .category(historiesEntity.getCategory())
+                .kind(historiesEntity.getKind())
+                .ordersId(historiesEntity.getOrdersId())
+                .orderDate(historiesEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .oStatus(historiesEntity.getOStatus())
+                .price(historiesEntity.getSalePrice())
                 .addressInfo(addressInfo)
                 .build();
+
     }
 
     // 판매 내역 조회
@@ -264,10 +250,10 @@ public class MypageServiceImpl implements MypageService {
     }
 
     //판매내역 dto생성
-    private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity history) {
+    private ResponseSellHistoryDto buildResponseSellHistoryDto(HistoriesEntity historyEntity) {
 
         String url = null;
-        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(history);
+        HistoriesImgEntity historiesImg = historiesImgRepository.findByHistoriesEntity(historyEntity);
         if (historiesImg == null) {
             url = null;
         } else {
@@ -275,21 +261,21 @@ public class MypageServiceImpl implements MypageService {
         }
 
         Float price = null;
-        if (history.getCategory().equals("AUCS")) {
-            price = history.getHighestPrice();  //등록가 기준으로 보임, 최고가 아님
-        } else if(history.getCategory().equals("SALE")){
-            price = history.getSalePrice();     //일반상품
+        if (historyEntity.getCategory().equals("AUCS")) {
+            price = historyEntity.getHighestPrice();  //등록가 기준으로 보임, 최고가 아님
+        } else if(historyEntity.getCategory().equals("SALE")){
+            price = historyEntity.getSalePrice();     //일반상품
         }
 
         return ResponseSellHistoryDto.builder()
-                .historiesId(history.getId())
-                .productName(history.getName())
+                .historiesId(historyEntity.getId())
+                .productName(historyEntity.getName())
                 .productImgUrl(url)
-                .category(history.getCategory())
-                .kind(history.getKind())
-                .createdDate(history.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .pStatus(history.getPStatus())
-                .ordersId(history.getOrdersId())
+                .category(historyEntity.getCategory())
+                .kind(historyEntity.getKind())
+                .createdDate(historyEntity.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .pStatus(historyEntity.getPStatus())
+                .ordersId(historyEntity.getOrdersId())
                 .price(price)
                 .build();
     }
