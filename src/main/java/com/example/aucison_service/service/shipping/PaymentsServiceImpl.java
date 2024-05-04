@@ -695,8 +695,11 @@ public class PaymentsServiceImpl implements PaymentsService {
                 if (ord != lastlyOrder && ord.getOStatus().equals(OStatusEnum.B001)) {
 
                     //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
-                    //TODO: histories의 o_status 업데이트
+                    //histories의 o_status 업데이트
                     ord.updateStatus(failedBidStatus);
+
+                    HistoriesEntity history = historiesRepository.findByOrdersId(ord.getOrdersId());
+                    history.updateOstatus(failedBidStatus);
 
                     float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
