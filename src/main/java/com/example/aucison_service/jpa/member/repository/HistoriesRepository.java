@@ -17,8 +17,6 @@ public interface HistoriesRepository extends JpaRepository<HistoriesEntity, Long
     HistoriesEntity findByHistoriesId(Long historiesId);
     HistoriesEntity findByOrdersId(Long ordersId);
 
-    HistoriesEntity findByProductsIdAndEmail(Long productsId, String email);
-
     //특정 상품(판매명으로 식별)의 판매자(상태 분류로 식별) 반환
     HistoriesEntity findByNameAndOrderType(String name, OrderType orderType);
 
