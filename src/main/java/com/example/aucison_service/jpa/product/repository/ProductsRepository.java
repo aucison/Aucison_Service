@@ -1,7 +1,9 @@
 package com.example.aucison_service.jpa.product.repository;
 
 import com.example.aucison_service.jpa.product.entity.ProductsEntity;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -20,5 +22,6 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
     void deleteByProductId(Long productId);
 
-    List<ProductsEntity> findByExpiryDateBefore(LocalDateTime now); // 변경된 메서드 이름
+    @Query("SELECT p FROM ProductsEntity p WHERE p.aucsInfosEntity.end < :now")
+    List<ProductsEntity> findByAuctionExpiryDateBefore(@Param("now") LocalDateTime now);
 }
