@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface AucsInfosRepository extends JpaRepository<AucsInfosEntity, Long> {
     AucsInfosEntity findByProductsEntity(ProductsEntity products);
 
-    void deleteByProductsId(Long productsId);
+    void deleteByProductsEntity_ProductsId(Long productsId);
 }
