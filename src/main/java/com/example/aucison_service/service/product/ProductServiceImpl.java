@@ -360,13 +360,25 @@ public class ProductServiceImpl implements ProductService{
          // HistoriesEntity 생성 및 저장 -> 240502 수정
         MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(principal.getMember());
 
+        Float highestPrice = null;
+        Float salePrice = null;
+
+        // 카테고리에 따른 가격 설정
+        if ("AUCS".equals(dto.getCategory())) {
+            // 경매인 경우:
+            highestPrice = dto.getStartPrice();
+        } else if ("SALE".equals(dto.getCategory())) {
+            // 비경매인 경우
+            salePrice = dto.getPrice();
+        }
+
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.SELL)
                 .name(product.getName())
                 .category(product.getCategory())
                 .kind(product.getKind())
-                .highestPrice(dto.getStartPrice())
-                .salePrice(dto.getPrice())
+                .highestPrice(highestPrice)  // 최고 가격
+                .salePrice(salePrice)        // 판매 가격
                 .pStatus(PStatusEnum.S000)  //"판매중"
                 .productsId(product.getProductsId())
                 .membersInfoEntity(membersInfo)
