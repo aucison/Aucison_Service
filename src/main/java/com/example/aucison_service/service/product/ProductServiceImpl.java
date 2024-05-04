@@ -607,16 +607,16 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public void deleteSaleProduct(Long productsId) {
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductId(productsId);
+        productImgRepository.deleteByProductsId(productsId);
 
         // 판매 정보 삭제 - 1
-        sale_infosRepository.deleteByProductId(productsId);
+        sale_infosRepository.deleteByProductsId(productsId);
 
         // 판매 정보 삭제 - 2
-        productsRepository.deleteByProductId(productsId);
+        productsRepository.deleteByProductsId(productsId);
 
         //입찰 카운팅 삭제 -> 입찰이 일반이든 경매든 생성됨 / bid는 아님
-        bidCountsRepository.deleteByProductId(productsId);
+        bidCountsRepository.deleteByProductsId(productsId);
     }
 
 
@@ -639,19 +639,19 @@ public class ProductServiceImpl implements ProductService{
 
     private void deleteExpiredAuctionProduct(Long productsId) {
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductId(productsId);
+        productImgRepository.deleteByProductsId(productsId);
 
         // 판매 정보 삭제 - 1
-        aucs_infosRepository.deleteByProductId(productsId);
+        aucs_infosRepository.deleteByProductsId(productsId);
 
         // 판매 정보 삭제 - 2
-        productsRepository.deleteByProductId(productsId);
+        productsRepository.deleteByProductsId(productsId);
 
         //입찰 카운팅 삭제
-        bidCountsRepository.deleteByProductId(productsId);
+        bidCountsRepository.deleteByProductsId(productsId);
 
         //입찰 내역 삭제
-        bidsRepository.deletdByProductId(productsId);
+        bidsRepository.deletdByProductsId(productsId);
     }
 
 }
