@@ -486,7 +486,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 //        updateSoldDate(product);    //TODO: 삭제될 로직
 
         //product_delete 호출하여 상품 삭제
-        logger.info("일반상품 판매완료로 인한 상품 삭제 : 상품명 - ", product.getName() );
+        logger.info("일반상품 판매완료로 인한 상품 삭제 : 상품명 - " + product.getName() );
         productService.deleteSaleProduct(product.getProductsId());
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
