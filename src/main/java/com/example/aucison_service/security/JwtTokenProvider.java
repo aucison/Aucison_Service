@@ -93,7 +93,7 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token);    //240126 getBytes 추가
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            logger.error("Token validation error: ", e);
+//            logger.error("Token validation error: ", e);
             throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -115,7 +115,7 @@ public class JwtTokenProvider {
     // HTTP 요청으로부터 JWT 토큰 추출
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-        logger.info("resolveToken - Extracted bearerToken: {}", bearerToken);
+//        logger.info("resolveToken - Extracted bearerToken: {}", bearerToken);
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
