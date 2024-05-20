@@ -129,7 +129,7 @@ public class GoogleAuthService {
         // JWT 토큰을 생성합니다.
         String jwtToken = jwtTokenProvider.createToken(email, Role.ROLE_CUSTOMER);
         // JWT 토큰 값을 로그로 출력
-        logger.info("Generated JWT Token: {}", jwtToken);
+//        logger.info("Generated JWT Token: {}", jwtToken);
 
 
         // 생성된 JWT 토큰을 AuthResponseDto에 담아 반환합니다.

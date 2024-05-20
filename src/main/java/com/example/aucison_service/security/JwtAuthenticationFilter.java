@@ -29,10 +29,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
-        logger.info("JwtAuthenticationFilter - Authorization Header: {}", authorizationHeader); // 헤더 로그 출력
+//        logger.info("JwtAuthenticationFilter - Authorization Header: {}", authorizationHeader); // 헤더 로그 출력
         try {
             String token = jwtTokenProvider.resolveToken(request);
-            logger.info("JwtAuthenticationFilter - Token: {}", token); // 토큰 로그 추가
+//            logger.info("JwtAuthenticationFilter - Token: {}", token); // 토큰 로그 추가
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 //OAuth2User oAuth2User = jwtTokenProvider.getOAuth2User(token);
                 //Authentication auth = new UsernamePasswordAuthenticationToken(oAuth2User, token, oAuth2User.getAuthorities());
