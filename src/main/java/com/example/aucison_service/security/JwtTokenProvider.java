@@ -73,7 +73,7 @@ public class JwtTokenProvider {
     public String getEmailFromToken(String token) {
         try {
             String email = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody().getSubject();
-            logger.info("JwtTokenProvider - Extracted email from token: {}", email); // 이메일 추출 로그
+//            logger.info("JwtTokenProvider - Extracted email from token: {}", email); // 이메일 추출 로그
             return email;
         } catch (Exception e) {
             logger.error("JwtTokenProvider - Error extracting email from token: ", e); // 에러 로그
