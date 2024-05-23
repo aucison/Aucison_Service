@@ -94,7 +94,9 @@ public class JwtTokenProvider {
             return true;
         } catch (JwtException | IllegalArgumentException e) {
 //            logger.error("Token validation error: ", e);
-            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+//            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
+            //2024-05-23 수정
+            return false;
         }
     }
 
