@@ -132,6 +132,9 @@ public class GoogleAuthService {
 //        logger.info("Generated JWT Token: {}", jwtToken);
 
 
+
+        logger.info(" 새로운 접속자 로그인 완료: " + member.getEmail());
+
         // 생성된 JWT 토큰을 AuthResponseDto에 담아 반환합니다.
         return AuthResponseDto.builder()
                 .jwtToken(jwtToken)
