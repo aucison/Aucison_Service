@@ -72,6 +72,9 @@ public class ProductServiceImpl implements ProductService{
 
     BidCountsRepository bidCountsRepository;
     BidsRepository bidsRepository;
+
+    PostsRepository postsRepository;
+    CommentsRepository commentsRepository;
     S3Service s3Service;
 
     ElasticsearchOperations elasticsearchOperations;
@@ -87,7 +90,8 @@ public class ProductServiceImpl implements ProductService{
                               MembersInfoRepository membersInfoRepository,
                               S3Service s3Service,
                               ElasticsearchOperations elasticsearchOperations, KafkaTemplate<String, Object> kafkaTemplate,
-                              ProductImgRepository productImgRepository, BidsRepository bidsRepository){
+                              ProductImgRepository productImgRepository, BidsRepository bidsRepository,
+                              PostsRepository postsRepository, CommentsRepository commentsRepository){
 
         this.productsRepository=productsRepository;
         this.productImgRepository = productImgRepository;
@@ -102,6 +106,8 @@ public class ProductServiceImpl implements ProductService{
         this.s3Service=s3Service;
         this.elasticsearchOperations = elasticsearchOperations;
         this.kafkaTemplate = kafkaTemplate;
+        this.postsRepository =postsRepository;
+        this.commentsRepository = commentsRepository;
     }
 
 
@@ -652,6 +658,12 @@ public class ProductServiceImpl implements ProductService{
     }
 
     private void deleteExpiredAuctionProduct(Long productsId) {
+        //제품 문의 삭제
+        postsRepository.deleteByProductsId(productsId);
+
+        //제품 문의 댓글 삭제
+        commentsRepository.deleteByProductsId(productsId);
+
         // 제품 이미지 삭제
         productImgRepository.deleteByProduct_ProductsId(productsId);
 
