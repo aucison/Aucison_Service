@@ -658,11 +658,11 @@ public class ProductServiceImpl implements ProductService{
     }
 
     private void deleteExpiredAuctionProduct(Long productsId) {
-        //제품 문의 삭제
-        postsRepository.deleteByProductsEntity_ProductsId(productsId);
-
         //제품 문의 댓글 삭제
         commentsRepository.deleteByProductsEntity_ProductsId(productsId);
+
+        //제품 문의 삭제
+        postsRepository.deleteByProductsEntity_ProductsId(productsId);
 
         // 제품 이미지 삭제
         productImgRepository.deleteByProduct_ProductsId(productsId);
