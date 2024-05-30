@@ -106,7 +106,7 @@ public class ProductServiceImpl implements ProductService{
         this.s3Service=s3Service;
         this.elasticsearchOperations = elasticsearchOperations;
         this.kafkaTemplate = kafkaTemplate;
-        this.bidsRepository = bidsRepository
+        this.bidsRepository = bidsRepository;
         this.postsRepository =postsRepository;
         this.commentsRepository = commentsRepository;
     }
