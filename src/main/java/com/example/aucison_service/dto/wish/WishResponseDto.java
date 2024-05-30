@@ -29,4 +29,8 @@ public class WishResponseDto {
 
     //비경매상품
     private float nowPrice; // 실시간 가격(경매)
+
+    // 추가 필드
+    private String imageUrl; // 이미지 URL
+    private Long productsId; // 상품 ID
 }
