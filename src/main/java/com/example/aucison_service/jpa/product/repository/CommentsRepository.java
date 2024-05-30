@@ -10,4 +10,5 @@ import java.util.List;
 public interface CommentsRepository extends JpaRepository<CommentsEntity, Long> {
     List<CommentsEntity> findByPostsEntity_PostsId(Long posts_id);
 
+    void deleteByProductsId(Long productsId);
 }
