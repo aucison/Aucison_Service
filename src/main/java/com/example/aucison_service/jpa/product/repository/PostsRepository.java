@@ -9,5 +9,5 @@ import java.util.List;
 public interface PostsRepository extends JpaRepository<PostsEntity, Long> {
     List<PostsEntity> findByProductsEntity_ProductsId(Long productId);
 
-    void deleteByProductsId(Long productsId);
+    void deleteByProductsEntity_ProductsId(Long productsId);
 }
