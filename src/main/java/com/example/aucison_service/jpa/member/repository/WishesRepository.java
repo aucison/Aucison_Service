@@ -30,4 +30,6 @@ public interface WishesRepository extends JpaRepository<WishesEntity, Long> {
     // 개수 계산을 위한 쿼리 메서드 추가
     @Query("SELECT COUNT(w) FROM WishesEntity w WHERE w.membersEntity = :member")
     int countByMember(@Param("member") MembersEntity member);
+
+    void deleteByProductId(Long productsId);
 }

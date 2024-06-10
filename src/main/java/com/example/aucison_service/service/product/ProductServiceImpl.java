@@ -638,6 +638,9 @@ public class ProductServiceImpl implements ProductService{
 
         //입찰 카운팅 삭제 -> 입찰이 일반이든 경매든 생성됨 / bid는 아님
         bidCountsRepository.deleteByProductsId(productsId);
+
+        //찜 내역 삭제
+        wishesRepository.deleteByProductId(productsId);
     }
 
 
@@ -679,6 +682,9 @@ public class ProductServiceImpl implements ProductService{
 
         //입찰 내역 삭제
         bidsRepository.deleteByProductsId(productsId);
+
+        //찜 내역 삭제
+        wishesRepository.deleteByProductId(productsId);
     }
 
 }
