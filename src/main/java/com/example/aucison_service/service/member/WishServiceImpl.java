@@ -82,9 +82,29 @@ public class WishServiceImpl implements WishService {
     }
 
     //찜 삭제
+//    @Override
+//    @Transactional
+//    public WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+//
+//        //사용자 정보 가져옴
+//        MembersEntity member = membersRepository.findByEmail(principal.getUsername());
+//        if (member == null) {
+//            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+//        }
+//
+//        // 찜 정보 조회
+//        Long productId = wishRequestDto.getProductsId();
+//        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productId)
+//                .orElseThrow(() -> new AppException(ErrorCode.WISH_NOT_FOUND));
+//
+//
+//        // 찜 삭제
+//        wishesRepository.delete(wish);
+//        return WishSimpleResponseDto.builder().productId(wishRequestDto.getProductsId()).build();
+//    }
     @Override
     @Transactional
-    public WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+    public WishSimpleResponseDto deleteWish(Long productsId, MemberDetails principal) {
 
         //사용자 정보 가져옴
         MembersEntity member = membersRepository.findByEmail(principal.getUsername());
@@ -93,14 +113,13 @@ public class WishServiceImpl implements WishService {
         }
 
         // 찜 정보 조회
-        Long productId = wishRequestDto.getProductsId();
-        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productId)
+        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productsId)
                 .orElseThrow(() -> new AppException(ErrorCode.WISH_NOT_FOUND));
 
 
         // 찜 삭제
         wishesRepository.delete(wish);
-        return WishSimpleResponseDto.builder().productId(wishRequestDto.getProductsId()).build();
+        return WishSimpleResponseDto.builder().productId(productsId).build();
     }
 
     //찜 목록 조회

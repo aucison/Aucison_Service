@@ -15,6 +15,7 @@ public interface WishService {
     //찜 리스트 조회
 
     WishSimpleResponseDto addWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
-    WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
+//    WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, @AuthenticationPrincipal MemberDetails principal);
+    WishSimpleResponseDto deleteWish(Long productsId, @AuthenticationPrincipal MemberDetails principal);
     List<WishResponseDto> getMemberWishList(@AuthenticationPrincipal MemberDetails principal);
 }
