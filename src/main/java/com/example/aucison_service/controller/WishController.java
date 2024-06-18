@@ -33,12 +33,20 @@ public class WishController {
     }
 
     // 찜 삭제
+//    @DeleteMapping("/delete")
+//    @PreAuthorize("isAuthenticated()")
+//    public ApiResponse<WishSimpleResponseDto> deleteWish(@RequestBody WishRequestDto wishRequestDto,
+//                                        @AuthenticationPrincipal MemberDetails principal) {
+//
+//        return ApiResponse.createSuccess(wishService.deleteWish(wishRequestDto, principal));
+//    }
+
     @DeleteMapping("/delete")
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<WishSimpleResponseDto> deleteWish(@RequestBody WishRequestDto wishRequestDto,
+    public ApiResponse<WishSimpleResponseDto> deleteWish(@RequestParam(name = "productsId") Long productsId,
                                         @AuthenticationPrincipal MemberDetails principal) {
 
-        return ApiResponse.createSuccess(wishService.deleteWish(wishRequestDto, principal));
+        return ApiResponse.createSuccess(wishService.deleteWish(productsId, principal));
     }
 
 
