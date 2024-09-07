@@ -6,6 +6,7 @@ on:
 #      - th-cd
 #      - sm-test
       - main
+  workflow_dispatch:
 
 # 설정된 환경 변수
 env:
