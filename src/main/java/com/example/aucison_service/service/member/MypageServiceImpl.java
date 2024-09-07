@@ -73,7 +73,7 @@ public class MypageServiceImpl implements MypageService {
 
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(principal.getMember());
         // '구매'에 해당하는 histories 조회
-        List<HistoriesEntity> buyHistories = historiesRepository.findByMembersInfoEntityAndOrderType(membersInfoEntity.getId(), OrderType.BUY);
+        List<HistoriesEntity> buyHistories = historiesRepository.findByMembersInfoEntity_IdAndOrderType(membersInfoEntity.getId(), OrderType.BUY);
 
         return buyHistories.stream()
                 .map(this::buildResponseOrderHistoryDto)
@@ -100,7 +100,7 @@ public class MypageServiceImpl implements MypageService {
         }
 
         return ResponseOrderHistoryDto.builder()
-                .historiesId(history.getId())
+                .historiesId(history.getHistoriesId())
                 .productName(history.getName())
                 .productImgUrl(url)
                 .category(history.getCategory())
@@ -241,7 +241,7 @@ public class MypageServiceImpl implements MypageService {
 
         MembersInfoEntity membersInfoEntity = membersInfoRepository.findByMembersEntity(principal.getMember());
         //'판매' 에 해당하는 histories 조회
-        List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntityAndOrderType(membersInfoEntity.getId(), OrderType.SELL);
+        List<HistoriesEntity> sellHistories = historiesRepository.findByMembersInfoEntity_IdAndOrderType(membersInfoEntity.getId(), OrderType.SELL);
 
         return sellHistories.stream()
                 .map(this::buildResponseSellHistoryDto)
@@ -268,7 +268,7 @@ public class MypageServiceImpl implements MypageService {
         }
 
         return ResponseSellHistoryDto.builder()
-                .historiesId(historyEntity.getId())
+                .historiesId(historyEntity.getHistoriesId())
                 .productName(historyEntity.getName())
                 .productImgUrl(url)
                 .category(historyEntity.getCategory())

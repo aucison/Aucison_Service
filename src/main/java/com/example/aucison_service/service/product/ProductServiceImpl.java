@@ -72,6 +72,9 @@ public class ProductServiceImpl implements ProductService{
 
     BidCountsRepository bidCountsRepository;
     BidsRepository bidsRepository;
+
+    PostsRepository postsRepository;
+    CommentsRepository commentsRepository;
     S3Service s3Service;
 
     ElasticsearchOperations elasticsearchOperations;
@@ -87,7 +90,8 @@ public class ProductServiceImpl implements ProductService{
                               MembersInfoRepository membersInfoRepository,
                               S3Service s3Service,
                               ElasticsearchOperations elasticsearchOperations, KafkaTemplate<String, Object> kafkaTemplate,
-                              ProductImgRepository productImgRepository, BidsRepository bidsRepository){
+                              ProductImgRepository productImgRepository, BidsRepository bidsRepository,
+                              PostsRepository postsRepository, CommentsRepository commentsRepository){
 
         this.productsRepository=productsRepository;
         this.productImgRepository = productImgRepository;
@@ -102,6 +106,9 @@ public class ProductServiceImpl implements ProductService{
         this.s3Service=s3Service;
         this.elasticsearchOperations = elasticsearchOperations;
         this.kafkaTemplate = kafkaTemplate;
+        this.bidsRepository = bidsRepository;
+        this.postsRepository =postsRepository;
+        this.commentsRepository = commentsRepository;
     }
 
 
@@ -360,13 +367,27 @@ public class ProductServiceImpl implements ProductService{
          // HistoriesEntity 생성 및 저장 -> 240502 수정
         MembersInfoEntity membersInfo = membersInfoRepository.findByMembersEntity(principal.getMember());
 
+        Float highestPrice = null;
+        Float salePrice = null;
+
+        // 카테고리에 따른 가격 설정
+        if ("AUCS".equals(dto.getCategory())) {
+            // 경매인 경우:
+            highestPrice = dto.getStartPrice() != null ? dto.getStartPrice() : 0.0f;
+            salePrice = 0.0f;
+        } else if ("SALE".equals(dto.getCategory())) {
+            // 비경매인 경우
+            salePrice = dto.getPrice() != null ? dto.getPrice() : 0.0f;
+            highestPrice = 0.0f;
+        }
+
         HistoriesEntity history = HistoriesEntity.builder()
                 .orderType(OrderType.SELL)
                 .name(product.getName())
                 .category(product.getCategory())
                 .kind(product.getKind())
-                .highestPrice(dto.getStartPrice())
-                .salePrice(dto.getPrice())
+                .highestPrice(highestPrice)  // 최고 가격
+                .salePrice(salePrice)        // 판매 가격
                 .pStatus(PStatusEnum.S000)  //"판매중"
                 .productsId(product.getProductsId())
                 .membersInfoEntity(membersInfo)
@@ -607,16 +628,19 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public void deleteSaleProduct(Long productsId) {
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductId(productsId);
+        productImgRepository.deleteByProduct_ProductsId(productsId);
 
         // 판매 정보 삭제 - 1
-        sale_infosRepository.deleteByProductId(productsId);
+        sale_infosRepository.deleteByProductsEntity_ProductsId(productsId);
 
         // 판매 정보 삭제 - 2
-        productsRepository.deleteByProductId(productsId);
+        productsRepository.deleteByProductsId(productsId);
 
         //입찰 카운팅 삭제 -> 입찰이 일반이든 경매든 생성됨 / bid는 아님
-        bidCountsRepository.deleteByProductId(productsId);
+        bidCountsRepository.deleteByProductsId(productsId);
+
+        //찜 내역 삭제
+        wishesRepository.deleteByProductId(productsId);
     }
 
 
@@ -626,7 +650,7 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public void deleteAucsProduct(){
-        List<ProductsEntity> expiredProducts = productsRepository.findExpiredAuctions(LocalDateTime.now());
+        List<ProductsEntity> expiredProducts = productsRepository.findByAuctionExpiryDateBefore(LocalDateTime.now());
         if (expiredProducts.isEmpty()) {
             logger.info("낙찰 완료된 상품 없음 (현재시간: {})", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         } else {
@@ -638,20 +662,29 @@ public class ProductServiceImpl implements ProductService{
     }
 
     private void deleteExpiredAuctionProduct(Long productsId) {
+        //제품 문의 댓글 삭제
+        commentsRepository.deleteByProductsEntity_ProductsId(productsId);
+
+        //제품 문의 삭제
+        postsRepository.deleteByProductsEntity_ProductsId(productsId);
+
         // 제품 이미지 삭제
-        productImgRepository.deleteByProductId(productsId);
+        productImgRepository.deleteByProduct_ProductsId(productsId);
 
         // 판매 정보 삭제 - 1
-        aucs_infosRepository.deleteByProductId(productsId);
+        aucs_infosRepository.deleteByProductsEntity_ProductsId(productsId);
 
         // 판매 정보 삭제 - 2
-        productsRepository.deleteByProductId(productsId);
+        productsRepository.deleteByProductsId(productsId);
 
         //입찰 카운팅 삭제
-        bidCountsRepository.deleteByProductId(productsId);
+        bidCountsRepository.deleteByProductsId(productsId);
 
         //입찰 내역 삭제
-        bidsRepository.deletdByProductId(productsId);
+        bidsRepository.deleteByProductsId(productsId);
+
+        //찜 내역 삭제
+        wishesRepository.deleteByProductId(productsId);
     }
 
 }

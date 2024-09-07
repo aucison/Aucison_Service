@@ -367,7 +367,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
                     //credit 정보 가져오기
                     //"최고가 입찰" 직전의 "최고가 입찰" 사용자의 credit 증가(환불)
-                    MembersEntity member = membersRepository.findByEmail(order.getEmail());
+                    MembersEntity member = membersRepository.findByEmail(ord.getEmail());
                     if (member == null) {
                         throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
                     }
@@ -464,7 +464,7 @@ public class PaymentsServiceImpl implements PaymentsService {
         pageAccessLogsRepository.findById(logId).orElseThrow(() -> new AppException(ErrorCode.LOG_NOT_FOUND)); // 로그를 찾지 못한 경우 예외 발생
 
         // Orders, Payments, Deliveries 정보 저장
-        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.COOO);
+        Orders orders = createOrderAndPaymentAndDelivery(paymentsRequestDto, email, OStatusEnum.C000);
 
         //구매자 credit 감소, 판매자 credit 증가
         ProductsEntity product = productsRepository.findByProductsId(paymentsRequestDto.getProductsId());
@@ -486,6 +486,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 //        updateSoldDate(product);    //TODO: 삭제될 로직
 
         //product_delete 호출하여 상품 삭제
+        logger.info("일반상품 판매완료로 인한 상품 삭제 : 상품명 - " + product.getName() );
         productService.deleteSaleProduct(product.getProductsId());
 
         //가상 결제 페이지 탈출 로그 생성 전에 체크
@@ -621,14 +622,15 @@ public class PaymentsServiceImpl implements PaymentsService {
         HistoriesEntity history = null;
         if (product.getCategory().equals("AUCS")) {
             // HistoriesEntity 생성 및 저장
-             history = HistoriesEntity.builder()
+            history = HistoriesEntity.builder()
                     .orderType(OrderType.BUY) // 구매로 설정
                     .name(product.getName())
                     .category(product.getCategory())
                     .kind(product.getKind())
                     .highestPrice(paymentsRequestDto.getPrice())
                     .oStatus(orders.getOStatus())
-                    .ordersId(orders.getOrdersId()) // 주문번호 설정
+                    .ordersId(orders.getOrdersId())
+                    .productsId(product.getProductsId())
                     .membersInfoEntity(membersInfo)
                     .build();
 
@@ -645,6 +647,7 @@ public class PaymentsServiceImpl implements PaymentsService {
                     .salePrice(paymentsRequestDto.getPrice())
                     .oStatus(orders.getOStatus())
                     .ordersId(orders.getOrdersId()) // 주문번호 설정
+                    .productsId(product.getProductsId())
                     .membersInfoEntity(membersInfo)
                     .build();
 
@@ -693,14 +696,17 @@ public class PaymentsServiceImpl implements PaymentsService {
                 if (ord != lastlyOrder && ord.getOStatus().equals(OStatusEnum.B001)) {
 
                     //3분 미만일 경우 "패찰", 그 외에 "응찰취소"
-                    //TODO: histories의 o_status 업데이트
+                    //histories의 o_status 업데이트
                     ord.updateStatus(failedBidStatus);
+
+                    HistoriesEntity history = historiesRepository.findByOrdersId(ord.getOrdersId());
+                    history.updateOstatus(failedBidStatus);
 
                     float refundedAmount = ord.getPayments().getCost();   //환불해 줄 금액
 
                     //credit 정보 가져오기
                     //"최고가 입찰" 직전의 "최고가 입찰" 사용자의 credit 증가(환불)
-                    MembersEntity member = membersRepository.findByEmail(order.getEmail());
+                    MembersEntity member = membersRepository.findByEmail(ord.getEmail());
                     if (member == null) {
                         throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
                     }

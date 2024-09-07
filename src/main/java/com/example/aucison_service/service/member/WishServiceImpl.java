@@ -14,6 +14,7 @@ import com.example.aucison_service.jpa.member.entity.WishesEntity;
 import com.example.aucison_service.jpa.member.repository.WishesRepository;
 
 import com.example.aucison_service.jpa.product.entity.AucsInfosEntity;
+import com.example.aucison_service.jpa.product.entity.ProductImgEntity;
 import com.example.aucison_service.jpa.product.entity.ProductsEntity;
 import com.example.aucison_service.jpa.product.repository.ProductsRepository;
 import com.example.aucison_service.jpa.product.entity.SaleInfosEntity;
@@ -81,11 +82,29 @@ public class WishServiceImpl implements WishService {
     }
 
     //찜 삭제
+//    @Override
+//    @Transactional
+//    public WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
+//
+//        //사용자 정보 가져옴
+//        MembersEntity member = membersRepository.findByEmail(principal.getUsername());
+//        if (member == null) {
+//            throw new AppException(ErrorCode.MEMBER_NOT_FOUND);
+//        }
+//
+//        // 찜 정보 조회
+//        Long productId = wishRequestDto.getProductsId();
+//        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productId)
+//                .orElseThrow(() -> new AppException(ErrorCode.WISH_NOT_FOUND));
+//
+//
+//        // 찜 삭제
+//        wishesRepository.delete(wish);
+//        return WishSimpleResponseDto.builder().productId(wishRequestDto.getProductsId()).build();
+//    }
     @Override
     @Transactional
-    public WishSimpleResponseDto deleteWish(WishRequestDto wishRequestDto, MemberDetails principal) {
-
-
+    public WishSimpleResponseDto deleteWish(Long productsId, MemberDetails principal) {
 
         //사용자 정보 가져옴
         MembersEntity member = membersRepository.findByEmail(principal.getUsername());
@@ -94,14 +113,13 @@ public class WishServiceImpl implements WishService {
         }
 
         // 찜 정보 조회
-        Long productId = wishRequestDto.getProductsId();
-        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productId)
+        WishesEntity wish = wishesRepository.findByMembersEntityAndProductId(member, productsId)
                 .orElseThrow(() -> new AppException(ErrorCode.WISH_NOT_FOUND));
 
 
         // 찜 삭제
         wishesRepository.delete(wish);
-        return WishSimpleResponseDto.builder().productId(wishRequestDto.getProductsId()).build();
+        return WishSimpleResponseDto.builder().productId(productsId).build();
     }
 
     //찜 목록 조회
@@ -121,12 +139,26 @@ public class WishServiceImpl implements WishService {
                     ProductsEntity product = productsRepository.findById(wish.getProductId())
                             .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
+                    if (product == null) {
+                        // 상품이 삭제된 경우 해당 찜 항목 삭제
+                        wishesRepository.delete(wish);
+                        return null;
+                    }
+
+                    // 첫 번째 이미지 URL 추출 (이미지가 없는 경우 null이 될 수 있음)
+                    String firstImageUrl = product.getImages().stream()
+                            .map(ProductImgEntity::getUrl)
+                            .findFirst()
+                            .orElse(null);
+
                     WishResponseDto.WishResponseDtoBuilder builder = WishResponseDto.builder()
                             .wishesId(wish.getWishesId())
                             .name(product.getName())
                             .category(product.getCategory())
                             .kind(product.getKind())
-                            .tags(product.getTags());
+                            .tags(product.getTags())
+                            .imageUrl(firstImageUrl)
+                            .productsId(product.getProductsId());
 
                     if ("AUCS".equals(product.getCategory())) {
                         // 경매 상품인 경우

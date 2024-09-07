@@ -1,7 +1,9 @@
 package com.example.aucison_service.jpa.product.repository;
 
 import com.example.aucison_service.jpa.product.entity.ProductsEntity;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -18,7 +20,8 @@ public interface ProductsRepository extends JpaRepository<ProductsEntity, Long> 
 
     List<ProductsEntity> findTop10ByOrderByCreatedDateDesc();
 
-    void deleteByProductId(Long productId);
+    void deleteByProductsId(Long productsId);
 
-    List<ProductsEntity> findExpiredAuctions(LocalDateTime now);
+    @Query("SELECT p FROM ProductsEntity p WHERE p.aucsInfosEntity.end < :now")
+    List<ProductsEntity> findByAuctionExpiryDateBefore(@Param("now") LocalDateTime now);
 }

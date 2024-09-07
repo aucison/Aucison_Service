@@ -18,7 +18,7 @@ public class HistoriesEntity extends BaseTimeEntity{ // 사용자 구매/판매 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "histories_id")
-    private Long id; // 사용자 구매/판매 내역 id
+    private Long historiesId; // 사용자 구매/판매 내역 id
 
     @Column(name = "order_type", nullable = false)
     @Enumerated(EnumType.STRING)

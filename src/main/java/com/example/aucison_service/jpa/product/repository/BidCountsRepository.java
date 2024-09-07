@@ -13,5 +13,5 @@ public interface BidCountsRepository extends JpaRepository<BidCountsEntity, Long
 
     List<BidCountsEntity> findTop10ByOrderByTotCntDesc();
 
-    void deleteByProductId(Long productId);
+    void deleteByProductsId(Long productsId);
 }

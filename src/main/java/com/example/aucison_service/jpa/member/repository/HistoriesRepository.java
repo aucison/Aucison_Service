@@ -13,11 +13,9 @@ import java.util.List;
 
 @Repository
 public interface HistoriesRepository extends JpaRepository<HistoriesEntity, Long> {
-    List<HistoriesEntity> findByMembersInfoEntityAndOrderType(Long membersInfoId, OrderType orderType);
+    List<HistoriesEntity> findByMembersInfoEntity_IdAndOrderType(Long membersInfoId, OrderType orderType);
     HistoriesEntity findByHistoriesId(Long historiesId);
     HistoriesEntity findByOrdersId(Long ordersId);
-
-    HistoriesEntity findByProductsIdAndEmail(Long productsId, String email);
 
     //특정 상품(판매명으로 식별)의 판매자(상태 분류로 식별) 반환
     HistoriesEntity findByNameAndOrderType(String name, OrderType orderType);
